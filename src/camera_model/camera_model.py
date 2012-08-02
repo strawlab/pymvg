@@ -749,6 +749,10 @@ def load_camera_from_dict(d, extrinsics_required=True ):
             R=d['R'])
         name = None
 
+    if translation is None or rotation is None:
+        if extrinsics_required:
+            raise ValueError('extrinsic parameters are required, but not provided')
+
     result = CameraModel(translation=translation,
                          rotation=rotation,
                          intrinsics=c,
@@ -759,10 +763,11 @@ def load_camera_from_dict(d, extrinsics_required=True ):
 SUPPORTED_FILE_TYPES = ('.bag','.yaml')
 def load_camera_from_file( fname, extrinsics_required=True ):
     if fname.endswith('.bag'):
-        return load_camera_from_bagfile(fname, extrinsics_required)
+        return load_camera_from_bagfile(fname, extrinsics_required=extrinsics_required)
     elif fname.endswith('.yaml'):
         with open(fname,'r') as f:
-            return load_camera_from_dict(yaml.load(f), extrinsics_required)
+            d = yaml.load(f)
+        return load_camera_from_dict(d, extrinsics_required=extrinsics_required)
     else:
         raise Exception("Only supports .bag and .yaml file loading")
 
