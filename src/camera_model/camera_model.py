@@ -305,6 +305,7 @@ class CameraModel(object):
         # these are from image_geometry ROS package in the utest.cpp file
         i.height = self.height
         i.width = self.width
+        assert len(self.distortion) == 5
         i.distortion_model = 'plumb_bob'
         i.D = list(self.distortion.flatten())
         i.K = list(self.K.flatten())
