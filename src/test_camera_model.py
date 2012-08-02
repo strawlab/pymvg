@@ -381,18 +381,38 @@ def check_bagfile_roundtrip(cam_opts):
     fname = '/tmp/cam-model-rosbag-test.bag'
     with open(fname,mode='wb') as fd:
         cam.save_to_bagfile(fd)
-        fd.close()
 
     with open(fname,mode='r') as fd:
         cam2 = camera_model.load_camera_from_bagfile( fd )
 
         verts = np.array([[ 0.042306,  0.015338,  0.036328],
                           [ 0.03323,   0.030344,  0.041542],
+                          [ 0.03323,   0.030344,  0.041542],
+                          [ 0.03323,   0.030344,  0.041542],
                           [ 0.036396,  0.026464,  0.052408]])
 
         expected =  cam.project_3d_to_pixel(verts)
         actual   = cam2.project_3d_to_pixel(verts)
         assert np.allclose( expected, actual )
+
+def test_distortion_yamlfile_roundtrip():
+    all_options = get_default_options()
+    for opts in all_options:
+        yield check_distortion_yamlfile_roundtrip, opts
+
+def check_distortion_yamlfile_roundtrip(cam_opts):
+    cam = _build_test_camera(**cam_opts)
+    fname = '/tmp/cam-model-rosyaml-test.yaml'
+    cam.save_intrinsics_to_yamlfile(fname)
+    cam2 = camera_model.load_camera_from_file( fname, extrinsics_required=False )
+
+    distorted = np.array( [[100.0,100],
+                           [100,200],
+                           [100,300],
+                           [100,400]] )
+    orig_undistorted = cam.undistort( distorted )
+    reloaded_undistorted = cam2.undistort( distorted )
+    assert np.allclose( orig_undistorted, reloaded_undistorted )
 
 def test_camera_mirror_projection_roundtrip():
     all_options = get_default_options()

@@ -384,6 +384,12 @@ class CameraModel(object):
         bagout.write(topic, intrinsics)
         bagout.close()
 
+    def save_intrinsics_to_yamlfile(self,fname):
+        msg = self.get_intrinsics_as_msg()
+        buf = roslib.message.strify_message(msg)
+        with open(fname,'w') as fd:
+            fd.write( buf )
+
     def get_mirror_camera(self):
         """return a copy of this camera whose x coordinate is (image_width-x)"""
         if 0:
@@ -718,19 +724,35 @@ class CameraModel(object):
 
 # factory functions
 def load_camera_from_dict(d, extrinsics_required=True ):
-    #only needs w,h,P,K,D,R
-    c = sensor_msgs.msg.CameraInfo(
+    translation = None
+    rotation = None
+
+    if 'image_height' in d:
+        # format saved in ~/.ros/camera_info/<camera_name>.yaml
+        #only needs w,h,P,K,D,R
+        c = sensor_msgs.msg.CameraInfo(
             height=d['image_height'],
             width=d['image_width'],
             P=d['projection_matrix']['data'],
             K=d['camera_matrix']['data'],
             D=d['distortion_coefficients']['data'],
             R=d['rectification_matrix']['data'])
-    
-    result = CameraModel(translation=None,  #or nan???
-                         rotation=None,
+        name = d['camera_name']
+    else:
+        # format saved by roslib.message.strify_message( sensor_msgs.msg.CameraInfo() )
+        c = sensor_msgs.msg.CameraInfo(
+            height = d['height'],
+            width = d['width'],
+            P=d['P'],
+            K=d['K'],
+            D=d['D'],
+            R=d['R'])
+        name = None
+
+    result = CameraModel(translation=translation,
+                         rotation=rotation,
                          intrinsics=c,
-                         name=d['camera_name'])
+                         name=name)
 
     return result
 
