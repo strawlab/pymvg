@@ -14,7 +14,7 @@ from camera_model import CameraModel
 from camera_model.camera_model import point_msg_to_tuple, parse_rotation_msg
 import camera_model
 
-import cv
+import cv # ubuntu: apt-get install python-opencv
 
 # helper functions ---------------
 
