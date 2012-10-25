@@ -8,6 +8,7 @@ import sensor_msgs.msg
 import geometry_msgs.msg
 
 import numpy as np
+import scipy.linalg
 
 import yaml
 
@@ -65,7 +66,6 @@ def _undistort( xd, yd, D):
 
 def my_rq(M):
     """RQ decomposition, ensures diagonal of R is positive"""
-    import scipy.linalg
     R,K = scipy.linalg.rq(M)
     n = R.shape[0]
     for i in range(n):
