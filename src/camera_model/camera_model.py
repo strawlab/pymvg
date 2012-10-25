@@ -838,6 +838,12 @@ def load_camera_from_pmat( pmat, width=None, height=None, name='cam', _depth=0 )
     c = center(pmat)
     M = pmat[:,:3]
     K,R = my_rq(M)
+    if not is_rotation_matrix(R):
+        # RQ may return left-handed rotation matrix. Make right-handed.
+        R2 = -R
+        K2 = -K
+        assert np.allclose(np.dot(K2,R2), np.dot(K,R))
+        K,R = K2,R2
     a = K[2,2]
     if a==0:
         warnings.warn('ill-conditioned intrinsic camera parameters')
