@@ -842,7 +842,8 @@ def load_camera_from_pmat( pmat, width=None, height=None, name='cam', _depth=0 )
     if a==0:
         warnings.warn('ill-conditioned intrinsic camera parameters')
     else:
-        if a != 1.0:
+        eps = 1e-15
+        if abs(a-1.0) > eps:
             if _depth > 0:
                 raise ValueError('cannot scale this pmat: %s'%( repr(pmat,)))
             new_pmat = pmat/a
