@@ -280,9 +280,9 @@ def check_camera_distortion_roundtrip(cam_opts):
     border = 65
 
     uv_raws = []
-    for row in range(border, cam.height-border, 10):
-        for col in range(border, cam.width-border, 10):
-            uv_raw = [col, row] # Bug in utest.cpp line 130: these are flipped at svn r29350
+    for row in range(border, cam.height-border, step):
+        for col in range(border, cam.width-border, step):
+            uv_raw = [col, row]
             uv_raws.append(uv_raw)
     uv_raw = np.array(uv_raws)
     uv_rect = cam.undistort( uv_raw )
@@ -302,9 +302,9 @@ def check_camera_projection_roundtrip(cam_opts,distorted=False):
     border = 65
 
     uv_raws = []
-    for row in range(border, cam.height-border, 10):
-        for col in range(border, cam.width-border, 10):
-            uv_raw = [col, row] # Bug in utest.cpp line 130: these are flipped at svn r29350
+    for row in range(border, cam.height-border, step):
+        for col in range(border, cam.width-border, step):
+            uv_raw = [col, row]
             uv_raws.append(uv_raw)
     uv_raw = np.array(uv_raws)
     pts3d = cam.project_pixel_to_3d_ray( uv_raw, distorted=distorted )
@@ -420,9 +420,9 @@ def check_camera_mirror_projection_roundtrip(cam_opts,distorted=False):
     border = 65
 
     uv_raws = []
-    for row in range(border, cam_orig.height-border, 10):
-        for col in range(border, cam_orig.width-border, 10):
-            uv_raw = [col, row] # Bug in utest.cpp line 130: these are flipped at svn r29350
+    for row in range(border, cam_orig.height-border, step):
+        for col in range(border, cam_orig.width-border, step):
+            uv_raw = [col, row]
             uv_raws.append(uv_raw)
     uv_raw = np.array(uv_raws)
     # Get a collection of 3D points for which we know the pixel location of
