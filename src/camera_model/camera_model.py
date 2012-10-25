@@ -101,8 +101,8 @@ def is_rotation_matrix(R):
     if not np.allclose(dr,1):
         return False
 
-    # test: has eigenvalue of unity
-    l, W = np.linalg.eig(R.T)
+    # test: has one eigenvalue of unity
+    l, W = np.linalg.eig(R)
     eps = 1e-8
     i = np.where(abs(np.real(l) - 1.0) < eps)[0]
     if not len(i):
