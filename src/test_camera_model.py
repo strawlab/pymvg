@@ -342,34 +342,27 @@ def check_built_from_pmat(cam_opts):
     cam = camera_model.load_camera_from_pmat( cam_orig.pmat, width=cam_orig.width, height=cam_orig.height)
     assert np.allclose( cam.pmat, cam_orig.pmat)
 
-# def test_problem_pmat():
-#     # This pmat (found by the DLT method) was causing me problems.
-#     if 0:
-#         pmat = np.array([[-13770.75567,  -11668.5582,      -64.229267,    812.000266],
-#                          [ -7075.226893,  -5992.91884,     -27.953958,    416.965691],
-#                          [   -16.958163,    -14.375729,     -0.077775,      1.      ]])
-#         cam = camera_model.load_camera_from_pmat( pmat )
+def test_problem_pmat():
+    # This pmat (found by the DLT method) was causing me problems.
+    d = {'width': 848,
+         'name': 'camera',
+         'height': 480}
+    pmat =  np.array([[ -1.70677031e+03,  -4.10373295e+03,  -3.88568028e+02, 6.89034515e+02],
+                      [ -6.19019195e+02,  -1.01292091e+03,  -2.67534989e+03, 4.51847857e+02],
+                      [ -4.52548832e+00,  -3.78900498e+00,  -7.35860226e-01, 1.00000000e+00]])
+    cam = camera_model.load_camera_from_pmat( pmat, **d)
 
-#     elif 1:
-#        d = {'width': 848,
-#              'name': 'camera',
-#              'height': 480}
-#        pmat =  np.array([[ -1.70677031e+03,  -4.10373295e+03,  -3.88568028e+02, 6.89034515e+02],
-#                          [ -6.19019195e+02,  -1.01292091e+03,  -2.67534989e+03, 4.51847857e+02],
-#                          [ -4.52548832e+00,  -3.78900498e+00,  -7.35860226e-01, 1.00000000e+00]])
-#        cam = camera_model.load_camera_from_pmat( pmat, **d)
+    #assert np.allclose( cam.pmat, pmat) # we don't expect this since the intrinsic matrix may not be scaled
 
-#     #assert np.allclose( cam.pmat, pmat) # we don't expect this since the intrinsic matrix may not be scaled
+    verts = np.array([[ 0.042306,  0.015338,  0.036328, 1.0],
+                      [ 0.03323,   0.030344,  0.041542, 1.0],
+                      [ 0.036396,  0.026464,  0.052408, 1.0]])
 
-#     verts = np.array([[ 0.042306,  0.015338,  0.036328, 1.0],
-#                       [ 0.03323,   0.030344,  0.041542, 1.0],
-#                       [ 0.036396,  0.026464,  0.052408, 1.0]])
+    actual = cam.project_3d_to_pixel(verts[:,:3])
 
-#     actual = cam.project_3d_to_pixel(verts[:,:3])
-
-#     expectedh = np.dot( pmat, verts.T )
-#     expected = (expectedh[:2]/expectedh[2]).T
-#     assert np.allclose( expected, actual )
+    expectedh = np.dot( pmat, verts.T )
+    expected = (expectedh[:2]/expectedh[2]).T
+    assert np.allclose( expected, actual )
 
 def test_bagfile_roundtrip():
     all_options = get_default_options()
