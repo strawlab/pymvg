@@ -9,7 +9,8 @@ import geometry_msgs
 import sensor_msgs
 
 from test_utils import _build_test_camera, _build_points_3d, get_default_options
-from npcv import numpy2opencv_image, numpy2opencv_pointmat, opencv_pointmat2numpy
+from camera_model.npcv import numpy2opencv_image, numpy2opencv_pointmat, \
+     opencv_pointmat2numpy
 
 def test_undistortion_compared_to_opencv():
     all_options = get_default_options()
