@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
+import os
 
 # ROS imports
 import roslib; roslib.load_manifest('camera_model')
@@ -20,6 +21,11 @@ def _build_opts():
                 opts.append(dict(at_origin=at_origin,
                                  ROS_test_data=ROS_test_data,
                                  flipped=flipped))
+    test_dir = os.path.split( __file__ )[0]
+    yaml_base_fname = 'roscal.yaml'
+    yaml_fname = os.path.join( test_dir, yaml_base_fname )
+    opts.append({'from_yaml_file':yaml_fname,'at_origin':True,'flipped':False})
+    opts.append({'from_yaml_file':yaml_fname,'at_origin':False,'flipped':False})
     return opts
 opts = _build_opts()
 
@@ -52,7 +58,18 @@ def _build_test_camera(**kwargs):
         rotation.z = 0.0
         rotation.w = 1.0
 
-    if 1:
+    if 'from_yaml_file' in kwargs:
+        cam = camera_model.load_camera_from_file( o.from_yaml_file,
+                                                  extrinsics_required=False )
+        i = cam.get_intrinsics_as_msg()
+        cam = CameraModel(translation=point_msg_to_tuple(translation),
+                          rotation=parse_rotation_msg(rotation),
+                          intrinsics=i,
+                          name='cam',
+                          )
+
+    else:
+
         if o.ROS_test_data:
             i = sensor_msgs.msg.CameraInfo()
             # these are from image_geometry ROS package in the utest.cpp file
