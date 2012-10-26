@@ -87,6 +87,7 @@ def test_extrinsic_msg():
 
 def check_extrinsic_msg(cam_opts):
     """check that ROS message contains actual camera extrinsic parameters"""
+    cam_opts = cam_opts.copy()
     cam_opts['get_input_data']=True
     r = _build_test_camera(**cam_opts)
     cam = r['cam']
