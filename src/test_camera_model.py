@@ -217,9 +217,10 @@ def check_undistortion(cam_opts):
 def test_projection_to_distorted():
     all_options = get_default_options()
     for opts in all_options:
-        yield check_projection_to_distorted, opts
+        for distorted in (True,False):
+            yield check_projection_to_distorted, opts, distorted
 
-def check_projection_to_distorted(cam_opts):
+def check_projection_to_distorted(cam_opts,distorted=True):
     cam = _build_test_camera(**cam_opts)
     R = cam.get_rect()
     if not np.allclose(R, np.eye(3)):
@@ -240,18 +241,23 @@ def check_projection_to_distorted(cam_opts):
     rvec = numpy2opencv_image(np.empty( (1,3) ))
     cv.Rodrigues2(numpy2opencv_image(R), rvec)
 
+    if distorted:
+        cv_distortion = numpy2opencv_image(cam.get_D())
+    else:
+        cv_distortion = numpy2opencv_image(np.zeros((5,1)))
+
     cv.ProjectPoints2(src,
                       rvec,
                       numpy2opencv_image(t),
                       numpy2opencv_image(cam.get_K()),
-                      numpy2opencv_image(cam.get_D()),
+                      cv_distortion,
                       dst)
-    distorted_cv = opencv_pointmat2numpy(dst)
+    result_cv = opencv_pointmat2numpy(dst)
 
-    distorted_np = cam.project_3d_to_pixel( pts3D, distorted=True )
-    assert distorted_cv.shape == distorted_np.shape
+    result_np = cam.project_3d_to_pixel( pts3D, distorted=distorted )
+    assert result_cv.shape == result_np.shape
     if cam.is_opencv_compatible():
-        assert np.allclose(distorted_cv, distorted_np)
+        assert np.allclose(result_cv, result_np)
 
 def test_projection_to_undistorted1():
     at_origin=True # this test mathematically only makes sense of camera at origin
