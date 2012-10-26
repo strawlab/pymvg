@@ -101,8 +101,8 @@ def test_build_from_pmat():
 def check_built_from_pmat(cam_opts):
     cam_orig = _build_test_camera(**cam_opts)
     pmat_orig = cam_orig.pmat
-    cam = camera_model.load_camera_from_pmat( cam_orig.pmat, width=cam_orig.width, height=cam_orig.height)
-    assert np.allclose( cam.pmat, cam_orig.pmat)
+    cam = camera_model.load_camera_from_pmat( pmat_orig )
+    assert np.allclose( cam.pmat, pmat_orig)
 
 def test_problem_pmat():
     # This pmat (found by the DLT method) was causing me problems.
