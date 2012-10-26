@@ -196,10 +196,16 @@ def test_undistortion():
 def check_undistortion(cam_opts):
     cam = _build_test_camera(**cam_opts)
 
-    npdistorted = np.array( [[100.0,100],
-                             [100,200],
-                             [100,300],
-                             [100,400]] )
+    step = 5
+    border = 65
+
+    distorteds = []
+    for row in range(border, cam.height-border, step):
+        for col in range(border, cam.width-border, step):
+            distorted = [col, row]
+            distorteds.append(distorted)
+    npdistorted = np.array(distorteds,dtype=np.float)
+
     src = numpy2opencv_pointmat(npdistorted)
     dst = cv.CloneMat(src)
     cv.UndistortPoints(src, dst,
