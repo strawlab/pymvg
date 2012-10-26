@@ -214,13 +214,13 @@ def check_undistortion(cam_opts):
     if cam.is_opencv_compatible():
         assert np.allclose(undistorted_cv, undistorted_np)
 
-def test_projection_to_distorted():
+def test_projection_compared_to_opencv():
     all_options = get_default_options()
     for opts in all_options:
         for distorted in (True,False):
-            yield check_projection_to_distorted, opts, distorted
+            yield check_projection_compared_to_opencv, opts, distorted
 
-def check_projection_to_distorted(cam_opts,distorted=True):
+def check_projection_compared_to_opencv(cam_opts,distorted=True):
     cam = _build_test_camera(**cam_opts)
     R = cam.get_rect()
     if not np.allclose(R, np.eye(3)):
