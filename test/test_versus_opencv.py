@@ -12,12 +12,12 @@ from test_utils import _build_test_camera, _build_points_3d, get_default_options
 from camera_model.npcv import numpy2opencv_image, numpy2opencv_pointmat, \
      opencv_pointmat2numpy
 
-def test_undistortion_compared_to_opencv():
+def test_undistortion():
     all_options = get_default_options()
     for opts in all_options:
-        yield check_undistortion_compared_to_opencv, opts
+        yield check_undistortion, opts
 
-def check_undistortion_compared_to_opencv(cam_opts):
+def check_undistortion(cam_opts):
     cam = _build_test_camera(**cam_opts)
 
     step = 5
@@ -44,13 +44,13 @@ def check_undistortion_compared_to_opencv(cam_opts):
     if cam.is_opencv_compatible():
         assert np.allclose(undistorted_cv, undistorted_np)
 
-def test_projection_compared_to_opencv():
+def test_projection():
     all_options = get_default_options()
     for opts in all_options:
         for distorted in (True,False):
-            yield check_projection_compared_to_opencv, opts, distorted
+            yield check_projection, opts, distorted
 
-def check_projection_compared_to_opencv(cam_opts,distorted=True):
+def check_projection(cam_opts,distorted=True):
     cam = _build_test_camera(**cam_opts)
     R = cam.get_rect()
     if not np.allclose(R, np.eye(3)):
