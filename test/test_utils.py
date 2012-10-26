@@ -94,7 +94,7 @@ def _build_points_3d():
     x,y,z = 10.001, 20.001, 30.001
     theta = np.linspace(0,10,n_pts)%(2*np.pi)
     h = np.linspace(0,10,n_pts)
-    r = 0.05
+    r = 1.05
     pts3D = np.vstack( (r*np.cos(theta)+x, r*np.sin(theta)+y, h+z )).T
     return pts3D
 
