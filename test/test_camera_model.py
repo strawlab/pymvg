@@ -22,6 +22,7 @@ def test_projection_to_undistorted1():
         yield check_projection_to_undistorted1, opts
 
 def check_projection_to_undistorted1(cam_opts):
+    """check that points along optical axis are imaged onto principal point"""
     cam = _build_test_camera(**cam_opts)
     for z in np.linspace(0.1, 10, 20):
         pt = np.array([[0,0,z]])
@@ -37,6 +38,7 @@ def test_camera_distortion_roundtrip():
         yield check_camera_distortion_roundtrip, opts
 
 def check_camera_distortion_roundtrip(cam_opts):
+    """check that uv == distort( undistort( uv ))"""
     cam = _build_test_camera(**cam_opts)
     step = 5
     border = 65
@@ -59,6 +61,7 @@ def test_camera_projection_roundtrip():
             yield check_camera_projection_roundtrip, opts, distorted
 
 def check_camera_projection_roundtrip(cam_opts,distorted=False):
+    """check that uv == project_to_2d( project_to_3d( uv ))"""
     cam = _build_test_camera(**cam_opts)
     step = 5
     border = 65
@@ -83,6 +86,7 @@ def test_extrinsic_msg():
         yield check_extrinsic_msg, opts
 
 def check_extrinsic_msg(cam_opts):
+    """check that ROS message contains actual camera extrinsic parameters"""
     cam_opts['get_input_data']=True
     r = _build_test_camera(**cam_opts)
     cam = r['cam']
@@ -99,12 +103,14 @@ def test_build_from_pmat():
         yield check_built_from_pmat, opts
 
 def check_built_from_pmat(cam_opts):
+    """check that pmat is preserved in load_camera_from_pmat() factory"""
     cam_orig = _build_test_camera(**cam_opts)
     pmat_orig = cam_orig.pmat
     cam = camera_model.load_camera_from_pmat( pmat_orig )
     assert np.allclose( cam.pmat, pmat_orig)
 
 def test_problem_pmat():
+    """check a particular pmat which previously caused problems"""
     # This pmat (found by the DLT method) was causing me problems.
     d = {'width': 848,
          'name': 'camera',
@@ -132,6 +138,7 @@ def test_bagfile_roundtrip():
         yield check_bagfile_roundtrip, opts
 
 def check_bagfile_roundtrip(cam_opts):
+    """check that roundtrip of camera model to/from a bagfile works"""
     cam = _build_test_camera(**cam_opts)
     fname = '/tmp/cam-model-rosbag-test.bag'
     with open(fname,mode='wb') as fd:
@@ -156,6 +163,7 @@ def test_distortion_yamlfile_roundtrip():
         yield check_distortion_yamlfile_roundtrip, opts
 
 def check_distortion_yamlfile_roundtrip(cam_opts):
+    """check that roundtrip of camera model to/from a yaml file works"""
     cam = _build_test_camera(**cam_opts)
     fname = '/tmp/cam-model-rosyaml-test.yaml'
     cam.save_intrinsics_to_yamlfile(fname)
@@ -176,6 +184,7 @@ def test_camera_mirror_projection_roundtrip():
             yield check_camera_mirror_projection_roundtrip, opts, distorted
 
 def check_camera_mirror_projection_roundtrip(cam_opts,distorted=False):
+    """check that a mirrored camera gives reflected pixel coords"""
     cam_orig = _build_test_camera(**cam_opts)
     cam_mirror = cam_orig.get_mirror_camera()
     step = 5
@@ -236,6 +245,7 @@ def test_view():
         yield check_view, opts
 
 def check_view(cam_opts):
+    """check that we can reset camera extrinsic parameters"""
 
     # This is not a very good test. (Should maybe check more eye
     # positions, more lookat directions, and more up vectors.)
@@ -251,6 +261,7 @@ def check_view(cam_opts):
     assert np.allclose( up, up2 )
 
 def test_camcenter():
+    """check that our idea of camera center is theoretically expected value"""
     all_options = get_default_options()
     for opts in all_options:
         cam = _build_test_camera(**opts)
