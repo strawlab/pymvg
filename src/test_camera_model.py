@@ -188,12 +188,12 @@ def get_default_options():
     #result.append( dict(from_pmat=True) )
     return result
 
-def test_undistortion():
+def test_undistortion_compared_to_opencv():
     all_options = get_default_options()
     for opts in all_options:
-        yield check_undistortion, opts
+        yield check_undistortion_compared_to_opencv, opts
 
-def check_undistortion(cam_opts):
+def check_undistortion_compared_to_opencv(cam_opts):
     cam = _build_test_camera(**cam_opts)
 
     step = 5
