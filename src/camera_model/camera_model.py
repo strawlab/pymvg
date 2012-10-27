@@ -581,32 +581,6 @@ class CameraModel(object):
 
         return np.vstack( (up,vp) ).T
 
-    def distort2(self, nparr):
-        # Parse inputs
-        nparr = np.array(nparr,copy=False)
-        assert nparr.ndim==2
-        assert nparr.shape[1]==2
-
-        if np.sum(abs(self.distortion)) == 0.0:
-            # no distortion necessary, just copy inputs
-            return np.array(nparr,copy=True)
-
-        xp = nparr[:,0]
-        yp = nparr[:,1]
-
-        r2 = xp*xp + yp*yp
-        r4 = r2*r2
-        r6 = r4*r2
-        a1 = 2*xp*yp
-        D = self.distortion
-        k1 = D[0]; k2=D[1]; p1=D[2]; p2=D[3]; k3=D[4]
-        barrel = 1 + k1*r2 + k2*r4 + k3*r6
-        if len(D)==8:
-            barrel /= (1.0 + D[5]*r2 + D[6]*r4 + D[7]*r6)
-        xpp = xp*barrel + p1*a1 + p2*(r2+2*(xp*xp))
-        ypp = yp*barrel + p1*(r2+2*(yp*yp)) + p2*a1;
-        return np.vstack( (xpp,ypp) ).T
-
     def distort(self, nparr):
         # See http://opencv.willowgarage.com/documentation/cpp/camera_calibration_and_3d_reconstruction.html#cv-undistortpoints
 
@@ -703,21 +677,17 @@ class CameraModel(object):
         pts3d_h[3] = 1
 
         # undistorted homogeneous image coords
-        cc = np.dot(self.Rt, pts3d_h)
+        cc = np.dot(self.pmat, pts3d_h)
 
         # project
         pc = cc[:2]/cc[2]
-        x, y = pc
+        u, v = pc
 
         if distorted:
             # distort (the currently undistorted) image coordinates
-            nparr = np.vstack((x,y)).T
-            x,y = self.distort2( nparr ).T
-
-        K = self.K
-        x2=x*self.fx()+self.cx()
-        y2=y*self.fy()+self.cy()
-        return np.vstack((x2,y2)).T
+            nparr = np.vstack((u,v)).T
+            u,v = self.distort( nparr ).T
+        return np.vstack((u,v)).T
 
     def project_camera_frame_to_3d(self, pts3d):
         """take 3D coordinates in camera frame and convert to world frame"""
