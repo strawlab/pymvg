@@ -158,9 +158,9 @@ class CameraModel(object):
         '_opencv_compatible',
         # these intrinsic parameters specified like OpenCV
         'P', # used for undistorted<->normalized, np.array with shape (3,4)
-        'K', # used for distorted<->normalized, np.array with shape (3,3)
 
         # the distortion model
+        'K', # (distortion params) used for distorted<->normalized, np.array with shape (3,3)
         'distortion', # (distortion params) the distortion, np.array with shape (5,1) or (8,1)
         'rect', # (distortion params) the rectification, None or np.array with shape (3,3)
         ]
@@ -236,7 +236,7 @@ class CameraModel(object):
         #self.translation=np.array(translation,copy=True)
         self.name = name
 
-        K = self.K[:3,:3]
+        K = self.P[:3,:3]
         self._opencv_compatible = (K[0,1]==0)
 
         # And a final check
@@ -260,7 +260,7 @@ class CameraModel(object):
     Rt = property(get_Rt)
 
     def get_pmat(self):
-        K = self.K[:3,:3]
+        K = self.P[:3,:3]
         pmat = np.dot( K, self.Rt )
         return pmat
     pmat = property(get_pmat)
@@ -357,16 +357,16 @@ class CameraModel(object):
         return self.P
 
     def fx(self):
-        return self.K[0,0]
+        return self.P[0,0]
 
     def fy(self):
-        return self.K[1,1]
+        return self.P[1,1]
 
     def cx(self):
-        return self.K[0,2]
+        return self.P[0,2]
 
     def cy(self):
-        return self.K[1,2]
+        return self.P[1,2]
 
     def Tx(self):
         return self.P[0,3]
