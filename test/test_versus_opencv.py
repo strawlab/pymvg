@@ -8,7 +8,7 @@ import roslib; roslib.load_manifest('camera_model')
 import geometry_msgs
 import sensor_msgs
 
-from test_utils import _build_test_camera, _build_points_3d, get_default_options
+from utils import _build_test_camera, _build_points_3d, get_default_options
 from camera_model.npcv import numpy2opencv_image, numpy2opencv_pointmat, \
      opencv_pointmat2numpy
 

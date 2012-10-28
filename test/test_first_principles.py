@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from test_utils import _build_points_3d, make_pmat
+from utils import _build_points_3d, make_pmat
 import os
 
 # ROS imports

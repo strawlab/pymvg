@@ -11,7 +11,7 @@ from camera_model import CameraModel
 from camera_model.camera_model import point_msg_to_tuple, parse_rotation_msg
 import camera_model
 
-from test_utils import _build_test_camera, get_default_options
+from utils import _build_test_camera, get_default_options
 
 # --------------------- testing -----------------------------
 
