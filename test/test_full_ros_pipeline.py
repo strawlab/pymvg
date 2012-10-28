@@ -80,9 +80,12 @@ class ROSPipelineMimic:
 
         parts = make_pmat( 1234.56, width, height,
                            rmat, center)
-        self.cal_parts = parts
+
+        dist = [-0.4, .2, 0, 0, 0]
+
         self.cam = camera_model.load_camera_from_pmat(parts['pmat'],
-                                                      width=width,height=height)
+                                                      width=width,height=height,
+                                                      distortion_coefficients=dist)
 
     def generate_images(self):
         """make checkerboard images in camera view"""
@@ -119,7 +122,7 @@ class ROSPipelineMimic:
             rquat = tf.transformations.quaternion_about_axis(theta, axis)
             rmat,_ = get_rotation_matrix_and_quaternion(rquat)
 
-            this_cc = np.dot(rmat,base_cc)# + np.array([(0,0,-dist)]).T
+            this_cc = np.dot(rmat,base_cc)
 
             first_pixel = np.array( center_pix, copy=True )
             atmp = i*np.pi/2.
@@ -225,11 +228,17 @@ def test_ros_pipeline():
     pm.generate_images()
     #pm.save_tarball('/tmp/pipeline-mimic.tar.gz') # optional
     cals = pm.run_ros_calibrator()
-    assert pm.calc_mean_reproj_error(cals['perfect']) < 1.0
-    assert pm.calc_mean_reproj_error(cals['good']) < 5.0
-
+    print cals
+    err1 = pm.calc_mean_reproj_error(cals['perfect'])
+    err2 = pm.calc_mean_reproj_error(cals['good'])
+    print err1,err2
     if DRAW:
+        print 'using perfect point data, mean reprojection error is %s'%err1
+        print 'mean reprojection error is %s'%err2
         plt.show()
+
+    assert err1 < 1.0
+    assert err2 < 5.0
 
 
 if __name__=='__main__':
