@@ -35,7 +35,7 @@ def test_simple_projection():
     width, height = 640,480
     R = np.eye(3) # look at +Z
     c = np.array( (9.99, 19.99, 20) )
-    pmat = make_pmat( focal_length, width, height, R, c)
+    pmat = make_pmat( focal_length, width, height, R, c)['pmat']
 
     # now, project these 3D points into our image plane
     pts_3d_H = np.vstack( (pts_3d.T, np.ones( (1,len(pts_3d))))) # make homog.

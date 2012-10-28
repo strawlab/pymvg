@@ -22,7 +22,8 @@ def make_pmat( focal_length, width, height, R, c):
     C.shape = (3,1)
     t = -np.dot( R, C)
     pmat = np.dot(K, np.hstack((R,t)))
-    return pmat
+    parts = {'K':K, 'R':R, 't':t, 'pmat':pmat}
+    return parts
 
 def _build_opts():
     opts = []
