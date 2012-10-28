@@ -239,8 +239,8 @@ class CameraModel(object):
         K = self.P[:3,:3]
         self._opencv_compatible = (K[0,1]==0)
 
-        # And a final check
-        if K[0,1] != 0.0:
+        # If skew is 15 orders of magnitude less than focal length, ignore it.
+        if abs(K[0,1]) > (abs(K[0,0])/1e15):
             if np.sum(abs(self.distortion)) != 0.0:
                 raise NotImplementedError('distortion/undistortion for skewed pixels not implemented')
 
