@@ -832,7 +832,9 @@ def load_camera_from_bagfile( bag_fname, extrinsics_required=True ):
     return result
 
 
-def load_camera_from_pmat( pmat, width=None, height=None, name='cam', _depth=0 ):
+def load_camera_from_pmat( pmat, width=None, height=None, name='cam',
+                           distortion_coefficients=None,
+                           _depth=0 ):
     pmat = np.array(pmat)
     assert pmat.shape==(3,4)
     c = center(pmat)
@@ -861,10 +863,16 @@ def load_camera_from_pmat( pmat, width=None, height=None, name='cam', _depth=0 )
     P = np.zeros( (3,4) )
     P[:3,:3]=K
 
+    if distortion_coefficients is None:
+        distortion_coefficients = np.zeros((5,))
+    else:
+        distortion_coefficients = np.array(distortion_coefficients)
+        assert distortion_coefficients.shape == (5,)
+
     i = sensor_msgs.msg.CameraInfo()
     i.width = width
     i.height = height
-    i.D = [0,0,0,0,0]
+    i.D = [float(val) for val in distortion_coefficients]
     i.K = list(K.flatten())
     i.R = list(np.eye(3).flatten())
     i.P = list(P.flatten())
