@@ -76,10 +76,11 @@ def check_projection(cam_opts,distorted=True):
     else:
         cv_distortion = numpy2opencv_image(np.zeros((5,1)))
 
+    Pleft = cam.get_P()[:3,:3]
     cv.ProjectPoints2(src,
                       rvec,
                       numpy2opencv_image(t),
-                      numpy2opencv_image(cam.get_K()),
+                      numpy2opencv_image(Pleft),
                       cv_distortion,
                       dst)
     result_cv = opencv_pointmat2numpy(dst)
