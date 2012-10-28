@@ -12,6 +12,18 @@ from camera_model import CameraModel
 from camera_model.camera_model import point_msg_to_tuple, parse_rotation_msg
 import camera_model
 
+def make_pmat( focal_length, width, height, R, c):
+    K = np.eye(3)
+    K[0,0] = focal_length
+    K[1,1] = focal_length
+    K[0,2] = width/2.0
+    K[1,2] = height/2.0
+    C = np.array(c,copy=True)
+    C.shape = (3,1)
+    t = -np.dot( R, C)
+    pmat = np.dot(K, np.hstack((R,t)))
+    return pmat
+
 def _build_opts():
     opts = []
     for at_origin in (True,False):

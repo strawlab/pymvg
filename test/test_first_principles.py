@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from test_utils import _build_points_3d
+from test_utils import _build_points_3d, make_pmat
 import os
 
 # ROS imports
@@ -16,18 +16,6 @@ if DRAW:
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
     from camera_model.plot_utils import plot_camera
-
-def make_pmat( focal_length, width, height, R, c):
-    K = np.eye(3)
-    K[0,0] = focal_length
-    K[1,1] = focal_length
-    K[0,2] = width/2.0
-    K[1,2] = height/2.0
-    C = np.array(c,copy=True)
-    C.shape = (3,1)
-    t = -np.dot( R, C)
-    pmat = np.dot(K, np.hstack((R,t)))
-    return pmat
 
 def test_simple_projection():
 
