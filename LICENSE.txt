@@ -1,0 +1,19 @@
+camera_model
+============
+
+The camera_model package was written by Andrew Straw at the Research
+Institute of Molecular Pathology (IMP), Vienna, Austria.
+
+other parts
+===========
+
+The camera_model package includes the following other parts.
+
+_fill_polygon() in test/fill_polygon.py
+--------------------------------------
+
+Downloaded on 17 May, 2012 from
+https://raw.github.com/luispedro/mahotas/master/mahotas/polygon.py
+
+  Author: Luis Pedro Coelho
+  License: GPL 2
