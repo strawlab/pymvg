@@ -43,6 +43,11 @@ def check_undistortion(cam_opts):
     assert undistorted_cv.shape == undistorted_np.shape
     if cam.is_opencv_compatible():
         assert np.allclose(undistorted_cv, undistorted_np)
+    else:
+        from nose.plugins.skip import SkipTest
+        raise SkipTest("Test %s is skipped: %s" %(
+            check_undistortion.__name__,
+            'camera model is not OpenCV compatible, skipping test'))
 
 def test_projection():
     all_options = get_default_options()
@@ -92,3 +97,8 @@ def check_projection(cam_opts,distorted=True):
     assert result_cv.shape == result_np.shape
     if cam.is_opencv_compatible():
         assert np.allclose(result_cv, result_np)
+    else:
+        from nose.plugins.skip import SkipTest
+        raise SkipTest("Test %s is skipped: %s" %(
+            check_projection.__name__,
+            'camera model is not OpenCV compatible, skipping test'))
