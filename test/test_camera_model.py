@@ -15,6 +15,17 @@ from utils import _build_test_camera, get_default_options
 
 # --------------------- testing -----------------------------
 
+def _generate_uv_raw(width,height):
+    step = 5
+    border = 65
+
+    uv_raws = []
+    for row in range(border, height-border, step):
+        for col in range(border, width-border, step):
+            uv_raw = [col, row]
+            uv_raws.append(uv_raw)
+    return np.array(uv_raws)
+
 def test_projection_to_undistorted1():
     at_origin=True # this test mathematically only makes sense of camera at origin
     for ROS_test_data in (True,False):
@@ -40,15 +51,7 @@ def test_camera_distortion_roundtrip():
 def check_camera_distortion_roundtrip(cam_opts):
     """check that uv == distort( undistort( uv ))"""
     cam = _build_test_camera(**cam_opts)
-    step = 5
-    border = 65
-
-    uv_raws = []
-    for row in range(border, cam.height-border, step):
-        for col in range(border, cam.width-border, step):
-            uv_raw = [col, row]
-            uv_raws.append(uv_raw)
-    uv_raw = np.array(uv_raws)
+    uv_raw = _generate_uv_raw(cam.width, cam.height)
     uv_rect = cam.undistort( uv_raw )
     uv_unrect = cam.distort( uv_rect )
     assert uv_raw.shape == uv_unrect.shape
@@ -63,15 +66,8 @@ def test_camera_projection_roundtrip():
 def check_camera_projection_roundtrip(cam_opts,distorted=False):
     """check that uv == project_to_2d( project_to_3d( uv ))"""
     cam = _build_test_camera(**cam_opts)
-    step = 5
-    border = 65
+    uv_raw = _generate_uv_raw(cam.width, cam.height)
 
-    uv_raws = []
-    for row in range(border, cam.height-border, step):
-        for col in range(border, cam.width-border, step):
-            uv_raw = [col, row]
-            uv_raws.append(uv_raw)
-    uv_raw = np.array(uv_raws)
     pts3d = cam.project_pixel_to_3d_ray( uv_raw, distorted=distorted )
     uv_unrect = cam.project_3d_to_pixel( pts3d, distorted=distorted )
     assert uv_raw.shape == uv_unrect.shape
@@ -188,15 +184,8 @@ def check_camera_mirror_projection_roundtrip(cam_opts,distorted=False):
     """check that a mirrored camera gives reflected pixel coords"""
     cam_orig = _build_test_camera(**cam_opts)
     cam_mirror = cam_orig.get_mirror_camera()
-    step = 5
-    border = 65
+    uv_raw = _generate_uv_raw(cam_orig.width, cam_orig.height)
 
-    uv_raws = []
-    for row in range(border, cam_orig.height-border, step):
-        for col in range(border, cam_orig.width-border, step):
-            uv_raw = [col, row]
-            uv_raws.append(uv_raw)
-    uv_raw = np.array(uv_raws)
     # Get a collection of 3D points for which we know the pixel location of
     pts3d = cam_orig.project_pixel_to_3d_ray( uv_raw, distorted=distorted )
     # Now project that through our mirror-image camera.
