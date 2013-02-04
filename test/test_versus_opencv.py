@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
+import os
 import numpy as np
 import cv # ubuntu: apt-get install python-opencv
 
@@ -11,6 +12,15 @@ import sensor_msgs
 from utils import _build_test_camera, _build_points_3d, get_default_options
 from camera_model.npcv import numpy2opencv_image, numpy2opencv_pointmat, \
      opencv_pointmat2numpy
+
+def noop(*args,**kwargs):
+    pass
+
+DEBUG=int(os.environ.get('DEBUG',0))
+if DEBUG:
+    debug = print
+else:
+    debug = noop
 
 def test_undistortion():
     all_options = get_default_options()
@@ -96,7 +106,16 @@ def check_projection(cam_opts,distorted=True):
     result_np = cam.project_3d_to_pixel( pts3D, distorted=distorted )
     assert result_cv.shape == result_np.shape
     if cam.is_opencv_compatible():
-        assert np.allclose(result_cv, result_np)
+        try:
+            assert np.allclose(result_cv, result_np)
+        except:
+            debug()
+            debug('result_cv')
+            debug(result_cv)
+            debug('result_np')
+            debug(result_np)
+            debug()
+            raise
     else:
         from nose.plugins.skip import SkipTest
         raise SkipTest("Test %s is skipped: %s" %(
