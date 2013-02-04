@@ -70,6 +70,9 @@ def draw_checkerboard(check_pixels,cw,ch,imw,imh):
     return canvas
 
 class ROSPipelineMimic:
+    def __init__(self,use_distortion=True):
+        self.use_distortion=use_distortion
+
     def generate_camera(self):
         (width,height)=(self.width,self.height)=(640,480)
         center = 1,2,3
@@ -81,7 +84,10 @@ class ROSPipelineMimic:
         parts = make_pmat( 1234.56, width, height,
                            rmat, center)
 
-        dist = [-0.4, .2, 0, 0, 0]
+        if self.use_distortion:
+            dist = [-0.4, .2, 0, 0, 0]
+        else:
+            dist = [0, 0, 0, 0, 0]
 
         self.cam = camera_model.load_camera_from_pmat(parts['pmat'],
                                                       width=width,height=height,
@@ -223,7 +229,11 @@ class ROSPipelineMimic:
         return mean_err
 
 def test_ros_pipeline():
-    pm = ROSPipelineMimic()
+    yield check_ros_pipeline, dict(use_distortion=True)
+    yield check_ros_pipeline, dict(use_distortion=False)
+
+def check_ros_pipeline(use_distortion):
+    pm = ROSPipelineMimic(use_distortion=use_distortion)
     pm.generate_camera()
     pm.generate_images()
     #pm.save_tarball('/tmp/pipeline-mimic.tar.gz') # optional
