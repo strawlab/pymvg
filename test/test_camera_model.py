@@ -256,3 +256,25 @@ def test_camcenter():
     for opts in all_options:
         cam = _build_test_camera(**opts)
         assert np.allclose( cam.get_camcenter(), cam.t_inv.T )
+
+def test_stages():
+    all_options = get_default_options()
+    for distorted in (True,False):
+        for opts in all_options:
+            yield check_stages, opts, distorted
+
+def check_stages(cam_opts, distorted=False):
+    """check the sum of all stages equals all stages summed"""
+    cam = _build_test_camera(**cam_opts)
+
+    uv_raw = _generate_uv_raw(cam.width, cam.height)
+    pts3d = cam.project_pixel_to_3d_ray( uv_raw, distorted=distorted )
+
+    # case 1: direct projection to pixels
+    direct = cam.project_3d_to_pixel( pts3d, distorted=distorted )
+
+    # case 2: project to camera frame, then to pixels
+    cam_frame = cam.project_3d_to_camera_frame(pts3d)
+    indirect = cam.project_camera_frame_to_pixel(cam_frame, distorted=distorted)
+
+    assert np.allclose(direct, indirect)

@@ -661,6 +661,29 @@ class CameraModel(object):
         ray_cam = distance*(ray_cam/rl) # normalize then scale
         return ray_cam.T
 
+    def project_camera_frame_to_pixel(self, pts3d, distorted=True):
+        pts3d = np.array(pts3d,copy=False)
+        assert pts3d.ndim==2
+        assert pts3d.shape[1]==3
+
+        # homogeneous and transposed
+        pts3d_h = np.empty( (4,pts3d.shape[0]) )
+        pts3d_h[:3,:] = pts3d.T
+        pts3d_h[3] = 1
+
+        # undistorted homogeneous image coords
+        cc = np.dot(self.P, pts3d_h)
+
+        # project
+        pc = cc[:2]/cc[2]
+        u, v = pc
+
+        if distorted:
+            # distort (the currently undistorted) image coordinates
+            nparr = np.vstack((u,v)).T
+            u,v = self.distort( nparr ).T
+        return np.vstack((u,v)).T
+
     def project_pixel_to_3d_ray(self, nparr, distorted=True, distance=1.0 ):
         ray_cam = self.project_pixel_to_camera_frame( nparr, distorted=distorted, distance=distance )
         # transform to world frame
