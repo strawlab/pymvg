@@ -56,7 +56,10 @@ def check_projection(cam_opts,distorted=True):
     if not np.allclose(R, np.eye(3)):
         # opencv's ProjectPoints2 does not take into account
         # rectifciation matrix, thus we skip this test.
-        return
+        from nose.plugins.skip import SkipTest
+        raise SkipTest("Test %s is skipped: %s" %(
+            check_projection.__name__,
+            'cannot check if rectification matrix is not unity'))
 
     pts3D = _build_points_3d()
     n_pts = len(pts3D)
