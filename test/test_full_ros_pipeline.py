@@ -206,6 +206,7 @@ class ROSPipelineMimic:
                 ax = f.add_subplot(111)
                 ax.plot(cnp[:,0],cnp[:,1],'r+',label='cv')
                 ax.plot(myp[:,0],myp[:,1],'bx',label='truth')
+                ax.legend()
             goodcorners.append( (corners,board) )
             perfectcorners.append( ([(x,y) for x,y in imd['pix']], board) )
 
