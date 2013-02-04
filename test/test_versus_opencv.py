@@ -90,15 +90,16 @@ def check_projection(cam_opts,distorted=True):
     cv.Rodrigues2(numpy2opencv_image(R), rvec)
 
     if distorted:
+        K = cam.get_K()
         cv_distortion = numpy2opencv_image(cam.get_D())
     else:
+        K = cam.get_P()[:3,:3]
         cv_distortion = numpy2opencv_image(np.zeros((5,1)))
 
-    Pleft = cam.get_P()[:3,:3]
     cv.ProjectPoints2(src,
                       rvec,
                       numpy2opencv_image(t),
-                      numpy2opencv_image(Pleft),
+                      numpy2opencv_image(K),
                       cv_distortion,
                       dst)
     result_cv = opencv_pointmat2numpy(dst)
