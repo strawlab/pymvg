@@ -232,6 +232,20 @@ def test_ros_pipeline():
     err1 = pm.calc_mean_reproj_error(cals['perfect'])
     err2 = pm.calc_mean_reproj_error(cals['good'])
     print err1,err2
+
+    if DRAW:
+        from mpl_toolkits.mplot3d import Axes3D
+        from camera_model.plot_utils import plot_camera
+
+        f = plt.figure()
+        ax = f.add_subplot(111,projection='3d')
+        for imd in pm.db:
+            wcs3d = imd['wc']
+
+            ax.plot(wcs3d[:,0],wcs3d[:,1],wcs3d[:,2], 'o-')
+
+        plot_camera( ax, pm.cam )#, scale=10, axes_size=5.0 )
+
     if DRAW:
         print 'using perfect point data, mean reprojection error is %s'%err1
         print 'mean reprojection error is %s'%err2
