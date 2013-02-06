@@ -910,3 +910,17 @@ def load_default_camera( ):
                       [   0, 300, 240, 0],
                       [   0,   0,   1, 0]])
     return load_camera_from_pmat( pmat, width=640, height=480, name='cam')
+
+def load_from_ROS_tf( translation=None,
+                      rotation=None,
+                      **kwargs):
+    rmat, rquat = get_rotation_matrix_and_quaternion(rotation)
+    C = np.array(translation)
+    C.shape = 3,1
+
+    r2 =  np.linalg.pinv(rmat)
+    rmat2, rquat2 = get_rotation_matrix_and_quaternion(r2)
+
+    t = -np.dot( rmat2, C)[:,0]
+
+    return CameraModel(translation=t, rotation=rquat2, **kwargs)
