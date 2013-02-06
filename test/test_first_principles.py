@@ -11,11 +11,59 @@ import sensor_msgs
 
 import camera_model.camera_model as camera_model
 
+normalize = camera_model.normalize
+
 DRAW=int(os.environ.get('DRAW','0'))
 if DRAW:
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
     from camera_model.plot_utils import plot_camera
+
+def test_lookat():
+
+    dist = 5.0
+
+    # build camera
+    center_expected = np.array( [10, 5, 20] )
+    lookat_expected = center_expected + np.array( [dist, 0, 0] ) # looking in +X
+    up_expected     = np.array( [0,  0,  1] )
+
+    f = 300.0 # focal length
+    width, height = 640, 480
+    cx, cy = width/2.0, height/2.0
+
+    pmat = np.array( [[ f, 0, cx, 0],
+                      [ 0, f, cy, 0],
+                      [ 0, 0,   1, 0]])
+    cam1 = camera_model.load_camera_from_pmat( pmat, width=width, height=height)
+    cam = cam1.get_view_camera(center_expected, lookat_expected, up_expected)
+
+    # check that the extrinsic parameters were what we expected
+    (center_actual,lookat_actual,up_actual) = cam.get_view()
+
+    lookdir_expected = normalize( lookat_expected - center_expected )
+    lookdir_actual   = normalize( lookat_actual   - center_actual   )
+
+    assert np.allclose( center_actual,  center_expected  )
+    assert np.allclose( lookdir_actual, lookdir_expected )
+    assert np.allclose( up_actual,      up_expected      )
+
+    # check that the extrinsics work as expected
+    pts = np.array([lookat_expected,
+                    lookat_expected+up_expected])
+    eye_actual = cam.project_3d_to_camera_frame( pts )
+
+    eye_expected = [[0, 0, dist], # camera looks at +Z
+                    [0,-1, dist], # with -Y as up
+                    ]
+    assert np.allclose( eye_actual,      eye_expected      )
+
+    # now check some basics of the projection
+    pix_actual = cam.project_3d_to_pixel( pts )
+
+    pix_expected = [[cx,cy], # center pixel on the camera
+                    [cx,cy-(f/dist)]]
+    assert np.allclose( pix_actual,      pix_expected      )
 
 def test_simple_projection():
 
@@ -74,3 +122,4 @@ def test_simple_projection():
 
 if __name__=='__main__':
     test_simple_projection()
+    test_lookat()
