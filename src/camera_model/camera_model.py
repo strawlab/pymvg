@@ -139,10 +139,15 @@ def get_rotation_matrix_and_quaternion(rotation):
 # main class
 
 class CameraModel(object):
-    """an implementation of the Camera Model used by ROS
+    """an implementation of the Camera Model used by ROS and OpenCV
 
-    See http://www.ros.org/wiki/image_pipeline/CameraInfo for a
-    discussion of the coordinate system used here.
+    Coordinate system: the camera is looking at +Z, with +X rightward
+    and +Y down. For more information, see
+    http://www.ros.org/wiki/image_pipeline/CameraInfo
+
+    As noted on the link above, this differs from the coordinate
+    system of Harley and Zisserman, which has Z forward, Y up, and X
+    to the left (looking towards +Z).'
 
     """
     __slots__ = [
