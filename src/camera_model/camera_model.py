@@ -310,6 +310,11 @@ class CameraModel(object):
             setattr(msg.rotation,'xyzw'[i], self._rquat[i] )
         return msg
 
+    def get_ROS_tf(self):
+        rmat = self.get_rot_inv()
+        rmat2, rquat2 = get_rotation_matrix_and_quaternion(rmat)
+        return self.get_camcenter(), rquat2
+
     def get_intrinsics_as_msg(self):
         i = sensor_msgs.msg.CameraInfo()
         # these are from image_geometry ROS package in the utest.cpp file
@@ -925,6 +930,8 @@ def load_from_ROS_tf( translation=None,
                       rotation=None,
                       **kwargs):
     rmat, rquat = get_rotation_matrix_and_quaternion(rotation)
+    if hasattr(translation,'x'):
+        translation = (translation.x, translation.y, translation.z)
     C = np.array(translation)
     C.shape = 3,1
 

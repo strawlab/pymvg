@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import numpy as np
-from utils import _build_points_3d, make_pmat
+from utils import make_pmat, _build_test_camera, get_default_options
+
 import fill_polygon
 import scipy.misc
 import tarfile, time, os, StringIO
@@ -269,6 +270,36 @@ def check_ros_pipeline(use_distortion):
     # important. Nevertheless, this is an annoyingly large error.
     assert err2 < 30.0
 
+
+def test_roundtrip_ros_tf():
+    all_options = get_default_options()
+    for opts in all_options:
+        yield check_roundtrip_ros_tf, opts
+
+def check_roundtrip_ros_tf(cam_opts):
+    cam1 = _build_test_camera(**cam_opts)
+    translation, rotation = cam1.get_ROS_tf()
+    i = cam1.get_intrinsics_as_msg()
+    cam2 = camera_model.load_from_ROS_tf( translation=translation,
+                                          rotation=rotation,
+                                          intrinsics = i,
+                                          name = cam1.name)
+
+    assert np.allclose( cam1.get_camcenter(),
+                        cam2.get_camcenter() )
+
+    assert np.allclose( cam1.get_rotation_quat(),
+                        cam2.get_rotation_quat() )
+
+    verts = np.array([[ 0.042306,  0.015338,  0.036328],
+                      [ 0.03323,   0.030344,  0.041542],
+                      [ 0.03323,   0.030344,  0.041542],
+                      [ 0.03323,   0.030344,  0.041542],
+                      [ 0.036396,  0.026464,  0.052408]])
+
+    p1 = cam1.project_3d_to_pixel(verts)
+    p2 = cam2.project_3d_to_pixel(verts)
+    assert np.allclose( p1, p2 )
 
 if __name__=='__main__':
     test_ros_pipeline()
