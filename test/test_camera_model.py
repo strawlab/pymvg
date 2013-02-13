@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
+from nose.plugins.skip import SkipTest
 
 # ROS imports
 import roslib; roslib.load_manifest('camera_model')
@@ -71,9 +72,6 @@ def check_camera_projection_roundtrip(cam_opts,distorted=False):
     pts3d = cam.project_pixel_to_3d_ray( uv_raw, distorted=distorted )
     uv_unrect = cam.project_3d_to_pixel( pts3d, distorted=distorted )
     assert uv_raw.shape == uv_unrect.shape
-    print uv_raw
-    print
-    print uv_unrect
     assert np.allclose(uv_raw, uv_unrect, atol=1.0) # within one pixel
 
 def test_extrinsic_msg():
@@ -176,14 +174,15 @@ def check_distortion_yamlfile_roundtrip(cam_opts):
 
 def test_camera_mirror_projection_roundtrip():
     all_options = get_default_options()
-    for distorted in (True,False):
-        for opts in all_options:
-            yield check_camera_mirror_projection_roundtrip, opts, distorted
+    for axis in ('lr','ud'):
+        for distorted in (True,False):
+            for opts in all_options:
+                yield check_camera_mirror_projection_roundtrip, opts, distorted, axis
 
-def check_camera_mirror_projection_roundtrip(cam_opts,distorted=False):
+def check_camera_mirror_projection_roundtrip(cam_opts,distorted=False,axis='lr'):
     """check that a mirrored camera gives reflected pixel coords"""
     cam_orig = _build_test_camera(**cam_opts)
-    cam_mirror = cam_orig.get_mirror_camera()
+    cam_mirror = cam_orig.get_mirror_camera(axis=axis)
     uv_raw = _generate_uv_raw(cam_orig.width, cam_orig.height)
 
     # Get a collection of 3D points for which we know the pixel location of
@@ -192,42 +191,43 @@ def check_camera_mirror_projection_roundtrip(cam_opts,distorted=False):
     uv_mirror = cam_mirror.project_3d_to_pixel( pts3d, distorted=distorted )
     # Which points should be xnew = (width-x)
     expected = np.array(uv_raw)
-    expected[:,0] = cam_orig.width - uv_raw[:,0]
+    if axis=='lr':
+        expected[:,0] = cam_orig.width - uv_raw[:,0]
+    else:
+        expected[:,1] = cam_orig.height - uv_raw[:,1]
     assert expected.shape == uv_mirror.shape
     assert np.allclose(expected, uv_mirror, atol=1.0) # within one pixel
 
-# def test_flip():
-#     all_options = get_default_options()
-#     for opts in all_options:
-#         yield check_flip, opts
+def test_flip():
+    all_options = get_default_options()
+    for opts in all_options:
+        yield check_flip, opts
 
-# def check_flip(cam_opts):
-#     cam_orig = _build_test_camera(**cam_opts)
-#     cam_flip = cam_orig.get_flipped_camera()
+def check_flip(cam_opts):
+    cam_orig = _build_test_camera(**cam_opts)
+    try:
+        cam_flip = cam_orig.get_flipped_camera()
+    except NotImplementedError as err:
+        raise SkipTest(str(err))
 
-#     print 'cam_orig.get_camcenter()',cam_orig.get_camcenter()
-#     print 'cam_orig.get_rotation_quat()',cam_orig.get_rotation_quat()
-#     # They have different orientation (but same position) in space,
-#     assert not np.allclose( cam_orig.get_rotation(), cam_flip.get_rotation())
-#     assert np.allclose( cam_orig.get_camcenter(), cam_flip.get_camcenter())
+    # They have different orientation (but same position) in space,
+    assert not np.allclose( cam_orig.get_rotation(), cam_flip.get_rotation())
+    assert np.allclose( cam_orig.get_camcenter(), cam_flip.get_camcenter())
 
-#     eye, lookat, up = cam_orig.get_view()
-#     eye2, lookat2, up2 = cam_flip.get_view()
+    eye, lookat, up = cam_orig.get_view()
+    eye2, lookat2, up2 = cam_flip.get_view()
 
-#     print 'lookat, eye, lookat2', lookat, eye, lookat2
-#     d1 = eye-lookat
-#     d2 = lookat2-eye
-#     print 'd1,d2',d1,d2
+    assert not np.allclose( lookat, lookat2 )
 
-#     # but they project 3D points to same pixel locations
-#     verts = np.array([[ 0.042306,  0.015338,  0.036328],
-#                       [ 1.03323,   2.030344,  3.041542],
-#                       [ 0.03323,   0.030344,  0.041542],
-#                       [ 0.036396,  0.026464,  0.052408]])
+    # but they project 3D points to same pixel locations
+    verts = np.array([[ 0.042306,  0.015338,  0.036328],
+                      [ 1.03323,   2.030344,  3.041542],
+                      [ 0.03323,   0.030344,  0.041542],
+                      [ 0.036396,  0.026464,  0.052408]])
 
-#     expected = cam_orig.project_3d_to_pixel(verts)
-#     actual   = cam_flip.project_3d_to_pixel(verts)
-#     assert np.allclose( expected, actual )
+    expected = cam_orig.project_3d_to_pixel(verts)
+    actual   = cam_flip.project_3d_to_pixel(verts)
+    assert np.allclose( expected, actual )
 
 def test_view():
     all_options = get_default_options()

@@ -405,109 +405,63 @@ class CameraModel(object):
         with open(fname,'w') as fd:
             fd.write( buf )
 
-    def get_mirror_camera(self):
+    def get_mirror_camera(self,axis='lr',hold_center=False):
         """return a copy of this camera whose x coordinate is (image_width-x)"""
-        if 0:
+        assert axis in ['lr','ud']
+        # Keep extrinsic coordinates, but flip intrinsic
+        # parameter so that a mirror image is rendered.
 
-            # Method 1: flip the extrinsic coordinates to a LH
-            # system. (Adjust camera center for distortion.)
-
-            # Implementation note: I guess this should work, but it is
-            # not quite right for some reason.
-
-            flipr = np.eye(3)
-            flipr[0,0] = -1
-            rnew = np.dot(flipr,self.rot)
-            C = self.get_camcenter()
-            tnew = -np.dot(rnew, C)
-            i = self.get_intrinsics_as_msg()
-            i.K[2] = (self.width-i.K[2])
-            i.P[2] = (self.width-i.P[2])
-            camnew = CameraModel( translation = tnew,
-                                  rotation = rnew,
-                                  intrinsics = i,
-                                  name = self.name + '_mirror',
-                                  )
-            return camnew
-        elif 1:
-
-            # Method 2: keep extrinsic coordinates, but flip intrinsic
-            # parameter so that a mirror image is rendered.
-
-            i = self.get_intrinsics_as_msg()
+        i = self.get_intrinsics_as_msg()
+        if axis=='lr':
             i.K[0] = -i.K[0]
             i.P[0] = -i.P[0]
 
-            # Now, do we flip about optical center or just the X
-            # coordinate?
-
-            if 1:
-
+            if not hold_center:
                 # This flips the X coordinate but preserves the
                 # optical center.
 
                 i.K[2] = (self.width-i.K[2])
                 i.P[2] = (self.width-i.P[2])
+        else:
+            # axis=='ud'
+            i.K[4] = -i.K[4]
+            i.P[5] = -i.P[5]
 
-            camnew = CameraModel( translation = self.translation,
-                                  rotation = self.rot,
-                                  intrinsics = i,
-                                  name = self.name + '_mirror',
-                                  )
-            return camnew
+            if not hold_center:
 
-    # def get_flipped_camera(self):
-    #     """return a copy of this camera looking in the opposite direction
+                # This flips the Y coordinate but preserves the
+                # optical center.
 
-    #     The returned camera has the same 3D->2D projection. (The
-    #     2D->3D projection results in a vector in the opposite
-    #     direction.)
-    #     """
+                i.K[5] = (self.height-i.K[5])
+                i.P[6] = (self.height-i.P[6])
 
-    #     #rold = self.get_rotation()
-    #     #q = tf.transformations.quaternion_from_matrix(rold)
-    #     q = self.get_rotation_quat()
-    #     cosa2 = q[3]
-    #     theta=2*np.arccos(cosa2)
-    #     axis = q[:3]
+        camnew = CameraModel( translation = self.translation,
+                              rotation = self.rot,
+                              intrinsics = i,
+                              name = self.name + '_mirror',
+                              )
+        return camnew
 
-    #     eps = 1e16
+    def get_flipped_camera(self):
+        """return a copy of this camera looking in the opposite direction
 
-    #     if 1:
-    #         newtheta = theta+np.pi
-    #         axlen = np.sqrt( np.sum(axis**2 ))
-    #         if axlen > eps:
-    #             newaxis = axis
-    #         else:
-    #             newaxis = np.array((1,0,0)) # arbirtrary direction
-    #     else:
-    #         if theta > eps:
-    #             newtheta = theta
-    #             newaxis = -axis
-    #         else:
-    #             0
+        The returned camera has the same 3D->2D projection. (The
+        2D->3D projection results in a vector in the opposite
+        direction.)
+        """
+        cc, la, up = self.get_view()
+        lv = la-cc # look vector
 
-    #     qnew = tf.transformations.quaternion_about_axis(newtheta, newaxis)
-    #     print 'theta, axis, q', theta, axis, q
-    #     print 'newtheta, newaxis, qnew', newtheta, newaxis, qnew
-    #     #qnew = tf.transformations.quaternion_from_matrix(rold)
-    #     rnew = tf.transformations.quaternion_matrix(qnew)[:3,:3]
-    #     if not is_rotation_matrix(rnew):
-    #         print 'impossible?',theta, newaxis
-    #         assert 1==0
+        lv2 = -lv
+        up2 = -up
+        la2 = cc+lv2
 
-    #     # flip = -np.eye(3)
-    #     # rnew = np.dot( flip, rnew)
-    #     i = self.get_intrinsics_as_msg()
+        camnew = self.get_view_camera(cc, la2, up2).get_mirror_camera(hold_center=True)
+        camnew.distortion[3] = -self.distortion[3]
 
-    #     C = self.get_camcenter()
-    #     tnew = -np.dot(rnew, C)
-    #     camnew = CameraModel( translation = tnew,
-    #                           rotation = rnew,
-    #                           intrinsics = i,
-    #                           name = self.name + '_flip',
-    #                           )
-    #     return camnew
+        if camnew.rect is not None:
+            raise NotImplementedError('No support for flipping stereo cameras')
+        return camnew
 
     def get_view_camera(self, eye, lookat, up=None):
         """return a copy of this camera with new extrinsic coordinates"""

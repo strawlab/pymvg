@@ -37,6 +37,7 @@ def test_lookat():
                       [ 0, 0,   1, 0]])
     cam1 = camera_model.load_camera_from_pmat( pmat, width=width, height=height)
     cam = cam1.get_view_camera(center_expected, lookat_expected, up_expected)
+    del cam1
 
     # check that the extrinsic parameters were what we expected
     (center_actual,lookat_actual,up_actual) = cam.get_view()
@@ -64,6 +65,44 @@ def test_lookat():
     pix_expected = [[cx,cy], # center pixel on the camera
                     [cx,cy-(f/dist)]]
     assert np.allclose( pix_actual,      pix_expected      )
+
+def test_flip():
+    for distortion in (False,True):
+        yield check_flip, distortion
+
+def check_flip(distortion=False):
+    if distortion:
+        d = [0.1, 0.2, 0.3, 0.4, 0.5]
+    else:
+        d = None
+
+    # build camera
+    center_expected = np.array( [10, 5, 20] )
+    lookat_expected = center_expected + np.array( [1, 2, 0] )
+    up_expected     = np.array( [0,  0,  1] )
+
+    width, height = 640, 480
+
+    pmat = np.array( [[ 300.0,     0,  321, 0],
+                      [ 0,     298.0,  240, 0],
+                      [ 0,         0,   1,  0]])
+    cam1 = camera_model.load_camera_from_pmat( pmat, width=width, height=height,
+                                               distortion_coefficients=d )
+    cam = cam1.get_view_camera(center_expected, lookat_expected, up_expected)
+    del cam1
+
+    pts = np.array([lookat_expected,
+                    lookat_expected+up_expected,
+                    [1,2,3],
+                    [4,5,6]])
+    pix_actual = cam.project_3d_to_pixel( pts )
+
+    # Flipped camera gives same 3D->2D transform but different look direction.
+    cf = cam.get_flipped_camera()
+    assert not np.allclose( cam.get_lookat(), cf.get_lookat() )
+
+    pix_actual_flipped = cf.project_3d_to_pixel( pts )
+    assert np.allclose( pix_actual,      pix_actual_flipped )
 
 def test_simple_projection():
 
