@@ -110,6 +110,7 @@ def is_rotation_matrix(R):
     return True
 
 def get_rotation_matrix_and_quaternion(rotation):
+    rotation_orig = rotation
     rotation = np.array(rotation)
     if rotation.ndim==2:
         assert rotation.shape==(3,3)
@@ -124,6 +125,10 @@ def get_rotation_matrix_and_quaternion(rotation):
         if not np.alltrue(np.isnan( rquat )):
             R2 = tf.transformations.quaternion_matrix(rquat)[:3,:3]
             assert np.allclose(rmat,R2)
+    elif rotation.ndim==0:
+        assert rotation.dtype == object
+        rotation = (rotation_orig.x, rotation_orig.y, rotation_orig.z, rotation_orig.w)
+        return get_rotation_matrix_and_quaternion(rotation)
     else:
         assert rotation.ndim==1
         assert rotation.shape==(4,)
