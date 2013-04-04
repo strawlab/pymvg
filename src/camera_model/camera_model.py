@@ -830,7 +830,6 @@ def load_camera_from_pmat( pmat, width=None, height=None, name='cam',
                            _depth=0 ):
     pmat = np.array(pmat)
     assert pmat.shape==(3,4)
-    c = center(pmat)
     M = pmat[:,:3]
     K,R = my_rq(M)
     if not is_rotation_matrix(R):
@@ -851,6 +850,7 @@ def load_camera_from_pmat( pmat, width=None, height=None, name='cam',
             cam = load_camera_from_pmat( new_pmat, width=width, height=height, name=name, _depth=_depth+1)
             return cam
 
+    c = center(pmat)
     t = -np.dot(R,c)
 
     P = np.zeros( (3,4) )
