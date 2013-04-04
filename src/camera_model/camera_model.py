@@ -75,7 +75,7 @@ def my_rq(M):
             K[i,:] = -K[i,:]
     return R,K
 
-def center(P):
+def center(P,eps=1e-8):
     orig_determinant = np.linalg.det
     def determinant( A ):
         return orig_determinant( np.asarray( A ) )
@@ -85,6 +85,7 @@ def center(P):
     Z = determinant( [ P[:,0], P[:,1], P[:,3] ] )
     T = -determinant( [ P[:,0], P[:,1], P[:,2] ] )
 
+    assert abs(T)>eps, "cannot calculate 3D camera center: camera at infinity"
     C_ = np.array( [[ X/T, Y/T, Z/T ]] ).T
     return C_
 
