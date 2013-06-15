@@ -786,7 +786,7 @@ def load_camera_from_file( fname, extrinsics_required=True ):
         return load_camera_from_bagfile(fname, extrinsics_required=extrinsics_required)
     elif fname.endswith('.yaml'):
         with open(fname,'r') as f:
-            d = yaml.load(f)
+            d = yaml.safe_load(f)
         return load_camera_from_dict(d, extrinsics_required=extrinsics_required)
     else:
         raise Exception("Only supports .bag and .yaml file loading")
