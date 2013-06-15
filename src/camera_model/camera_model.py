@@ -141,6 +141,9 @@ def get_rotation_matrix_and_quaternion(rotation):
 
     return rmat, rquat
 
+def get_vec_str(vec):
+    assert vec.ndim==1
+    return ', '.join( ['% 8.4g'%(vec[i],) for i in range(len(vec))])
 
 # main class
 
@@ -254,6 +257,30 @@ class CameraModel(object):
         if abs(K[0,1]) > (abs(K[0,0])/1e15):
             if np.sum(abs(self.distortion)) != 0.0:
                 raise NotImplementedError('distortion/undistortion for skewed pixels not implemented')
+
+    def __str__(self):
+        template = '''camera {name!r}:
+   extrinsic parameters:
+        center  : {center}
+        look at : {lookat}
+        up      : {up}
+   intrinsic parameters:
+        K       : [[{K0}],
+                   [{K1}],
+                   [{K2}]]
+        distortion : {D}
+
+'''
+        center, lookat, up = map(get_vec_str,self.get_view())
+
+        K = self.P[:3,:3]
+        K0,K1,K2 = [get_vec_str(K[i]) for i in range(3)]
+
+        D = get_vec_str(self.distortion.flatten())
+
+        d = dict(name=self.name)
+        d.update(locals())
+        return template.format( **d )
 
     # -------------------------------------------------
     # properties / getters
