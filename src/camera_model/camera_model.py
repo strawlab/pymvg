@@ -259,7 +259,7 @@ class CameraModel(object):
                 raise NotImplementedError('distortion/undistortion for skewed pixels not implemented')
 
     def __str__(self):
-        template = '''camera {name!r}:
+        template = '''camera {name!r}{size_str}:
    extrinsic parameters:
         center  : {center}
         look at : {lookat}
@@ -271,6 +271,10 @@ class CameraModel(object):
         distortion : {D}
 
 '''
+        if self.width is not None:
+            size_str = ' (%dx%d)'%(self.width,self.height)
+        else:
+            size_str = ''
         center, lookat, up = map(get_vec_str,self.get_view())
 
         K = self.P[:3,:3]
