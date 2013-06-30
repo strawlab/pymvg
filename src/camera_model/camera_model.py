@@ -906,15 +906,15 @@ def load_camera_from_pmat( pmat, width=None, height=None, name='cam',
                          name=name)
     return result
 
-def load_default_camera( ):
+def load_camera_default( ):
     pmat = np.array( [[ 300,   0, 320, 0],
                       [   0, 300, 240, 0],
                       [   0,   0,   1, 0]])
     return load_camera_from_pmat( pmat, width=640, height=480, name='cam')
 
-def load_from_ROS_tf( translation=None,
-                      rotation=None,
-                      **kwargs):
+def load_camera_from_ROS_tf( translation=None,
+                             rotation=None,
+                             **kwargs):
     rmat, rquat = get_rotation_matrix_and_quaternion(rotation)
     if hasattr(translation,'x'):
         translation = (translation.x, translation.y, translation.z)

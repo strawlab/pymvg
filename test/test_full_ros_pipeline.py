@@ -280,10 +280,10 @@ def check_roundtrip_ros_tf(cam_opts):
     cam1 = _build_test_camera(**cam_opts)
     translation, rotation = cam1.get_ROS_tf()
     i = cam1.get_intrinsics_as_msg()
-    cam2 = camera_model.load_from_ROS_tf( translation=translation,
-                                          rotation=rotation,
-                                          intrinsics = i,
-                                          name = cam1.name)
+    cam2 = camera_model.load_camera_from_ROS_tf( translation=translation,
+                                                 rotation=rotation,
+                                                 intrinsics = i,
+                                                 name = cam1.name)
 
     assert np.allclose( cam1.get_camcenter(),
                         cam2.get_camcenter() )

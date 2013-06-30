@@ -7,7 +7,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 R2D = 180./np.pi
 
-base = camera_model.load_default_camera()
+base = camera_model.load_camera_default()
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
