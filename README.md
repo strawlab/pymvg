@@ -7,3 +7,10 @@ implementation is in Python. This may make it suitable for easier
 debugging and learning than delving into the source code of OpenCV.
 
 See also [opengl-hz](https://github.com/strawlab/opengl-hz).
+
+## tests
+
+This package is well tested. To run the tests:
+
+    cd tests
+    nosetests
