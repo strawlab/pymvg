@@ -302,3 +302,10 @@ def check_stages(cam_opts, distorted=False):
     indirect = cam.project_camera_frame_to_pixel(cam_frame, distorted=distorted)
 
     assert np.allclose(direct, indirect)
+
+def test_simple_camera():
+    center = np.array( (0, 0.0, 5) )
+    lookat = center + np.array( (0,1,0))
+    cam = camera_model.load_camera_simple(fov_x_degrees=90,
+                                          eye=center,
+                                          lookat=lookat)

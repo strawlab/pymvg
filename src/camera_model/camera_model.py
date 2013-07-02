@@ -14,6 +14,8 @@ import yaml
 
 import warnings
 
+D2R = np.pi/180.0
+
 # helper functions ---------------
 
 def point_msg_to_tuple(d):
@@ -934,3 +936,22 @@ def load_camera_from_ROS_tf( translation=None,
     t = -np.dot( rmat2, C)[:,0]
 
     return CameraModel(translation=t, rotation=rquat2, **kwargs)
+
+def load_camera_simple( fov_x_degrees=30.0,
+                        width=640, height=480,
+                        eye=(0,0,0),
+                        lookat=(0,0,-1),
+                        up=None,
+                        name='simple',
+                        ):
+    aspect = float(width)/float(height)
+    fov_y_degrees = fov_x_degrees/aspect
+    f = (width/2.0) / np.tan(fov_x_degrees*D2R/2.0)
+    cx = width/2.0
+    cy = height/2.0
+    pmat = np.array( [[ f, 0, cx, 0],
+                      [ 0, f, cy, 0],
+                      [ 0, 0,  1, 0]])
+    c1 = load_camera_from_pmat( pmat, width=width, height=height, name=name)
+    c2 = c1.get_view_camera( eye=eye, lookat=lookat, up=None)
+    return c2
