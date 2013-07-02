@@ -250,6 +250,30 @@ def check_view(cam_opts):
     assert np.allclose( lookat, lookat2 )
     assert np.allclose( up, up2 )
 
+    # check a case that was previously failing
+    n=6
+    x = np.linspace(0, 2*n, n)
+    theta = np.linspace(0, 2*np.pi, n)
+    dim = 5.0
+    for i in range(n):
+        center = np.array( (x[i], 0.0, dim) )
+        lookat = center + np.array( (0,1,0))
+        up = -np.sin(theta[i]), 0, np.cos(theta[i])
+
+        cam_new2 = cam_orig.get_view_camera(eye=center, lookat=lookat)
+
+    # check a pathological case
+    center= [ 0.,  0.,  5.]
+    lookat= [ 0.,  1.,  5.]
+    up = [0,-1,0]
+    try:
+        cam_new3 = cam_orig.get_view_camera(eye=center, lookat=lookat, up=up)
+    except AssertionError, err:
+        # we should get this exception
+        pass
+    else:
+        assert 1==0, "did not fail test"
+
 def test_camcenter():
     """check that our idea of camera center is theoretically expected value"""
     all_options = get_default_options()

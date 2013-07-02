@@ -499,13 +499,18 @@ class CameraModel(object):
         """return a copy of this camera with new extrinsic coordinates"""
         eye = np.array(eye); eye.shape=(3,)
         lookat = np.array(lookat); lookat.shape=(3,)
+        gen_up = False
         if up is None:
             up = np.array((0,-1,0))
+            gen_up = True
         lv = lookat - eye
         f = normalize(lv)
         s = normalize( np.cross( f, up ))
+        if np.isnan(s[0]) and gen_up:
+            up = np.array((0,0,1))
+            s = normalize( np.cross( f, up ))
+        assert not np.isnan(s[0]), 'invalid up vector'
         u = normalize( np.cross( f, s ))
-
         R = np.array( [[ s[0], u[0], f[0]],
                        [ s[1], u[1], f[1]],
                        [ s[2], u[2], f[2]]]).T
