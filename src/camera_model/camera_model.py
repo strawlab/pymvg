@@ -505,7 +505,9 @@ class CameraModel(object):
             gen_up = True
         lv = lookat - eye
         f = normalize(lv)
+        old_settings = np.seterr(invalid='ignore')
         s = normalize( np.cross( f, up ))
+        np.seterr(**old_settings)
         if np.isnan(s[0]) and gen_up:
             up = np.array((0,0,1))
             s = normalize( np.cross( f, up ))
