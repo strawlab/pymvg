@@ -966,3 +966,64 @@ class CameraModel(object):
         assert nparr.ndim==2
         assert nparr.shape[1]==3
         return np.zeros( nparr.shape ) + self.t_inv.T
+
+class MultiCameraSystem:
+    def __init__(self,cameras):
+        self._cameras={}
+        for camera in cameras:
+            assert isinstance(camera, CameraModel)
+            name = camera.name
+            if name in self._cameras:
+                raise ValueError('Cannot create MultiCameraSystem with '
+                                 'multiple identically-named cameras.')
+            self._cameras[name] = camera
+
+    def get_names(self):
+        return self._cameras.keys()
+
+    def find3d(self,pts,undistort=True):
+        """Find 3D coordinate using all data given
+
+        Implements a linear triangulation method to find a 3D
+        point. For example, see Hartley & Zisserman section 12.2
+        (p.312). Also, 12.8 for intersecting lines.
+
+        By default, this function will undistort 2D points before
+        finding a 3D point.
+        """
+        # for info on SVD, see Hartley & Zisserman (2003) p. 593 (see
+        # also p. 587)
+        # Construct matrices
+        A=[]
+        P=[]
+        for name,xy in pts:
+            cam = self._cameras[name]
+            if undistort:
+                xy = cam.undistort( [xy] )
+            Pmat = cam.get_pmat() # Pmat is 3 rows x 4 columns
+            row2 = Pmat[2,:]
+            x,y = xy[0,:]
+            A.append( x*row2 - Pmat[0,:] )
+            A.append( y*row2 - Pmat[1,:] )
+
+        # Calculate best point
+        A=np.array(A)
+        u,d,vt=scipy.linalg.svd(A)
+        X = vt[-1,0:3]/vt[-1,3] # normalize
+        return X
+
+    def find2d(self,camera_name,xyz,distorted=True):
+        if not distorted:
+            raise NotImplementedError
+        cam = self._cameras[camera_name]
+
+        xyz = np.array(xyz)
+        rank1 = xyz.ndim==1
+
+        xyz = np.atleast_2d(xyz)
+        pix = cam.project_3d_to_pixel( xyz, distorted=distorted ).T
+
+        if rank1:
+            # convert back to rank1
+            pix = pix[:,0]
+        return pix
