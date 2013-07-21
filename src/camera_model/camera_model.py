@@ -492,9 +492,9 @@ class CameraModel(object):
         look at : {lookat}
         up      : {up}
    intrinsic parameters:
-        K       : [[{K0}],
-                   [{K1}],
-                   [{K2}]]
+        P       : [[{P0}],
+                   [{P1}],
+                   [{P2}]]
         distortion : {D}
 
 '''
@@ -504,8 +504,8 @@ class CameraModel(object):
             size_str = ''
         center, lookat, up = map(get_vec_str,self.get_view())
 
-        K = self.P[:3,:3]
-        K0,K1,K2 = [get_vec_str(K[i]) for i in range(3)]
+        P = self.P[:3,:3]
+        P0,P1,P2 = [get_vec_str(P[i]) for i in range(3)]
 
         D = get_vec_str(self.distortion.flatten())
 
