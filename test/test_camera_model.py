@@ -2,6 +2,7 @@
 
 import numpy as np
 from nose.plugins.skip import SkipTest
+import tempfile
 
 # ROS imports
 import roslib; roslib.load_manifest('camera_model')
@@ -135,7 +136,7 @@ def test_bagfile_roundtrip():
 def check_bagfile_roundtrip(cam_opts):
     """check that roundtrip of camera model to/from a bagfile works"""
     cam = _build_test_camera(**cam_opts)
-    fname = '/tmp/cam-model-rosbag-test.bag'
+    fname = tempfile.mktemp(suffix='.bag')
     with open(fname,mode='wb') as fd:
         cam.save_to_bagfile(fd)
 
@@ -160,7 +161,7 @@ def test_distortion_yamlfile_roundtrip():
 def check_distortion_yamlfile_roundtrip(cam_opts):
     """check that roundtrip of camera model to/from a yaml file works"""
     cam = _build_test_camera(**cam_opts)
-    fname = '/tmp/cam-model-rosyaml-test.yaml'
+    fname = tempfile.mktemp(suffix='.yaml')
     cam.save_intrinsics_to_yamlfile(fname)
     cam2 = CameraModel.load_camera_from_file( fname, extrinsics_required=False )
 
