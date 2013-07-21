@@ -12,5 +12,5 @@ See also [opengl-hz](https://github.com/strawlab/opengl-hz).
 
 This package is well tested. To run the tests:
 
-    cd tests
+    cd test
     nosetests
