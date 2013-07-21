@@ -1035,6 +1035,17 @@ class MultiCameraSystem:
                                  'multiple identically-named cameras.')
             self._cameras[name] = camera
 
+    def __eq__(self, other):
+        if len(self.get_names()) != len(other.get_names()):
+            return False
+        for name in self.get_names():
+            if self._cameras[name] != other._cameras[name]:
+                return False
+        return True
+
+    def __ne__(self,other):
+        return not (self==other)
+
     def get_names(self):
         return self._cameras.keys()
 
