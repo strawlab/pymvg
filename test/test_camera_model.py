@@ -2,7 +2,7 @@
 
 import numpy as np
 from nose.plugins.skip import SkipTest
-import tempfile
+import os, tempfile
 
 # ROS imports
 import roslib; roslib.load_manifest('camera_model')
@@ -137,21 +137,24 @@ def check_bagfile_roundtrip(cam_opts):
     """check that roundtrip of camera model to/from a bagfile works"""
     cam = _build_test_camera(**cam_opts)
     fname = tempfile.mktemp(suffix='.bag')
-    with open(fname,mode='wb') as fd:
-        cam.save_to_bagfile(fd)
+    try:
+        with open(fname,mode='wb') as fd:
+            cam.save_to_bagfile(fd)
 
-    with open(fname,mode='r') as fd:
-        cam2 = CameraModel.load_camera_from_bagfile( fd )
+        with open(fname,mode='r') as fd:
+            cam2 = CameraModel.load_camera_from_bagfile( fd )
+    finally:
+        os.unlink(fname)
 
-        verts = np.array([[ 0.042306,  0.015338,  0.036328],
-                          [ 0.03323,   0.030344,  0.041542],
-                          [ 0.03323,   0.030344,  0.041542],
-                          [ 0.03323,   0.030344,  0.041542],
-                          [ 0.036396,  0.026464,  0.052408]])
+    verts = np.array([[ 0.042306,  0.015338,  0.036328],
+                      [ 0.03323,   0.030344,  0.041542],
+                      [ 0.03323,   0.030344,  0.041542],
+                      [ 0.03323,   0.030344,  0.041542],
+                      [ 0.036396,  0.026464,  0.052408]])
 
-        expected =  cam.project_3d_to_pixel(verts)
-        actual   = cam2.project_3d_to_pixel(verts)
-        assert np.allclose( expected, actual )
+    expected =  cam.project_3d_to_pixel(verts)
+    actual   = cam2.project_3d_to_pixel(verts)
+    assert np.allclose( expected, actual )
 
 def test_distortion_yamlfile_roundtrip():
     all_options = get_default_options()
@@ -162,8 +165,11 @@ def check_distortion_yamlfile_roundtrip(cam_opts):
     """check that roundtrip of camera model to/from a yaml file works"""
     cam = _build_test_camera(**cam_opts)
     fname = tempfile.mktemp(suffix='.yaml')
-    cam.save_intrinsics_to_yamlfile(fname)
-    cam2 = CameraModel.load_camera_from_file( fname, extrinsics_required=False )
+    try:
+        cam.save_intrinsics_to_yamlfile(fname)
+        cam2 = CameraModel.load_camera_from_file( fname, extrinsics_required=False )
+    finally:
+        os.unlink(fname)
 
     distorted = np.array( [[100.0,100],
                            [100,200],
