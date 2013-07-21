@@ -10,6 +10,7 @@ import geometry_msgs
 import sensor_msgs
 
 import camera_model.camera_model as camera_model
+from camera_model import CameraModel
 
 normalize = camera_model.normalize
 
@@ -35,7 +36,7 @@ def test_lookat():
     pmat = np.array( [[ f, 0, cx, 0],
                       [ 0, f, cy, 0],
                       [ 0, 0,   1, 0]])
-    cam1 = camera_model.load_camera_from_pmat( pmat, width=width, height=height)
+    cam1 = CameraModel.load_camera_from_pmat( pmat, width=width, height=height)
     cam = cam1.get_view_camera(center_expected, lookat_expected, up_expected)
     del cam1
 
@@ -86,8 +87,8 @@ def check_flip(distortion=False):
     pmat = np.array( [[ 300.0,     0,  321, 0],
                       [ 0,     298.0,  240, 0],
                       [ 0,         0,   1,  0]])
-    cam1 = camera_model.load_camera_from_pmat( pmat, width=width, height=height,
-                                               distortion_coefficients=d )
+    cam1 = CameraModel.load_camera_from_pmat( pmat, width=width, height=height,
+                                              distortion_coefficients=d )
     cam = cam1.get_view_camera(center_expected, lookat_expected, up_expected)
     del cam1
 
@@ -137,7 +138,7 @@ def test_simple_projection():
         ax2.set_title('matrix multiply')
 
     # build a camera model from our pmat and project onto image plane
-    cam = camera_model.load_camera_from_pmat( pmat, width=width, height=height )
+    cam = CameraModel.load_camera_from_pmat( pmat, width=width, height=height )
     undist_full = cam.project_3d_to_pixel(pts_3d).T
 
     if DRAW:

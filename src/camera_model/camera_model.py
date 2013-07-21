@@ -148,7 +148,6 @@ def get_vec_str(vec):
     return ', '.join( ['% 8.4g'%(vec[i],) for i in range(len(vec))])
 
 # main class
-
 class CameraModel(object):
     """an implementation of the Camera Model used by ROS and OpenCV
 
@@ -183,6 +182,9 @@ class CameraModel(object):
     AXIS_FORWARD = np.array((0,0,1),dtype=np.float)
     AXIS_UP = np.array((0,-1,0),dtype=np.float)
     AXIS_RIGHT = np.array((1,0,0),dtype=np.float)
+
+    # --- start of CameraModel constructors ------------------------------------
+
     def __init__(self,
                  translation=None,
                  rotation=None,
@@ -259,6 +261,216 @@ class CameraModel(object):
         if abs(K[0,1]) > (abs(K[0,0])/1e15):
             if np.sum(abs(self.distortion)) != 0.0:
                 raise NotImplementedError('distortion/undistortion for skewed pixels not implemented')
+
+    @classmethod
+    def load_camera_from_dict(cls, d, extrinsics_required=True ):
+        translation = None
+        rotation = None
+
+        if 'image_height' in d:
+            # format saved in ~/.ros/camera_info/<camera_name>.yaml
+            #only needs w,h,P,K,D,R
+            c = sensor_msgs.msg.CameraInfo(
+                height=d['image_height'],
+                width=d['image_width'],
+                P=d['projection_matrix']['data'],
+                K=d['camera_matrix']['data'],
+                D=d['distortion_coefficients']['data'],
+                R=d['rectification_matrix']['data'])
+            name = d['camera_name']
+        else:
+            # format saved by roslib.message.strify_message( sensor_msgs.msg.CameraInfo() )
+            c = sensor_msgs.msg.CameraInfo(
+                height = d['height'],
+                width = d['width'],
+                P=d['P'],
+                K=d['K'],
+                D=d['D'],
+                R=d['R'])
+            name = None
+
+        if translation is None or rotation is None:
+            if extrinsics_required:
+                raise ValueError('extrinsic parameters are required, but not provided')
+
+        result = cls(translation=translation,
+                     rotation=rotation,
+                     intrinsics=c,
+                     name=name)
+
+        return result
+
+    @classmethod
+    def load_camera_from_file( cls, fname, extrinsics_required=True ):
+        if fname.endswith('.bag'):
+            return cls.load_camera_from_bagfile(fname, extrinsics_required=extrinsics_required)
+        elif fname.endswith('.yaml'):
+            with open(fname,'r') as f:
+                d = yaml.safe_load(f)
+            return cls.load_camera_from_dict(d, extrinsics_required=extrinsics_required)
+        else:
+            raise Exception("Only supports .bag and .yaml file loading")
+
+    @classmethod
+    def load_camera_from_bagfile( cls, bag_fname, extrinsics_required=True ):
+        """factory function for class CameraModel"""
+        bag = rosbag.Bag(bag_fname, 'r')
+        camera_name = None
+        translation = None
+        rotation = None
+        intrinsics = None
+
+        for topic, msg, t in bag.read_messages():
+            if 1:
+                parts = topic.split('/')
+                if parts[0]=='':
+                    parts = parts[1:]
+                topic = parts[-1]
+                parts = parts[:-1]
+                if len(parts)>1:
+                    this_camera_name = '/'.join(parts)
+                else:
+                    this_camera_name = parts[0]
+                # empty, this_camera_name, topic = parts
+                # assert empty==''
+            if camera_name is None:
+                camera_name = this_camera_name
+            else:
+                assert this_camera_name == camera_name
+
+            if topic == 'tf':
+                translation = msg.translation
+                rotation = msg.rotation # quaternion
+            elif topic == 'matrix_tf':
+                translation = msg.translation
+                rotation = msg.rotation # matrix
+            elif topic == 'camera_info':
+                intrinsics = msg
+            else:
+                print 'skipping message',topic
+                continue
+
+        bag.close()
+
+        if translation is None or rotation is None:
+            if extrinsics_required:
+                raise ValueError('no extrinsic parameters in bag file')
+            else:
+                translation = (np.nan, np.nan, np.nan)
+                rotation = (np.nan, np.nan, np.nan, np.nan)
+        else:
+            translation = point_msg_to_tuple(translation)
+            rotation = parse_rotation_msg(rotation)
+
+        if intrinsics is None:
+            raise ValueError('no intrinsic parameters in bag file')
+
+        result = cls(translation=translation,
+                     rotation=rotation,
+                     intrinsics=intrinsics,
+                     name=camera_name,
+                     )
+        return result
+
+
+    @classmethod
+    def load_camera_from_pmat( cls, pmat, width=None, height=None, name='cam',
+                               distortion_coefficients=None,
+                               _depth=0 ):
+        pmat = np.array(pmat)
+        assert pmat.shape==(3,4)
+        M = pmat[:,:3]
+        K,R = my_rq(M)
+        if not is_rotation_matrix(R):
+            # RQ may return left-handed rotation matrix. Make right-handed.
+            R2 = -R
+            K2 = -K
+            assert np.allclose(np.dot(K2,R2), np.dot(K,R))
+            K,R = K2,R2
+        a = K[2,2]
+        if a==0:
+            warnings.warn('ill-conditioned intrinsic camera parameters')
+        else:
+            eps = 1e-15
+            if abs(a-1.0) > eps:
+                if _depth > 0:
+                    raise ValueError('cannot scale this pmat: %s'%( repr(pmat,)))
+                new_pmat = pmat/a
+                cam = cls.load_camera_from_pmat( new_pmat, width=width, height=height, name=name, _depth=_depth+1)
+                return cam
+
+        c = center(pmat)
+        t = -np.dot(R,c)
+
+        P = np.zeros( (3,4) )
+        P[:3,:3]=K
+
+        if distortion_coefficients is None:
+            distortion_coefficients = np.zeros((5,))
+        else:
+            distortion_coefficients = np.array(distortion_coefficients)
+            assert distortion_coefficients.shape == (5,)
+
+        i = sensor_msgs.msg.CameraInfo()
+        i.width = width
+        i.height = height
+        i.D = [float(val) for val in distortion_coefficients]
+        i.K = list(K.flatten())
+        i.R = list(np.eye(3).flatten())
+        i.P = list(P.flatten())
+        result = cls(translation = t,
+                     rotation = R,
+                     intrinsics = i,
+                     name=name)
+        return result
+
+    @classmethod
+    def load_camera_default(cls):
+        pmat = np.array( [[ 300,   0, 320, 0],
+                          [   0, 300, 240, 0],
+                          [   0,   0,   1, 0]])
+        return cls.load_camera_from_pmat( pmat, width=640, height=480, name='cam')
+
+    @classmethod
+    def load_camera_from_ROS_tf( cls,
+                                 translation=None,
+                                 rotation=None,
+                                 **kwargs):
+        rmat, rquat = get_rotation_matrix_and_quaternion(rotation)
+        if hasattr(translation,'x'):
+            translation = (translation.x, translation.y, translation.z)
+        C = np.array(translation)
+        C.shape = 3,1
+
+        r2 =  np.linalg.pinv(rmat)
+        rmat2, rquat2 = get_rotation_matrix_and_quaternion(r2)
+
+        t = -np.dot( rmat2, C)[:,0]
+
+        return cls(translation=t, rotation=rquat2, **kwargs)
+
+    @classmethod
+    def load_camera_simple( cls,
+                            fov_x_degrees=30.0,
+                            width=640, height=480,
+                            eye=(0,0,0),
+                            lookat=(0,0,-1),
+                            up=None,
+                            name='simple',
+                            ):
+        aspect = float(width)/float(height)
+        fov_y_degrees = fov_x_degrees/aspect
+        f = (width/2.0) / np.tan(fov_x_degrees*D2R/2.0)
+        cx = width/2.0
+        cy = height/2.0
+        pmat = np.array( [[ f, 0, cx, 0],
+                          [ 0, f, cy, 0],
+                          [ 0, 0,  1, 0]])
+        c1 = cls.load_camera_from_pmat( pmat, width=width, height=height, name=name)
+        c2 = c1.get_view_camera( eye=eye, lookat=lookat, up=None)
+        return c2
+
+    # --- end of CameraModel constructors --------------------------------------
 
     def __str__(self):
         template = '''camera {name!r}{size_str}:
@@ -754,204 +966,3 @@ class CameraModel(object):
         assert nparr.ndim==2
         assert nparr.shape[1]==3
         return np.zeros( nparr.shape ) + self.t_inv.T
-
-# factory functions
-def load_camera_from_dict(d, extrinsics_required=True ):
-    translation = None
-    rotation = None
-
-    if 'image_height' in d:
-        # format saved in ~/.ros/camera_info/<camera_name>.yaml
-        #only needs w,h,P,K,D,R
-        c = sensor_msgs.msg.CameraInfo(
-            height=d['image_height'],
-            width=d['image_width'],
-            P=d['projection_matrix']['data'],
-            K=d['camera_matrix']['data'],
-            D=d['distortion_coefficients']['data'],
-            R=d['rectification_matrix']['data'])
-        name = d['camera_name']
-    else:
-        # format saved by roslib.message.strify_message( sensor_msgs.msg.CameraInfo() )
-        c = sensor_msgs.msg.CameraInfo(
-            height = d['height'],
-            width = d['width'],
-            P=d['P'],
-            K=d['K'],
-            D=d['D'],
-            R=d['R'])
-        name = None
-
-    if translation is None or rotation is None:
-        if extrinsics_required:
-            raise ValueError('extrinsic parameters are required, but not provided')
-
-    result = CameraModel(translation=translation,
-                         rotation=rotation,
-                         intrinsics=c,
-                         name=name)
-
-    return result
-
-SUPPORTED_FILE_TYPES = ('.bag','.yaml')
-def load_camera_from_file( fname, extrinsics_required=True ):
-    if fname.endswith('.bag'):
-        return load_camera_from_bagfile(fname, extrinsics_required=extrinsics_required)
-    elif fname.endswith('.yaml'):
-        with open(fname,'r') as f:
-            d = yaml.safe_load(f)
-        return load_camera_from_dict(d, extrinsics_required=extrinsics_required)
-    else:
-        raise Exception("Only supports .bag and .yaml file loading")
-
-def load_camera_from_bagfile( bag_fname, extrinsics_required=True ):
-    """factory function for class CameraModel"""
-    bag = rosbag.Bag(bag_fname, 'r')
-    camera_name = None
-    translation = None
-    rotation = None
-    intrinsics = None
-
-    for topic, msg, t in bag.read_messages():
-        if 1:
-            parts = topic.split('/')
-            if parts[0]=='':
-                parts = parts[1:]
-            topic = parts[-1]
-            parts = parts[:-1]
-            if len(parts)>1:
-                this_camera_name = '/'.join(parts)
-            else:
-                this_camera_name = parts[0]
-            # empty, this_camera_name, topic = parts
-            # assert empty==''
-        if camera_name is None:
-            camera_name = this_camera_name
-        else:
-            assert this_camera_name == camera_name
-
-        if topic == 'tf':
-            translation = msg.translation
-            rotation = msg.rotation # quaternion
-        elif topic == 'matrix_tf':
-            translation = msg.translation
-            rotation = msg.rotation # matrix
-        elif topic == 'camera_info':
-            intrinsics = msg
-        else:
-            print 'skipping message',topic
-            continue
-
-    bag.close()
-
-    if translation is None or rotation is None:
-        if extrinsics_required:
-            raise ValueError('no extrinsic parameters in bag file')
-        else:
-            translation = (np.nan, np.nan, np.nan)
-            rotation = (np.nan, np.nan, np.nan, np.nan)
-    else:
-        translation = point_msg_to_tuple(translation)
-        rotation = parse_rotation_msg(rotation)
-
-    if intrinsics is None:
-        raise ValueError('no intrinsic parameters in bag file')
-
-    result = CameraModel(translation=translation,
-                         rotation=rotation,
-                         intrinsics=intrinsics,
-                         name=camera_name,
-                         )
-    return result
-
-
-def load_camera_from_pmat( pmat, width=None, height=None, name='cam',
-                           distortion_coefficients=None,
-                           _depth=0 ):
-    pmat = np.array(pmat)
-    assert pmat.shape==(3,4)
-    M = pmat[:,:3]
-    K,R = my_rq(M)
-    if not is_rotation_matrix(R):
-        # RQ may return left-handed rotation matrix. Make right-handed.
-        R2 = -R
-        K2 = -K
-        assert np.allclose(np.dot(K2,R2), np.dot(K,R))
-        K,R = K2,R2
-    a = K[2,2]
-    if a==0:
-        warnings.warn('ill-conditioned intrinsic camera parameters')
-    else:
-        eps = 1e-15
-        if abs(a-1.0) > eps:
-            if _depth > 0:
-                raise ValueError('cannot scale this pmat: %s'%( repr(pmat,)))
-            new_pmat = pmat/a
-            cam = load_camera_from_pmat( new_pmat, width=width, height=height, name=name, _depth=_depth+1)
-            return cam
-
-    c = center(pmat)
-    t = -np.dot(R,c)
-
-    P = np.zeros( (3,4) )
-    P[:3,:3]=K
-
-    if distortion_coefficients is None:
-        distortion_coefficients = np.zeros((5,))
-    else:
-        distortion_coefficients = np.array(distortion_coefficients)
-        assert distortion_coefficients.shape == (5,)
-
-    i = sensor_msgs.msg.CameraInfo()
-    i.width = width
-    i.height = height
-    i.D = [float(val) for val in distortion_coefficients]
-    i.K = list(K.flatten())
-    i.R = list(np.eye(3).flatten())
-    i.P = list(P.flatten())
-    result = CameraModel(translation = t,
-                         rotation = R,
-                         intrinsics = i,
-                         name=name)
-    return result
-
-def load_camera_default( ):
-    pmat = np.array( [[ 300,   0, 320, 0],
-                      [   0, 300, 240, 0],
-                      [   0,   0,   1, 0]])
-    return load_camera_from_pmat( pmat, width=640, height=480, name='cam')
-
-def load_camera_from_ROS_tf( translation=None,
-                             rotation=None,
-                             **kwargs):
-    rmat, rquat = get_rotation_matrix_and_quaternion(rotation)
-    if hasattr(translation,'x'):
-        translation = (translation.x, translation.y, translation.z)
-    C = np.array(translation)
-    C.shape = 3,1
-
-    r2 =  np.linalg.pinv(rmat)
-    rmat2, rquat2 = get_rotation_matrix_and_quaternion(r2)
-
-    t = -np.dot( rmat2, C)[:,0]
-
-    return CameraModel(translation=t, rotation=rquat2, **kwargs)
-
-def load_camera_simple( fov_x_degrees=30.0,
-                        width=640, height=480,
-                        eye=(0,0,0),
-                        lookat=(0,0,-1),
-                        up=None,
-                        name='simple',
-                        ):
-    aspect = float(width)/float(height)
-    fov_y_degrees = fov_x_degrees/aspect
-    f = (width/2.0) / np.tan(fov_x_degrees*D2R/2.0)
-    cx = width/2.0
-    cy = height/2.0
-    pmat = np.array( [[ f, 0, cx, 0],
-                      [ 0, f, cy, 0],
-                      [ 0, 0,  1, 0]])
-    c1 = load_camera_from_pmat( pmat, width=width, height=height, name=name)
-    c2 = c1.get_view_camera( eye=eye, lookat=lookat, up=None)
-    return c2

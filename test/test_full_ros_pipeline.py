@@ -23,6 +23,7 @@ import tf.transformations
 # import sensor_msgs
 
 from camera_model.camera_model import get_rotation_matrix_and_quaternion
+from camera_model import CameraModel
 import camera_model
 
 roslib.load_manifest('camera_calibration')
@@ -90,9 +91,9 @@ class ROSPipelineMimic:
         else:
             dist = [0, 0, 0, 0, 0]
 
-        self.cam = camera_model.load_camera_from_pmat(parts['pmat'],
-                                                      width=width,height=height,
-                                                      distortion_coefficients=dist)
+        self.cam = CameraModel.load_camera_from_pmat(parts['pmat'],
+                                                     width=width,height=height,
+                                                     distortion_coefficients=dist)
 
     def generate_images(self):
         """make checkerboard images in camera view"""
@@ -219,7 +220,7 @@ class ROSPipelineMimic:
         return {'good':msg, 'perfect':msg2}
 
     def calc_mean_reproj_error(self,msg):
-        ros_cam = camera_model.CameraModel(intrinsics=msg)
+        ros_cam = CameraModel(intrinsics=msg)
         all_ims = []
         for imd in self.db:
             ros_pix  = ros_cam.project_3d_to_pixel(imd['cc'], distorted=True)
@@ -280,10 +281,10 @@ def check_roundtrip_ros_tf(cam_opts):
     cam1 = _build_test_camera(**cam_opts)
     translation, rotation = cam1.get_ROS_tf()
     i = cam1.get_intrinsics_as_msg()
-    cam2 = camera_model.load_camera_from_ROS_tf( translation=translation,
-                                                 rotation=rotation,
-                                                 intrinsics = i,
-                                                 name = cam1.name)
+    cam2 = CameraModel.load_camera_from_ROS_tf( translation=translation,
+                                                rotation=rotation,
+                                                intrinsics = i,
+                                                name = cam1.name)
 
     assert np.allclose( cam1.get_camcenter(),
                         cam2.get_camcenter() )

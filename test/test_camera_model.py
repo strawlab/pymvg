@@ -101,7 +101,7 @@ def check_built_from_pmat(cam_opts):
     """check that pmat is preserved in load_camera_from_pmat() factory"""
     cam_orig = _build_test_camera(**cam_opts)
     pmat_orig = cam_orig.pmat
-    cam = camera_model.load_camera_from_pmat( pmat_orig )
+    cam = CameraModel.load_camera_from_pmat( pmat_orig )
     assert np.allclose( cam.pmat, pmat_orig)
 
 def test_problem_pmat():
@@ -113,7 +113,7 @@ def test_problem_pmat():
     pmat =  np.array([[ -1.70677031e+03,  -4.10373295e+03,  -3.88568028e+02, 6.89034515e+02],
                       [ -6.19019195e+02,  -1.01292091e+03,  -2.67534989e+03, 4.51847857e+02],
                       [ -4.52548832e+00,  -3.78900498e+00,  -7.35860226e-01, 1.00000000e+00]])
-    cam = camera_model.load_camera_from_pmat( pmat, **d)
+    cam = CameraModel.load_camera_from_pmat( pmat, **d)
 
     #assert np.allclose( cam.pmat, pmat) # we don't expect this since the intrinsic matrix may not be scaled
 
@@ -140,7 +140,7 @@ def check_bagfile_roundtrip(cam_opts):
         cam.save_to_bagfile(fd)
 
     with open(fname,mode='r') as fd:
-        cam2 = camera_model.load_camera_from_bagfile( fd )
+        cam2 = CameraModel.load_camera_from_bagfile( fd )
 
         verts = np.array([[ 0.042306,  0.015338,  0.036328],
                           [ 0.03323,   0.030344,  0.041542],
@@ -162,7 +162,7 @@ def check_distortion_yamlfile_roundtrip(cam_opts):
     cam = _build_test_camera(**cam_opts)
     fname = '/tmp/cam-model-rosyaml-test.yaml'
     cam.save_intrinsics_to_yamlfile(fname)
-    cam2 = camera_model.load_camera_from_file( fname, extrinsics_required=False )
+    cam2 = CameraModel.load_camera_from_file( fname, extrinsics_required=False )
 
     distorted = np.array( [[100.0,100],
                            [100,200],
@@ -306,6 +306,6 @@ def check_stages(cam_opts, distorted=False):
 def test_simple_camera():
     center = np.array( (0, 0.0, 5) )
     lookat = center + np.array( (0,1,0))
-    cam = camera_model.load_camera_simple(fov_x_degrees=90,
-                                          eye=center,
-                                          lookat=lookat)
+    cam = CameraModel.load_camera_simple(fov_x_degrees=90,
+                                         eye=center,
+                                         lookat=lookat)
