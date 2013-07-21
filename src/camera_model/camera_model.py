@@ -43,6 +43,17 @@ def parse_rotation_msg(rotation, force_matrix=False):
     rotation.shape = 3,3
     return rotation
 
+def np2plain(arr):
+    '''convert numpy array to plain python (for serializing to yaml or json)'''
+    arr = np.array(arr)
+    if arr.ndim==1:
+        result = list(arr)
+    elif arr.ndim==2:
+        result = [ list(row) for row in arr ]
+    else:
+        raise NotImplementedError
+    return result
+
 def quaternion_msg_to_tuple(d):
     return d.x, d.y, d.z, d.w
 
@@ -287,7 +298,9 @@ class CameraModel(object):
                 K=d['K'],
                 D=d['D'],
                 R=d['R'])
-            name = None
+            name = d.get('name',None)
+            translation = d.get('translation',None)
+            rotation = d.get('rotation',None)
 
         if translation is None or rotation is None:
             if extrinsics_required:
@@ -508,6 +521,22 @@ class CameraModel(object):
 
     def __ne__(self,other):
         return not (self==other)
+
+    def to_dict(self):
+        d = {}
+        d['name'] =self.name
+        d['height'] = self.height
+        d['width'] = self.width
+        d['P'] = np2plain(self.P)
+        d['K'] = np2plain(self.K)
+        d['D'] = np2plain(self.distortion[:,0])
+        if self.rect is None:
+            d['R'] = np2plain(np.eye(3))
+        else:
+            d['R'] = np2plain(self.rect)
+        d['translation']=np2plain(self.translation)
+        d['rotation']=np2plain(self.get_rot())
+        return d
 
     # -------------------------------------------------
     # properties / getters

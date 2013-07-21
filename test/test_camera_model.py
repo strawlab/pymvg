@@ -28,6 +28,17 @@ def _generate_uv_raw(width,height):
             uv_raws.append(uv_raw)
     return np.array(uv_raws)
 
+def test_dict_roundtrip():
+    all_options = get_default_options()
+    for opts in all_options:
+        yield check_dict_roundtrip, opts
+
+def check_dict_roundtrip(cam_opts):
+    cam = _build_test_camera(**cam_opts)
+    d = cam.to_dict()
+    cam2 = CameraModel.load_camera_from_dict(d)
+    assert cam==cam2
+
 def test_projection_to_undistorted1():
     at_origin=True # this test mathematically only makes sense of camera at origin
     for ROS_test_data in (True,False):
