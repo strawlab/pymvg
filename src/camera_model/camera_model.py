@@ -500,6 +500,15 @@ class CameraModel(object):
         d.update(locals())
         return template.format( **d )
 
+    def __eq__(self,other):
+        # hmm, could do better than comparing strings...
+        c1s = str(self)
+        c2s = str(other)
+        return c1s==c2s
+
+    def __ne__(self,other):
+        return not (self==other)
+
     # -------------------------------------------------
     # properties / getters
 
