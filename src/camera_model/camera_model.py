@@ -495,8 +495,11 @@ class CameraModel(object):
         P       : [[{P0}],
                    [{P1}],
                    [{P2}]]
+        K       : [[{K0}],
+                   [{K1}],
+                   [{K2}]]
         distortion : {D}
-
+        rectification : {rect}
 '''
         if self.width is not None:
             size_str = ' (%dx%d)'%(self.width,self.height)
@@ -507,7 +510,23 @@ class CameraModel(object):
         P = self.P[:3,:3]
         P0,P1,P2 = [get_vec_str(P[i]) for i in range(3)]
 
+        K = self.get_K()[:3,:3]
+        K0,K1,K2 = [get_vec_str(K[i]) for i in range(3)]
+
         D = get_vec_str(self.distortion.flatten())
+
+        if self.rect is None:
+            rect = 'None'
+        else:
+            rtmp = '''[[{r0}],
+                   [{r1}],
+                   [{r2}]]
+'''
+            r = self.rect
+            r0,r1,r2 = [get_vec_str(r[i]) for i in range(3)]
+            d = dict()
+            d.update(locals())
+            rect = rtmp.format( **d )
 
         d = dict(name=self.name)
         d.update(locals())
