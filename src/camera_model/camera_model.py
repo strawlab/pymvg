@@ -1035,6 +1035,12 @@ class MultiCameraSystem:
                                  'multiple identically-named cameras.')
             self._cameras[name] = camera
 
+    @classmethod
+    def from_dict(cls, d):
+        cam_dict_list = d['camera_system']
+        cams = [CameraModel.load_camera_from_dict(cd) for cd in cam_dict_list]
+        return cls( cameras=cams )
+
     def __eq__(self, other):
         if len(self.get_names()) != len(other.get_names()):
             return False
@@ -1048,6 +1054,10 @@ class MultiCameraSystem:
 
     def get_names(self):
         return self._cameras.keys()
+
+    def to_dict(self):
+        return {'camera_system':
+                [self._cameras[name].to_dict() for name in self._cameras]}
 
     def find3d(self,pts,undistort=True):
         """Find 3D coordinate using all data given

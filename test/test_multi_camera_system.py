@@ -69,3 +69,8 @@ def test_single_and_multiple_points_find2d():
     assert multiple_2d.ndim==2
     assert multiple_2d.shape[0]==2
     assert multiple_2d.shape[1]==pts_3d.shape[0]
+
+def test_roundtrip_to_dict():
+    system1 = make_default_system()
+    system2 = MultiCameraSystem.from_dict( system1.to_dict() )
+    assert system1==system2
