@@ -47,9 +47,9 @@ def np2plain(arr):
     '''convert numpy array to plain python (for serializing to yaml or json)'''
     arr = np.array(arr)
     if arr.ndim==1:
-        result = list(arr)
+        result = plain_vec(arr)
     elif arr.ndim==2:
-        result = [ list(row) for row in arr ]
+        result = [ plain_vec(row) for row in arr ]
     else:
         raise NotImplementedError
     return result
@@ -157,6 +157,17 @@ def get_rotation_matrix_and_quaternion(rotation):
 def get_vec_str(vec):
     assert vec.ndim==1
     return ', '.join( ['% 8.4g'%(vec[i],) for i in range(len(vec))])
+
+def plain_vec(vec):
+    '''make a list of plain types'''
+    if hasattr( vec, 'dtype' ):
+        # assume it's a simple numpy array
+        # TODO: FIXME: could make this much better
+        result = [ float(el) for el in vec ]
+    else:
+        # no change
+        result = vec
+    return result
 
 # main class
 class CameraModel(object):
