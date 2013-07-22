@@ -533,6 +533,9 @@ class CameraModel(object):
         return template.format( **d )
 
     def __eq__(self,other):
+        assert isinstance( self, CameraModel )
+        if not isinstance( other, CameraModel ):
+            return False
         # hmm, could do better than comparing strings...
         c1s = str(self)
         c2s = str(other)
@@ -1042,6 +1045,9 @@ class MultiCameraSystem:
         return cls( cameras=cams )
 
     def __eq__(self, other):
+        assert isinstance( self, MultiCameraSystem )
+        if not isinstance( other, MultiCameraSystem ):
+            return False
         if len(self.get_names()) != len(other.get_names()):
             return False
         for name in self.get_names():
