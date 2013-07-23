@@ -36,7 +36,7 @@ def test_dict_roundtrip():
 def check_dict_roundtrip(cam_opts):
     cam = _build_test_camera(**cam_opts)
     d = cam.to_dict()
-    cam2 = CameraModel.load_camera_from_dict(d)
+    cam2 = CameraModel.from_dict(d)
     assert cam==cam2
 
 def test_projection_to_undistorted1():

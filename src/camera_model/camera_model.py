@@ -285,7 +285,7 @@ class CameraModel(object):
                 raise NotImplementedError('distortion/undistortion for skewed pixels not implemented')
 
     @classmethod
-    def load_camera_from_dict(cls, d, extrinsics_required=True ):
+    def from_dict(cls, d, extrinsics_required=True ):
         translation = None
         rotation = None
 
@@ -331,7 +331,7 @@ class CameraModel(object):
         elif fname.endswith('.yaml'):
             with open(fname,'r') as f:
                 d = yaml.safe_load(f)
-            return cls.load_camera_from_dict(d, extrinsics_required=extrinsics_required)
+            return cls.from_dict(d, extrinsics_required=extrinsics_required)
         else:
             raise Exception("Only supports .bag and .yaml file loading")
 
@@ -1052,7 +1052,7 @@ class MultiCameraSystem:
     @classmethod
     def from_dict(cls, d):
         cam_dict_list = d['camera_system']
-        cams = [CameraModel.load_camera_from_dict(cd) for cd in cam_dict_list]
+        cams = [CameraModel.from_dict(cd) for cd in cam_dict_list]
         return cls( cameras=cams )
 
     def __eq__(self, other):
