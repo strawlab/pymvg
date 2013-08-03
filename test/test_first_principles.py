@@ -5,20 +5,20 @@ from utils import _build_points_3d, make_pmat
 import os
 
 # ROS imports
-import roslib; roslib.load_manifest('camera_model')
+import roslib; roslib.load_manifest('pymvg')
 import geometry_msgs
 import sensor_msgs
 
-import camera_model.camera_model as camera_model
-from camera_model import CameraModel
+import pymvg.pymvg as pymvg
+from pymvg import CameraModel
 
-normalize = camera_model.normalize
+normalize = pymvg.normalize
 
 DRAW=int(os.environ.get('DRAW','0'))
 if DRAW:
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
-    from camera_model.plot_utils import plot_camera
+    from pymvg.plot_utils import plot_camera
 
 def test_lookat():
 
@@ -153,7 +153,7 @@ def test_simple_projection():
         ax3.plot( undist_full[0,:], undist_full[1,:], 'b.')
         ax3.set_xlim(0,width)
         ax3.set_ylim(height,0)
-        ax3.set_title('camera_model')
+        ax3.set_title('pymvg')
 
     if DRAW:
         plt.show()

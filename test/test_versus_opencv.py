@@ -5,12 +5,12 @@ import numpy as np
 import cv # ubuntu: apt-get install python-opencv
 
 # ROS imports
-import roslib; roslib.load_manifest('camera_model')
+import roslib; roslib.load_manifest('pymvg')
 import geometry_msgs
 import sensor_msgs
 
 from utils import _build_test_camera, _build_points_3d, get_default_options
-from camera_model.npcv import numpy2opencv_image, numpy2opencv_pointmat, \
+from pymvg.npcv import numpy2opencv_image, numpy2opencv_pointmat, \
      opencv_pointmat2numpy
 
 def noop(*args,**kwargs):

@@ -1,6 +1,6 @@
 import numpy as np
-import roslib; roslib.load_manifest('camera_model')
-from camera_model import CameraModel, MultiCameraSystem
+import roslib; roslib.load_manifest('pymvg')
+from pymvg import CameraModel, MultiCameraSystem
 
 def make_default_system():
     '''helper function to generate an instance of MultiCameraSystem'''

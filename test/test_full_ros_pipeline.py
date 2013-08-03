@@ -17,14 +17,14 @@ D2R = np.pi/180.0
 R2D = 1/D2R
 
 # ROS imports
-import roslib; roslib.load_manifest('camera_model')
+import roslib; roslib.load_manifest('pymvg')
 import tf.transformations
 # import geometry_msgs
 # import sensor_msgs
 
-from camera_model.camera_model import get_rotation_matrix_and_quaternion
-from camera_model import CameraModel
-import camera_model
+from pymvg.pymvg import get_rotation_matrix_and_quaternion
+from pymvg import CameraModel
+import pymvg
 
 roslib.load_manifest('camera_calibration')
 import camera_calibration.calibrator
@@ -248,7 +248,7 @@ def check_ros_pipeline(use_distortion):
 
     if DRAW:
         from mpl_toolkits.mplot3d import Axes3D
-        from camera_model.plot_utils import plot_camera
+        from pymvg.plot_utils import plot_camera
 
         f = plt.figure()
         ax = f.add_subplot(111,projection='3d')

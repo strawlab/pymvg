@@ -5,13 +5,13 @@ from nose.plugins.skip import SkipTest
 import os, tempfile
 
 # ROS imports
-import roslib; roslib.load_manifest('camera_model')
+import roslib; roslib.load_manifest('pymvg')
 import geometry_msgs
 import sensor_msgs
 
-from camera_model import CameraModel
-from camera_model.camera_model import point_msg_to_tuple, parse_rotation_msg
-import camera_model
+from pymvg import CameraModel
+from pymvg.pymvg import point_msg_to_tuple, parse_rotation_msg
+import pymvg
 
 from utils import _build_test_camera, get_default_options
 
