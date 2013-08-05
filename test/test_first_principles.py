@@ -4,11 +4,6 @@ import numpy as np
 from utils import _build_points_3d, make_pmat
 import os
 
-# ROS imports
-import roslib; roslib.load_manifest('pymvg')
-import geometry_msgs
-import sensor_msgs
-
 import pymvg.pymvg as pymvg
 from pymvg import CameraModel
 

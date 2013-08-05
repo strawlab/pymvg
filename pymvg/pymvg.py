@@ -1,15 +1,8 @@
 #!/usr/bin/env python
-
-# ROS imports
-import roslib; roslib.load_manifest('camera_model')
-import rosbag
-import tf.transformations
-import sensor_msgs.msg
-import geometry_msgs.msg
-
 import numpy as np
 import scipy.linalg
 
+from ros_compat import tf, sensor_msgs
 import yaml
 
 import warnings

@@ -3,11 +3,6 @@
 import numpy as np
 import os
 
-# ROS imports
-import roslib; roslib.load_manifest('pymvg')
-import geometry_msgs
-import sensor_msgs
-
 from pymvg import CameraModel
 from pymvg.pymvg import point_msg_to_tuple, parse_rotation_msg
 import pymvg
