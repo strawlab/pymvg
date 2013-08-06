@@ -176,8 +176,8 @@ def check_distortion_yamlfile_roundtrip(cam_opts):
     """check that roundtrip of camera model to/from a yaml file works"""
     cam = _build_test_camera(**cam_opts)
     fname = tempfile.mktemp(suffix='.yaml')
+    cam.save_intrinsics_to_yamlfile(fname)
     try:
-        cam.save_intrinsics_to_yamlfile(fname)
         cam2 = CameraModel.load_camera_from_file( fname, extrinsics_required=False )
     finally:
         os.unlink(fname)
