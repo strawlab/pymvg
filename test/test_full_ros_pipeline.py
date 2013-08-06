@@ -20,11 +20,20 @@ from pymvg.pymvg import get_rotation_matrix_and_quaternion
 from pymvg import CameraModel
 import pymvg
 
-import roslib
-roslib.load_manifest('camera_calibration')
-import camera_calibration.calibrator
-roslib.load_manifest('tf')
-import tf.transformations
+try:
+    import roslib
+except ImportError:
+    have_ros = False
+else:
+    have_ros = True
+
+if have_ros:
+    roslib.load_manifest('camera_calibration')
+    import camera_calibration.calibrator
+    roslib.load_manifest('tf')
+    import tf.transformations
+else:
+    from nose.plugins.skip import SkipTest
 
 def get_np_array_as_png_buf(im):
     output = StringIO.StringIO()
@@ -229,6 +238,8 @@ class ROSPipelineMimic:
         return mean_err
 
 def test_ros_pipeline():
+    if not have_ros:
+        raise SkipTest("no ROS, skipping")
     yield check_ros_pipeline, dict(use_distortion=True)
     yield check_ros_pipeline, dict(use_distortion=False)
 
