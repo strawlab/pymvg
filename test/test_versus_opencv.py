@@ -4,10 +4,7 @@ import os
 import numpy as np
 import cv # ubuntu: apt-get install python-opencv
 
-# ROS imports
-import roslib; roslib.load_manifest('pymvg')
-import geometry_msgs
-import sensor_msgs
+from pymvg.ros_compat import sensor_msgs, geometry_msgs
 
 from utils import _build_test_camera, _build_points_3d, get_default_options
 from pymvg.npcv import numpy2opencv_image, numpy2opencv_pointmat, \

@@ -16,18 +16,15 @@ if DRAW:
 D2R = np.pi/180.0
 R2D = 1/D2R
 
-# ROS imports
-import roslib; roslib.load_manifest('pymvg')
-import tf.transformations
-# import geometry_msgs
-# import sensor_msgs
-
 from pymvg.pymvg import get_rotation_matrix_and_quaternion
 from pymvg import CameraModel
 import pymvg
 
+import roslib
 roslib.load_manifest('camera_calibration')
 import camera_calibration.calibrator
+roslib.load_manifest('tf')
+import tf.transformations
 
 def get_np_array_as_png_buf(im):
     output = StringIO.StringIO()
