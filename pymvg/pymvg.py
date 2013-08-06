@@ -2,7 +2,7 @@
 import numpy as np
 import scipy.linalg
 
-from ros_compat import tf, sensor_msgs
+from ros_compat import tf, sensor_msgs, geometry_msgs, rosbag, roslib
 import yaml
 
 import warnings

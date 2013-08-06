@@ -1,8 +1,132 @@
 import math
 import numpy
+import numpy as np
+import pickle
+import yaml
 
-class CameraInfo():
+class FakeMessage(object):
+    def __init__(self,**kwargs):
+        for key in kwargs:
+            setattr(self,key,kwargs[key])
+    def __getattr__(self,key):
+        # normal name-resolution failed, return a sub-message
+        result = FakeMessage()
+        setattr(self,key,result)
+        return result
+    def __getstate__(self): return self.__dict__
+    def __setstate__(self, d): self.__dict__.update(d)
+    # def _get_clean_dict(self):
+    #     '''attempt to remove all tuples and numpy arrays'''
+    #     result = {}
+    #     print 'get clean'
+    #     for key in self.__dict__:
+    #         print 'key',key
+    #         val = getattr(self,key)
+    #         print 'val',val
+    #         print 'val.__type__',type(val)
+    #         val = self._make_safe( val )
+    #         result[key] = val
+    #     return result
+    # def _make_safe( self, val ):
+    #     if isinstance(val,FakeMessage):
+    #         print 'fake---'
+    #         val = val._get_clean_dict()
+    #     # elif isinstance(val,np.ndarray):
+    #     #     2/0
+    #     # elif isinstance(val,np.core.multiarray):
+    #     #     3/0
+    #     elif isinstance(val, np.ndarray):
+    #         print 'np'
+    #         4/0
+    #     elif isinstance(val, np.generic):
+    #         print 'np2'
+    #         print 'val',val
+    #         testval = float(val)
+    #         if testval==float(val):
+    #             val = testval
+    #         else:
+    #             raise NotImplementedError
+    #     elif isinstance(val,tuple):
+    #         print 'tup'
+    #         val = list(val)
+
+    #     if hasattr(val,'__len__'):
+    #         print 'list'
+    #         val = [ self._make_safe( element ) for element in val ]
+    #     return val
+
+    # def __str__(self):
+    #     d = self._get_clean_dict()
+    #     result = yaml.dump( d )
+    #     print result
+    #     1/0
+    #     return result
+    def __str__(self):
+        d = self._get_simple_dict()
+        result = yaml.dump(d)
+        return result
+
+def make_list(vec):
+    avec = np.array(vec)
+    assert avec.ndim==1
+    result = []
+    for el in avec:
+        newel = float(el)
+        assert newel==el
+        result.append(newel)
+    return result
+
+class CameraInfo(FakeMessage):
+    def _get_simple_dict(self):
+        result = {}
+        for key in ['D','P','K','R']:
+            result[key] = make_list(getattr(self,key))
+        result['width'] = self.width
+        result['height'] = self.height
+        return result
+
+class Point(FakeMessage):
     pass
+
+class Quaternion(FakeMessage):
+    pass
+
+class Transform(FakeMessage):
+    pass
+
+def strify_message(msg):
+    assert isinstance(msg,FakeMessage)
+    return str(msg)
+
+class Bag(object):
+    def __init__(self, file, mode):
+        assert mode in ['r','w']
+        self.mode=mode
+        if hasattr(file,'write'):
+            self.fd = file
+        else:
+            self.fd = open(file,mode=mode)
+        if mode=='w':
+            self.messages = []
+        else:
+            self.messages = pickle.load( self.fd )
+        self.closed=False
+    def __del__(self):
+        self.close()
+    def write(self,topic,value):
+        self.messages.append( (topic,value) )
+    def close(self):
+        if self.closed:
+            return
+        if self.mode=='w':
+            pickle.dump( self.messages, self.fd )
+        self.fd.close()
+        self.closed = True
+
+    def read_messages(self):
+        for topic,value in self.messages:
+            t = 0.0
+            yield (topic,value,t)
 
 _EPS = numpy.finfo(float).eps * 4.0
 
@@ -74,5 +198,27 @@ def _get_sensor_msgs():
     sensor_msgs.msg.CameraInfo = CameraInfo
     return sensor_msgs
 
+def _get_geometry_msgs():
+    geometry_msgs = Bunch()
+    geometry_msgs.msg = Bunch()
+    geometry_msgs.msg.Point = Point
+    geometry_msgs.msg.Quaternion = Quaternion
+    geometry_msgs.msg.Transform = Transform
+    return geometry_msgs
+
+def _get_rosbag():
+    rosbag = Bunch()
+    rosbag.Bag = Bag
+    return rosbag
+
+def _get_roslib():
+    roslib = Bunch()
+    roslib.message = Bunch()
+    roslib.message.strify_message = strify_message
+    return roslib
+
 tf = _get_tf()
 sensor_msgs = _get_sensor_msgs()
+geometry_msgs = _get_geometry_msgs()
+rosbag = _get_rosbag()
+roslib = _get_roslib()
