@@ -10,10 +10,19 @@ other parts
 The pymvg package includes the following other parts.
 
 _fill_polygon() in test/fill_polygon.py
---------------------------------------
+---------------------------------------
 
 Downloaded on 17 May, 2012 from
 https://raw.github.com/luispedro/mahotas/master/mahotas/polygon.py
 
   Author: Luis Pedro Coelho
   License: GPL 2
+
+quaternion_matrix(), quaternion_from_matrix() in pymvg/ros_compat.py
+--------------------------------------------------------------------
+
+Downloaded on 6 August, 2013 from
+http://www.lfd.uci.edu/~gohlke/code/transformations.py
+
+  Author: Christoph Gohlke
+  License: BSD
