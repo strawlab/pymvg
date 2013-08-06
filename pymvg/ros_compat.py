@@ -15,52 +15,6 @@ class FakeMessage(object):
         return result
     def __getstate__(self): return self.__dict__
     def __setstate__(self, d): self.__dict__.update(d)
-    # def _get_clean_dict(self):
-    #     '''attempt to remove all tuples and numpy arrays'''
-    #     result = {}
-    #     print 'get clean'
-    #     for key in self.__dict__:
-    #         print 'key',key
-    #         val = getattr(self,key)
-    #         print 'val',val
-    #         print 'val.__type__',type(val)
-    #         val = self._make_safe( val )
-    #         result[key] = val
-    #     return result
-    # def _make_safe( self, val ):
-    #     if isinstance(val,FakeMessage):
-    #         print 'fake---'
-    #         val = val._get_clean_dict()
-    #     # elif isinstance(val,np.ndarray):
-    #     #     2/0
-    #     # elif isinstance(val,np.core.multiarray):
-    #     #     3/0
-    #     elif isinstance(val, np.ndarray):
-    #         print 'np'
-    #         4/0
-    #     elif isinstance(val, np.generic):
-    #         print 'np2'
-    #         print 'val',val
-    #         testval = float(val)
-    #         if testval==float(val):
-    #             val = testval
-    #         else:
-    #             raise NotImplementedError
-    #     elif isinstance(val,tuple):
-    #         print 'tup'
-    #         val = list(val)
-
-    #     if hasattr(val,'__len__'):
-    #         print 'list'
-    #         val = [ self._make_safe( element ) for element in val ]
-    #     return val
-
-    # def __str__(self):
-    #     d = self._get_clean_dict()
-    #     result = yaml.dump( d )
-    #     print result
-    #     1/0
-    #     return result
     def __str__(self):
         d = self._get_simple_dict()
         result = yaml.dump(d)
