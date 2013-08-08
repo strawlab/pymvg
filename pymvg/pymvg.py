@@ -200,12 +200,26 @@ class CameraModel(object):
 
     # --- start of CameraModel constructors ------------------------------------
 
-    def __init__(self,
-                 translation=None,
-                 rotation=None,
-                 intrinsics=None,
-                 name=None,
-                 ):
+    def __init__(self, name, width, height, _rquat, _camcenter, P, K, distortion, rect):
+        self.name = name
+        self.width = width
+        self.height = height
+        self._rquat = _rquat
+        self._camcenter = _camcenter
+        self.P = P
+        self.K = K
+        self.distortion = distortion
+        self.rect = rect
+
+        self._opencv_compatible = (self.P[0,1]==0)
+
+    @classmethod
+    def from_ros_like(cls,
+                      translation=None,
+                      rotation=None,
+                      intrinsics=None,
+                      name=None,
+                      ):
         """Instantiate a Camera Model.
 
         params
@@ -230,52 +244,52 @@ class CameraModel(object):
 
         t = np.array(translation)
         t.shape = 3,1
-        self._camcenter = -np.dot( rmat.T, t )[:,0]
+        _camcenter = -np.dot( rmat.T, t )[:,0]
         del t
 
-        self._rquat = rquat
+        _rquat = rquat
 
         if 1:
             # Initialize the camera calibration from a CameraInfo message.
             msg = intrinsics
-            self.width = msg.width
-            self.height = msg.height
+            width = msg.width
+            height = msg.height
             shape = (msg.height, msg.width)
 
-            self.P = np.array(msg.P,dtype=np.float)
-            self.P.shape = (3,4)
-            if not np.allclose(self.P[:,3], np.zeros((3,))):
+            P = np.array(msg.P,dtype=np.float)
+            P.shape = (3,4)
+            if not np.allclose(P[:,3], np.zeros((3,))):
                 raise NotImplementedError('not tested when 4th column of P is nonzero')
 
-            self.K = np.array( msg.K, dtype=np.float)
-            self.K.shape = (3,3)
-            assert self.K.ndim == 2
+            K = np.array( msg.K, dtype=np.float)
+            K.shape = (3,3)
+            assert K.ndim == 2
 
-            self.distortion = np.array(msg.D, dtype=np.float)
-            if len(self.distortion) == 5:
-                self.distortion.shape = (5,1)
-            elif len(self.distortion) == 8:
-                self.distortion.shape = (8,1)
+            distortion = np.array(msg.D, dtype=np.float)
+            if len(distortion) == 5:
+                distortion.shape = (5,1)
+            elif len(distortion) == 8:
+                distortion.shape = (8,1)
             else:
                 raise ValueError('distortion can have only 5 or 8 entries')
 
-            assert self.distortion.ndim==2
+            assert distortion.ndim==2
 
-            self.rect = np.array( msg.R, dtype=np.float )
-            self.rect.shape = (3,3)
-            if np.allclose(self.rect,np.eye(3)):
-                self.rect = None
+            rect = np.array( msg.R, dtype=np.float )
+            rect.shape = (3,3)
+            if np.allclose(rect,np.eye(3)):
+                rect = None
 
         #self.translation=np.array(translation,copy=True)
-        self.name = name
 
-        K = self.P[:3,:3]
-        self._opencv_compatible = (K[0,1]==0)
+        K_ = P[:3,:3]
 
         # If skew is 15 orders of magnitude less than focal length, ignore it.
-        if abs(K[0,1]) > (abs(K[0,0])/1e15):
-            if np.sum(abs(self.distortion)) != 0.0:
+        if abs(K_[0,1]) > (abs(K_[0,0])/1e15):
+            if np.sum(abs(distortion)) != 0.0:
                 raise NotImplementedError('distortion/undistortion for skewed pixels not implemented')
+        result = cls(name, width, height, _rquat, _camcenter, P, K, distortion, rect)
+        return result
 
     @classmethod
     def from_dict(cls, d, extrinsics_required=True ):
@@ -310,11 +324,10 @@ class CameraModel(object):
             if extrinsics_required:
                 raise ValueError('extrinsic parameters are required, but not provided')
 
-        result = cls(translation=translation,
-                     rotation=rotation,
-                     intrinsics=c,
-                     name=name)
-
+        result = cls.from_ros_like(translation=translation,
+                                   rotation=rotation,
+                                   intrinsics=c,
+                                   name=name)
         return result
 
     @classmethod
@@ -382,11 +395,11 @@ class CameraModel(object):
         if intrinsics is None:
             raise ValueError('no intrinsic parameters in bag file')
 
-        result = cls(translation=translation,
-                     rotation=rotation,
-                     intrinsics=intrinsics,
-                     name=camera_name,
-                     )
+        result = cls.from_ros_like(translation=translation,
+                                   rotation=rotation,
+                                   intrinsics=intrinsics,
+                                   name=camera_name,
+                                   )
         return result
 
 
@@ -435,10 +448,10 @@ class CameraModel(object):
         i.K = list(K.flatten())
         i.R = list(np.eye(3).flatten())
         i.P = list(P.flatten())
-        result = cls(translation = t,
-                     rotation = R,
-                     intrinsics = i,
-                     name=name)
+        result = cls.from_ros_like(translation = t,
+                                   rotation = R,
+                                   intrinsics = i,
+                                   name=name)
         return result
 
     @classmethod
@@ -464,7 +477,7 @@ class CameraModel(object):
 
         t = -np.dot( rmat2, C)[:,0]
 
-        return cls(translation=t, rotation=rquat2, **kwargs)
+        return cls.from_ros_like(translation=t, rotation=rquat2, **kwargs)
 
     @classmethod
     def load_camera_simple( cls,
@@ -745,7 +758,8 @@ class CameraModel(object):
                 i.K[5] = (self.height-i.K[5])
                 i.P[6] = (self.height-i.P[6])
 
-        camnew = CameraModel( translation = self.translation,
+        camnew = CameraModel.from_ros_like(
+                              translation = self.translation,
                               rotation = self.rot,
                               intrinsics = i,
                               name = self.name + '_mirror',
@@ -798,7 +812,8 @@ class CameraModel(object):
         eye.shape = (3,1)
         t = -np.dot(R,eye)
 
-        result = CameraModel(translation=t,
+        result = CameraModel.from_ros_like(
+                             translation=t,
                              rotation=R,
                              intrinsics=self.get_intrinsics_as_msg(),
                              name=self.name,
@@ -1046,7 +1061,7 @@ class MultiCameraSystem:
     def from_dict(cls, d):
         cam_dict_list = d['camera_system']
         cams = [CameraModel.from_dict(cd) for cd in cam_dict_list]
-        return cls( cameras=cams )
+        return MultiCameraSystem( cameras=cams )
 
     def __eq__(self, other):
         assert isinstance( self, MultiCameraSystem )
