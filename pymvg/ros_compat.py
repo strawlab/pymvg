@@ -1,3 +1,8 @@
+"""utilities to emulate parts of ROS
+
+pymvg was originally written as a [ROS](http://ros.org) package. This
+module allows pymvg to run without ROS.
+"""
 import math
 import numpy
 import numpy as np
