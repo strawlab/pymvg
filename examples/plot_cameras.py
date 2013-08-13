@@ -1,13 +1,11 @@
-import roslib; roslib.load_manifest('camera_model')
-
-from camera_model.plot_utils import plot_camera
-import camera_model
+from pymvg.plot_utils import plot_camera
+import pymvg
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 R2D = 180./np.pi
 
-base = camera_model.load_camera_default()
+base = pymvg.CameraModel.load_camera_default()
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
