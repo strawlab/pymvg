@@ -188,9 +188,14 @@ class CameraModel(object):
         '_opencv_compatible',
         # these intrinsic parameters specified like OpenCV
         'P', # used for undistorted<->normalized, np.array with shape (3,4)
+        'K', # used for distorted<->normalized, a scaled version of P[:3,:3], np.array with shape (3,3)
+
+        # (The scaling of K, with the default alpha=0, is such that
+        # every pixel in the undistorted image is valid, thus throwing
+        # away some pixels. With alpha=1, all pixels in the original
+        # image are in the undistorted image.)
 
         # the distortion model
-        'K', # (distortion params) used for distorted<->normalized, np.array with shape (3,3)
         'distortion', # (distortion params) the distortion, np.array with shape (5,1) or (8,1)
         'rect', # (distortion params) the rectification, None or np.array with shape (3,3)
         ]
