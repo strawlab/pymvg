@@ -1086,6 +1086,9 @@ class MultiCameraSystem:
     def get_names(self):
         return self._cameras.keys()
 
+    def get_camera_dict(self):
+        return self._cameras
+
     def to_dict(self):
         return {'camera_system':
                 [self._cameras[name].to_dict() for name in self._cameras]}
