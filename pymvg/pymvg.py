@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 import scipy.linalg
+import os, re
 
 from ros_compat import tf, sensor_msgs, geometry_msgs, rosbag, roslib
 import yaml
@@ -162,6 +163,43 @@ def plain_vec(vec):
         result = vec
     return result
 
+def normalize_pmat(pmat,eps=1e-6):
+    pmat_orig = pmat
+    M = pmat[:,:3]
+    t = pmat[:,3,np.newaxis]
+    K,R = my_rq(M)
+    if abs(K[2,2]-1.0)>eps:
+        pmat = pmat/K[2,2]
+    assert np.allclose(center(pmat_orig),center(pmat))
+    return pmat
+
+def parse_radfile(filename):
+    result = {}
+    regex = re.compile(r'^(?P<key>[_a-zA-Z][a-zA-Z0-9_.]*)\s*=\s*(?P<value>.*)$')
+    with open(filename,mode='r') as fd:
+        for line in fd.readlines():
+            line = line[:line.find('#')] # strip comments
+            line = line.strip() # strip whitespace
+            if len(line)==0:
+                # discard empty lines
+                continue
+            matchobj = regex.match(line)
+            assert matchobj is not None
+            d = matchobj.groupdict()
+            result[ d['key'] ] = float(d['value'])
+
+    K = np.zeros((3,3))
+    for i in range(3):
+        for j in range(3):
+            K[i,j] = result[ 'K%d%d'%(i+1, j+1) ]
+
+    distortion = np.array(( result['kc1'],
+                            result['kc2'],
+                            result['kc3'],
+                            result['kc4'],
+                            result.get('kc5',0.0) ))
+    return K, distortion
+
 # main class
 class CameraModel(object):
     """an implementation of the Camera Model used by ROS and OpenCV
@@ -224,6 +262,7 @@ class CameraModel(object):
                       rotation=None,
                       intrinsics=None,
                       name=None,
+                      max_skew_ratio=1e15,
                       ):
         """Instantiate a Camera Model.
 
@@ -291,14 +330,16 @@ class CameraModel(object):
         K_ = P[:3,:3]
 
         # If skew is 15 orders of magnitude less than focal length, ignore it.
-        if abs(K_[0,1]) > (abs(K_[0,0])/1e15):
+        if abs(K_[0,1]) > (abs(K_[0,0])/max_skew_ratio):
             if np.sum(abs(distortion)) != 0.0:
-                raise NotImplementedError('distortion/undistortion for skewed pixels not implemented')
+                skew = K_[0,1]
+                fx = K_[0,0]
+                raise NotImplementedError('distortion/undistortion for skewed pixels not implemented (skew: %s, fx: %s)'%(skew,fx))
         result = cls(name, width, height, _rquat, _camcenter, P, K, distortion, rect)
         return result
 
     @classmethod
-    def from_dict(cls, d, extrinsics_required=True ):
+    def from_dict(cls, d, extrinsics_required=True, max_skew_ratio=1e15 ):
         translation = None
         rotation = None
 
@@ -333,7 +374,9 @@ class CameraModel(object):
         result = cls.from_ros_like(translation=translation,
                                    rotation=rotation,
                                    intrinsics=c,
-                                   name=name)
+                                   name=name,
+                                   max_skew_ratio = max_skew_ratio,
+                                   )
         return result
 
     @classmethod
@@ -412,7 +455,7 @@ class CameraModel(object):
     @classmethod
     def load_camera_from_pmat( cls, pmat, width=None, height=None, name='cam',
                                distortion_coefficients=None,
-                               _depth=0 ):
+                               _depth=0, eps=1e-15 ):
         pmat = np.array(pmat)
         assert pmat.shape==(3,4)
         M = pmat[:,:3]
@@ -427,7 +470,6 @@ class CameraModel(object):
         if a==0:
             warnings.warn('ill-conditioned intrinsic camera parameters')
         else:
-            eps = 1e-15
             if abs(a-1.0) > eps:
                 if _depth > 0:
                     raise ValueError('cannot scale this pmat: %s'%( repr(pmat,)))
@@ -1068,6 +1110,90 @@ class MultiCameraSystem:
         cam_dict_list = d['camera_system']
         cams = [CameraModel.from_dict(cd) for cd in cam_dict_list]
         return MultiCameraSystem( cameras=cams )
+
+    @classmethod
+    def from_mcsc(cls, dirname):
+        '''create MultiCameraSystem from output directory of MultiCamSelfCal'''
+
+        # FIXME: This is a bit convoluted because it's been converted
+        # from multiple layers of internal code. It should really be
+        # simplified and cleaned up.
+
+        do_normalize_pmat=True
+
+        all_Pmat = {}
+        all_Res = {}
+        all_K = {}
+        all_distortion = {}
+
+        opj = os.path.join
+
+        with open(opj(dirname,'camera_order.txt'),mode='r') as fd:
+            cam_ids = fd.read().strip().split('\n')
+
+        with open(os.path.join(dirname,'Res.dat'),'r') as res_fd:
+            for i, cam_id in enumerate(cam_ids):
+                fname = 'camera%d.Pmat.cal'%(i+1)
+                pmat = np.loadtxt(opj(dirname,fname)) # 3 rows x 4 columns
+                if do_normalize_pmat:
+                    pmat_orig = pmat
+                    pmat = normalize_pmat(pmat)
+                all_Pmat[cam_id] = pmat
+                all_Res[cam_id] = map(int,res_fd.readline().split())
+
+        # load non linear parameters
+        rad_files = [ f for f in os.listdir(dirname) if f.endswith('.rad') ]
+        for cam_id_enum, cam_id in enumerate(cam_ids):
+            filename = os.path.join(dirname,
+                                    'basename%d.rad'%(cam_id_enum+1,))
+            if os.path.exists(filename):
+                K, distortion = parse_radfile(filename)
+                all_K[cam_id] = K
+                all_distortion[cam_id] = distortion
+            else:
+                if len(rad_files):
+                    raise RuntimeError(
+                        '.rad files present but none named "%s"'%filename)
+                warnings.warn('no non-linear data (e.g. radial distortion) '
+                              'in calibration for %s'%cam_id)
+                all_K[cam_id] = None
+                all_distortion[cam_id] = None
+
+        cameras = []
+        for cam_id in cam_ids:
+            w,h = all_Res[cam_id]
+            Pmat = all_Pmat[cam_id]
+            M = Pmat[:,:3]
+            K,R = my_rq(M)
+            if not is_rotation_matrix(R):
+                # RQ may return left-handed rotation matrix. Make right-handed.
+                R2 = -R
+                K2 = -K
+                assert np.allclose(np.dot(K2,R2), np.dot(K,R))
+                K,R = K2,R2
+
+            P = np.zeros((3,4))
+            P[:3,:3] = K
+            KK = all_K[cam_id]
+            distortion = all_distortion[cam_id]
+
+            C = center(Pmat)
+            rot = R
+            t = -np.dot(rot, C)[:,0]
+
+            d = {'width':w,
+                 'height':h,
+                 'P':P,
+                 'K':KK,
+                 'R':None,
+                 'translation':t,
+                 'rotation':rot,
+                 'D':distortion,
+                 'name':cam_id,
+                 }
+            cam = CameraModel.from_dict(d)
+            cameras.append( cam )
+        return MultiCameraSystem( cameras=cameras )
 
     def __eq__(self, other):
         assert isinstance( self, MultiCameraSystem )
