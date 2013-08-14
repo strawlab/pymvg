@@ -280,12 +280,13 @@ class CameraModel(object):
 
             assert distortion.ndim==2
 
-            rect = np.array( msg.R, dtype=np.float )
-            rect.shape = (3,3)
-            if np.allclose(rect,np.eye(3)):
+            if msg.R is None:
                 rect = None
-
-        #self.translation=np.array(translation,copy=True)
+            else:
+                rect = np.array( msg.R, dtype=np.float )
+                rect.shape = (3,3)
+                if np.allclose(rect,np.eye(3)):
+                    rect = None
 
         K_ = P[:3,:3]
 
