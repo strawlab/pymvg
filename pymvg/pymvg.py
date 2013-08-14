@@ -1125,8 +1125,6 @@ class MultiCameraSystem:
         return X
 
     def find2d(self,camera_name,xyz,distorted=True):
-        if not distorted:
-            raise NotImplementedError
         cam = self._cameras[camera_name]
 
         xyz = np.array(xyz)
