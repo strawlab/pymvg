@@ -204,6 +204,31 @@ def parse_radfile(filename):
 class CameraModel(object):
     """an implementation of the Camera Model used by ROS and OpenCV
 
+    Tranformations: We can think about the overall projection to 2D in
+    two steps. Step 1 takes 3D world coordinates and, with a simple
+    matrix multiplication and perspective division, projects them to
+    undistorted 2D coordinates. Step 2 takes these undistorted 2D
+    coordinates and distorts them so they are 'distorted' and match up
+    with a real camera with radial distortion, for example.
+
+    3D world --(step1)----> undistorted 2D ---(step2)----> distorted 2D
+
+    Step 1 is accomplished by making the world coordinates a
+    homogeneous vector of length 4, multiplying by a 3x4 matrix pmat
+    (built from P, R and t) to get values [r,s,t] in which the
+    undistorted 2D coordinates are [r/t, s/t]. (The implementation is
+    vectorized so that in fact many points at once can be
+    transformed.)
+
+    Step 2 is somewhat complicated in that it allows a separate focal
+    length and camera center to be used for distortion. Undistorted 2D
+    coordinates are transformed first to uncorrected normalized image
+    coordinates using parameters from P, then corrected using a
+    rectification matrix. These corrected normalized image coordinates
+    are then used in conjunction with the distortion model to create
+    distorted normalized pixels which are finall transformed to
+    distorted image pixels by K.
+
     Coordinate system: the camera is looking at +Z, with +X rightward
     and +Y down. For more information, see
     http://www.ros.org/wiki/image_pipeline/CameraInfo
@@ -230,8 +255,8 @@ class CameraModel(object):
 
         # (The scaling of K, with the default alpha=0, is such that
         # every pixel in the undistorted image is valid, thus throwing
-        # away some pixels. With alpha=1, all pixels in the original
-        # image are in the undistorted image.)
+        # away some pixels. With alpha=1, P==K and all pixels in the
+        # original image are in the undistorted image.)
 
         # the distortion model
         'distortion', # (distortion params) the distortion, np.array with shape (5,1) or (8,1)
