@@ -1137,7 +1137,7 @@ class MultiCameraSystem:
         return MultiCameraSystem( cameras=cams )
 
     @classmethod
-    def from_mcsc(cls, dirname):
+    def from_mcsc(cls, dirname, max_skew_ratio=10 ):
         '''create MultiCameraSystem from output directory of MultiCamSelfCal'''
 
         # FIXME: This is a bit convoluted because it's been converted
@@ -1238,7 +1238,7 @@ class MultiCameraSystem:
                  'D':distortion,
                  'name':cam_id,
                  }
-            cam = CameraModel.from_dict(d)
+            cam = CameraModel.from_dict(d, max_skew_ratio=max_skew_ratio)
             cameras.append( cam )
         return MultiCameraSystem( cameras=cameras )
 
