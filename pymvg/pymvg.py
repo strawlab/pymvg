@@ -1199,8 +1199,30 @@ class MultiCameraSystem:
 
             P = np.zeros((3,4))
             P[:3,:3] = K
-            KK = all_K[cam_id]
+            KK = all_K[cam_id] # from rad file or None
             distortion = all_distortion[cam_id]
+
+            # (ab)use PyMVG's rectification to do coordinate transform
+            # for MCSC's undistortion.
+
+            # The intrinsic parameters used for 3D -> 2D.
+            ex = P[0,0]
+            bx = P[0,2]
+            Sx = P[0,3]
+            ey = P[1,1]
+            by = P[1,2]
+            Sy = P[1,3]
+
+            # Parameters used to define undistortion coordinates.
+            fx = KK[0,0]
+            fy = KK[1,1]
+            cx = KK[0,2]
+            cy = KK[1,2]
+
+            rect = np.array([[ ex/fx,     0, (bx+Sx-cx)/fx ],
+                             [     0, ey/fy, (by+Sy-cy)/fy ],
+                             [     0,     0,       1       ]]).T
+
 
             C = center(Pmat)
             rot = R
@@ -1210,7 +1232,7 @@ class MultiCameraSystem:
                  'height':h,
                  'P':P,
                  'K':KK,
-                 'R':None,
+                 'R':rect,
                  'translation':t,
                  'rotation':rot,
                  'D':distortion,
