@@ -570,7 +570,7 @@ class CameraModel(object):
                           [ 0, f, cy, 0],
                           [ 0, 0,  1, 0]])
         c1 = cls.load_camera_from_pmat( pmat, width=width, height=height, name=name)
-        c2 = c1.get_view_camera( eye=eye, lookat=lookat, up=None)
+        c2 = c1.get_view_camera( eye=eye, lookat=lookat, up=up)
         return c2
 
     # --- end of CameraModel constructors --------------------------------------
