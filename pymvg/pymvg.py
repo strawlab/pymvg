@@ -857,7 +857,8 @@ class CameraModel(object):
         camnew.distortion[3] = -self.distortion[3]
 
         if camnew.rect is not None:
-            raise NotImplementedError('No support for flipping stereo cameras')
+            raise NotImplementedError('No support for flipping cameras '
+                                      'that require rectifcation')
         return camnew
 
     def get_view_camera(self, eye, lookat, up=None):
