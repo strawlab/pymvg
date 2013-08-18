@@ -1,0 +1,47 @@
+GNU Octave, version 3.2.4
+Copyright (C) 2009 John W. Eaton and others.
+This is free software; see the source code for copying conditions.
+There is ABSOLUTELY NO WARRANTY; not even for MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  For details, type `warranty'.
+
+Octave was configured for "x86_64-pc-linux-gnu".
+
+Additional information about Octave is available at http://www.octave.org.
+
+Please contribute if you find this software useful.
+For more information, visit http://www.octave.org/help-wanted.html
+
+Report bugs to <bug@octave.org> (but first, please read
+http://www.octave.org/bugs.html to learn how to write a helpful report).
+
+For information about changes from previous versions, type `news'.
+
+arg = --config=/mnt/hgfs/straw/Documents/src/MultiCamSelfCal/strawlab/test-data/caldata20130726_122220/result/multicamselfcal.cfg
+config_dir = /mnt/hgfs/straw/Documents/src/MultiCamSelfCal/strawlab/test-data/caldata20130726_122220/result/
+Multi-Camera Self-Calibration, Tomas Svoboda et al., 07/2003
+************************************************************
+Experiment name: strawlab_test
+ 
+********** After 0 iteration *******************************************
+RANSAC validation step running with tolerance threshold: 10.00 ...
+RANSAC: 4 samples, 87 inliers out of 87 points
+RANSAC: 1 samples, 87 inliers out of 87 points
+RANSAC: 2 samples, 70 inliers out of 70 points
+RANSAC: 1 samples, 59 inliers out of 59 points
+87 points/frames have survived validations so far
+Filling of missing points is running ...
+Repr. error in proj. space (no fact./fact.) is ...  0.542818 0.436898
+************************************************************
+Number of detected outliers:   0
+About cameras (Id, 2D reprojection error, #inliers):
+CamId    std       mean  #inliers 
+  1      0.79      0.40     87 
+  2      0.38      0.37     70 
+  3      0.46      0.44     59 
+  4      0.46      0.53     87 
+***************************************************************
+**************************************************************
+Refinement by using Bundle Adjustment
+Repr. error in proj. space (no fact./fact./BA) is ...  0.512143 0.434507 0.302041
+2D reprojection error
+All points: mean  0.30 pixels, std is 0.22

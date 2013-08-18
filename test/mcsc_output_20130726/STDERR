@@ -1,0 +1,12 @@
+warning: addpath: ./CalTechCal: No such file or directory
+warning: The calibration file config.files.CalPmat does not exist
+warning: No P mat available
+warning: The calibration file config.files.CalPmat does not exist
+warning: No P mat available
+warning: The calibration file config.files.CalPmat does not exist
+warning: No P mat available
+warning: The calibration file config.files.CalPmat does not exist
+warning: No P mat available
+warning: No Pmat available
+warning: function name `readradfiles' does not agree with function file name `/mnt/hgfs/straw/Documents/src/MultiCamSelfCal/RadialDistortions/readradfile.m'
+warning: load: loaded ASCII file `/mnt/hgfs/straw/Documents/src/MultiCamSelfCal/strawlab/test-data/caldata20130726_122220/result/original_cam_centers.dat' -- ignoring extra args
