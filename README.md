@@ -1,9 +1,16 @@
 # pymvg - Python Multi-View Geometry
 
 [PyMVG](https://github.com/strawlab/pymvg) is a Python implementation
-of various computational camera geometry operations. In particular, it
-allows triangulation of 2D features from multiple calibrated cameras
-into a single 3D point.
+of various computational camera geometry operations.
+
+Features:
+
+- triangulate 2D features from multiple calibrated cameras into a single 3D point
+- load camera calibrations from [ROS](http://ros.org) (which uses [OpenCV](http://opencv.org))
+- load camera system calibrations from [MultiCamSelfCal](https://github.com/strawlab/MultiCamSelfCal)
+- complete implementation of OpenCV camera model in pure Python in a single file for easy understanding
+- completely vectorized code for rapid operation on many points using [numpy](http://numpy.org)
+- completely written in [Python](http://python.org)
 
 It contains a complete re-implementation of the OpenCV camera model
 and can thus use calibrations made by or for OpenCV. PyMVG is entirely
@@ -32,3 +39,9 @@ This package is well tested. To run the tests:
 
     cd test
     nosetests
+
+## TODO
+
+- Implement homography finding (rotation, translation and scaling between otherwise similar sets of cameras)
+- Implement the DLT algorithms to estimate single camera parameters from corresponding pairs of 2D and 3D points
+- Implement extrinsic camera calibration to find camera pose when intrinsic parameters are known and image coordinates of know 3D points are given
