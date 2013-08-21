@@ -356,13 +356,13 @@ class CameraModel(object):
 
             distortion = np.array(msg.D, dtype=np.float)
             if len(distortion) == 5:
-                distortion.shape = (5,1)
+                distortion.shape = (5,)
             elif len(distortion) == 8:
-                distortion.shape = (8,1)
+                distortion.shape = (8,)
             else:
                 raise ValueError('distortion can have only 5 or 8 entries')
 
-            assert distortion.ndim==2
+            assert distortion.ndim==1
 
             if msg.R is None:
                 rect = None
@@ -661,7 +661,7 @@ class CameraModel(object):
         d['width'] = self.width
         d['P'] = np2plain(self.P)
         d['K'] = np2plain(self.K)
-        d['D'] = np2plain(self.distortion[:,0])
+        d['D'] = np2plain(self.distortion[:])
         if self.rect is None:
             d['R'] = np2plain(np.eye(3))
         else:
