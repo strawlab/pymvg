@@ -148,18 +148,8 @@ def get_rotation_matrix_and_quaternion(rotation):
 
     return rmat, rquat
 
-def get_vec_str(vec_orig):
-    assert vec_orig.ndim==1
-
-    # convert -0 to 0
-    vec = []
-    for el in vec_orig:
-        if el==-0:
-            vec.append(0)
-        else:
-            vec.append(el)
-    vec = np.array(vec)
-
+def get_vec_str(vec):
+    assert vec.ndim==1
     # use numpy for printing (suppresses small values when others are large)
     tmp = np.array_repr(vec, precision=5, suppress_small=True)
     assert tmp.startswith('array([')
