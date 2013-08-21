@@ -246,7 +246,7 @@ class CameraModel(object):
     coordinates using parameters from P, then corrected using a
     rectification matrix. These corrected normalized image coordinates
     are then used in conjunction with the distortion model to create
-    distorted normalized pixels which are finall transformed to
+    distorted normalized pixels which are finally transformed to
     distorted image pixels by K.
 
     Coordinate system: the camera is looking at +Z, with +X rightward
