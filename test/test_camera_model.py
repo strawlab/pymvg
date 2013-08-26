@@ -111,6 +111,33 @@ def check_built_from_pmat(cam_opts):
     cam = CameraModel.load_camera_from_pmat( pmat_orig )
     assert np.allclose( cam.pmat, pmat_orig)
 
+def test_align():
+    all_options = get_default_options()
+    for opts in all_options:
+        yield check_align, opts
+
+def check_align(cam_opts):
+    import multicamselfcal.align as mcsc_align
+
+    cam_orig = _build_test_camera(**cam_opts)
+    pmat_orig = cam_orig.pmat
+    cam_orig = CameraModel.load_camera_from_pmat( pmat_orig )
+    R1 = np.eye(3)
+    R2 = np.zeros((3,3))
+    R2[0,1] = 1
+    R2[1,0] = 1
+    R2[2,2] = -1
+    t1 = np.array( (0.0, 0.0, 0.0) )
+    t2 = np.array( (0.0, 0.0, 0.1) )
+    t3 = np.array( (0.1, 0.0, 0.0) )
+    for s in [1.0, 2.0]:
+        for R in [R1, R2]:
+            for t in [t1, t2, t3]:
+                cam_actual = cam_orig.get_aligned_camera( s, R, t )
+                pmat_expected = mcsc_align.align_pmat( s,R,t, pmat_orig )
+                cam_expected = CameraModel.load_camera_from_pmat( pmat_expected )
+                assert cam_actual==cam_expected
+
 def test_problem_pmat():
     """check a particular pmat which previously caused problems"""
     # This pmat (found by the DLT method) was causing me problems.

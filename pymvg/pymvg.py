@@ -904,6 +904,25 @@ class CameraModel(object):
                              )
         return result
 
+    def get_aligned_camera(self, scale, rotation, translation):
+        """return a copy of this camera with new extrinsic coordinates"""
+        s,R,t = scale, rotation, translation
+        cc, la, up = self.get_view()
+        f = la-cc
+
+        X = np.linalg.inv( R )
+
+        fa = np.dot( f, X )
+        cca0 = cc*s
+        cca = np.dot( cca0, X )
+        laa = cca+fa
+        up2 = np.dot( up, X )
+
+        cca2 = cca+t
+        laa2 = laa+t
+
+        return self.get_view_camera(cca2, laa2, up2)
+
     # --------------------------------------------------
     # image coordinate operations
 
@@ -1321,3 +1340,27 @@ class MultiCameraSystem:
             # convert back to rank1
             pix = pix[:,0]
         return pix
+
+    def get_aligned_copy(self, other):
+        """return copy of self that is scaled, translated, and rotated to best match other"""
+        assert isinstance( other, MultiCameraSystem)
+        import multicamselfcal.align as mcsc_align
+
+        orig_names = self.get_names()
+        new_names = other.get_names()
+        names = set(orig_names).intersection( new_names )
+        if len(names) < 3:
+            raise ValueError('need 3 or more cameras in common to align.')
+        orig_points = np.array([ self._cameras[name].get_camcenter() for name in names ]).T
+        new_points = np.array([ other._cameras[name].get_camcenter() for name in names ]).T
+
+        s,R,t = mcsc_align.estsimt(orig_points,new_points)
+        assert is_rotation_matrix(R)
+
+        new_cams = []
+        for name in self.get_names():
+            orig_cam = self._cameras[name]
+            new_cam = orig_cam.get_aligned_camera(s,R,t)
+            new_cams.append( new_cam )
+        result = MultiCameraSystem(new_cams)
+        return result
