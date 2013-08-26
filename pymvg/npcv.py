@@ -5,6 +5,8 @@ import cv # ubuntu: apt-get install python-opencv
 
 def numpy2opencv_image(arr):
     arr = np.array(arr)
+    if arr.ndim==1:
+        arr = arr[:,np.newaxis]
     assert arr.ndim==2
     if arr.dtype in [np.float32]:
         result = cv.CreateMat( arr.shape[0], arr.shape[1], cv.CV_32FC1)
