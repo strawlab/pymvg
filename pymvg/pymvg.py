@@ -1243,16 +1243,22 @@ class MultiCameraSystem:
             by = P[1,2]
             Sy = P[1,3]
 
-            # Parameters used to define undistortion coordinates.
-            fx = KK[0,0]
-            fy = KK[1,1]
-            cx = KK[0,2]
-            cy = KK[1,2]
+            if KK is None:
+                rect = np.eye(3)
+                KK = P[:,:3]
+            else:
+                # Parameters used to define undistortion coordinates.
+                fx = KK[0,0]
+                fy = KK[1,1]
+                cx = KK[0,2]
+                cy = KK[1,2]
 
-            rect = np.array([[ ex/fx,     0, (bx+Sx-cx)/fx ],
-                             [     0, ey/fy, (by+Sy-cy)/fy ],
-                             [     0,     0,       1       ]]).T
+                rect = np.array([[ ex/fx,     0, (bx+Sx-cx)/fx ],
+                                 [     0, ey/fy, (by+Sy-cy)/fy ],
+                                 [     0,     0,       1       ]]).T
 
+            if distortion is None:
+                distortion = np.zeros((5,))
 
             C = center(Pmat)
             rot = R
