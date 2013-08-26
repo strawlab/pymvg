@@ -157,8 +157,18 @@ def get_vec_str(vec):
     assert tmp.endswith('])')
     tmp = tmp[:-2]
     tmp = tmp.strip()
-    tmps = tmp.split(',')
-    tmps = ['% 8s'%(t.strip(),) for t in tmps ]
+    tmps = [t.strip() for t in tmp.split(',')]
+
+    # convert -0 to 0
+    tmps2 = []
+    for t in tmps:
+        if t=='-0.':
+            tmps2.append('0.')
+        else:
+            tmps2.append(t)
+    tmps = tmps2
+
+    tmps = ['% 8s'%(t,) for t in tmps ]
     result = ', '.join( tmps )
     return result
 
