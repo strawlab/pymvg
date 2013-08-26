@@ -19,13 +19,21 @@ def make_default_system():
                                           lookat=lookat,
                                           )
 
-    center3 = np.array( (0.5, 0.0, 0.0) )
+    center3 = np.array( (0.5, 0.5, 0.0) )
     cam3 = CameraModel.load_camera_simple(name='cam3',
                                           fov_x_degrees=90,
                                           eye=center3,
                                           lookat=lookat,
                                           )
-    cameras = [cam1,cam2,cam3]
+
+    center4 = np.array( (0.5, 0.0, 0.5) )
+    cam4 = CameraModel.load_camera_simple(name='cam4',
+                                          fov_x_degrees=90,
+                                          eye=center4,
+                                          lookat=lookat,
+                                          )
+
+    cameras = [cam1,cam2,cam3,cam4]
     system = MultiCameraSystem(cameras)
     return system
 
@@ -72,4 +80,9 @@ def test_single_and_multiple_points_find2d():
 def test_roundtrip_to_dict():
     system1 = make_default_system()
     system2 = MultiCameraSystem.from_dict( system1.to_dict() )
+    assert system1==system2
+
+def test_align():
+    system1 = make_default_system()
+    system2 = system1.get_aligned_copy( system1 ) # This should be a no-op.
     assert system1==system2
