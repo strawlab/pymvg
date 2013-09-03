@@ -168,7 +168,7 @@ def check_mcsc_roundtrip(with_rad_files=False,align_existing=False):
                               cam_centers=cam_centers,
                               )
 
-        result = mcsc.execute(silent=False) # FIXME: set this silent?
+        result = mcsc.execute(silent=True)
         raw_cams = MultiCameraSystem.from_mcsc( result, max_skew_ratio=10 )
         if align_existing:
             aligned_cams = raw_cams
