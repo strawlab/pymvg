@@ -480,7 +480,7 @@ class CameraModel(object):
             elif topic == 'camera_info':
                 intrinsics = msg
             else:
-                print 'skipping message',topic
+                warnings.warn('skipping message topic %r'%topic)
                 continue
 
         bag.close()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 import numpy as np
 from utils import make_pmat, _build_test_camera, get_default_options
 
@@ -250,10 +250,10 @@ def check_ros_pipeline(use_distortion):
     pm.generate_images()
     #pm.save_tarball('/tmp/pipeline-mimic.tar.gz') # optional
     cals = pm.run_ros_calibrator()
-    print cals
+    print(cals)
     err1 = pm.calc_mean_reproj_error(cals['perfect'])
     err2 = pm.calc_mean_reproj_error(cals['good'])
-    print err1,err2
+    print(err1,err2)
 
     if DRAW:
         from mpl_toolkits.mplot3d import Axes3D
@@ -269,8 +269,8 @@ def check_ros_pipeline(use_distortion):
         plot_camera( ax, pm.cam )#, scale=10, axes_size=5.0 )
 
     if DRAW:
-        print 'using perfect point data, mean reprojection error is %s'%err1
-        print 'mean reprojection error is %s'%err2
+        print('using perfect point data, mean reprojection error is %s'%err1)
+        print('mean reprojection error is %s'%err2)
         plt.show()
 
     assert err1 < 1.0
