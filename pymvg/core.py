@@ -2,7 +2,7 @@
 import numpy as np
 import os, re
 
-from ros_compat import tf, sensor_msgs, geometry_msgs, rosbag, roslib
+from .ros_compat import tf, sensor_msgs, geometry_msgs, rosbag, roslib
 
 import warnings
 
