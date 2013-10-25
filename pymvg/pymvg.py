@@ -3,7 +3,6 @@ import numpy as np
 import os, re
 
 from ros_compat import tf, sensor_msgs, geometry_msgs, rosbag, roslib
-import yaml
 
 import warnings
 
@@ -438,6 +437,7 @@ class CameraModel(object):
         if fname.endswith('.bag'):
             return cls.load_camera_from_bagfile(fname, extrinsics_required=extrinsics_required)
         elif fname.endswith('.yaml'):
+            import yaml
             with open(fname,'r') as f:
                 d = yaml.safe_load(f)
             return cls.from_dict(d, extrinsics_required=extrinsics_required)
