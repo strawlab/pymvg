@@ -7,7 +7,7 @@ import math
 import numpy
 import numpy as np
 import pickle
-import yaml
+import json
 
 class FakeMessage(object):
     def __init__(self,**kwargs):
@@ -22,7 +22,7 @@ class FakeMessage(object):
     def __setstate__(self, d): self.__dict__.update(d)
     def __str__(self):
         d = self._get_simple_dict()
-        result = yaml.dump(d)
+        result = json.dumps(d,sort_keys=True,indent=4)
         return result
 
 def make_list(vec):
