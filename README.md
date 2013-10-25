@@ -9,6 +9,7 @@ Features:
 - load camera calibrations from [ROS](http://ros.org) (which uses [OpenCV](http://opencv.org))
 - load camera system calibrations from [MultiCamSelfCal](https://github.com/strawlab/MultiCamSelfCal)
 - complete implementation of OpenCV camera model in pure Python in a single file for easy understanding
+- complete implementation of DLT camera calibration procedure
 - completely vectorized code for rapid operation on many points using [numpy](http://numpy.org)
 - completely written in [Python](http://python.org)
 
