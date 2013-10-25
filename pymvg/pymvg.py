@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import numpy as np
-import scipy.linalg
 import os, re
 
 from ros_compat import tf, sensor_msgs, geometry_msgs, rosbag, roslib
@@ -71,9 +70,19 @@ def _undistort( xd, yd, D):
     return x,y
 
 
+def rq(A):
+    # see first comment at
+    # http://leohart.wordpress.com/2010/07/23/rq-decomposition-from-qr-decomposition/
+    from numpy.linalg import qr
+    from numpy import flipud
+    Q,R = qr(flipud(A).T)
+    R = flipud(R.T)
+    Q = Q.T
+    return R[:,::-1],Q[::-1,:]
+
 def my_rq(M):
     """RQ decomposition, ensures diagonal of R is positive"""
-    R,K = scipy.linalg.rq(M)
+    R,K = rq(M)
     n = R.shape[0]
     for i in range(n):
         if R[i,i]<0:
@@ -1339,7 +1348,7 @@ class MultiCameraSystem:
 
         # Calculate best point
         A=np.array(A)
-        u,d,vt=scipy.linalg.svd(A)
+        u,d,vt=np.linalg.svd(A)
         X = vt[-1,0:3]/vt[-1,3] # normalize
         return X
 
