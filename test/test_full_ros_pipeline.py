@@ -15,9 +15,8 @@ if DRAW:
 D2R = np.pi/180.0
 R2D = 1/D2R
 
-from pymvg.pymvg import get_rotation_matrix_and_quaternion
-from pymvg import CameraModel
-import pymvg
+from pymvg.core import get_rotation_matrix_and_quaternion, CameraModel
+import pymvg.core as pymvg
 
 try:
     import roslib

@@ -4,7 +4,7 @@ import numpy as np
 from utils import _build_points_3d, make_pmat
 import os
 
-import pymvg.pymvg as pymvg
+import pymvg.core as pymvg
 from pymvg import CameraModel
 
 normalize = pymvg.normalize

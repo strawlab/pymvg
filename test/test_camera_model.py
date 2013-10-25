@@ -5,8 +5,8 @@ from nose.plugins.skip import SkipTest
 import os, tempfile
 
 from pymvg import CameraModel
-from pymvg.pymvg import point_msg_to_tuple, parse_rotation_msg
-import pymvg
+from pymvg.core import point_msg_to_tuple, parse_rotation_msg
+import pymvg.core as pymvg
 
 from utils import _build_test_camera, get_default_options
 
