@@ -4,9 +4,16 @@ import numpy as np
 from utils import make_pmat, _build_test_camera, get_default_options
 
 import fill_polygon
-import tarfile, time, os, StringIO
+import tarfile, time, os
 import subprocess
 import cv # ubuntu: apt-get install python-opencv
+
+try:
+    # python 2
+    from StringIO import StringIO
+except ImportError:
+    # python 3
+    from io import StringIO
 
 DRAW=int(os.environ.get('DRAW','0'))
 if DRAW:
@@ -35,7 +42,7 @@ else:
 
 def get_np_array_as_png_buf(im):
     import scipy.misc
-    output = StringIO.StringIO()
+    output = StringIO()
     pil_im = scipy.misc.toimage( im )
     pil_im.save( output, format='PNG')
     return output.getvalue()
@@ -166,7 +173,7 @@ class ROSPipelineMimic:
 
     def save_tarball(self,tarball_fname):
         def taradd(name, buf):
-            s = StringIO.StringIO(buf)
+            s = StringIO(buf)
             ti = tarfile.TarInfo(name)
             ti.size = len(s.buf)
             ti.uname = 'calibrator'
