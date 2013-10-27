@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 import os, re
+import json
 
 from .ros_compat import tf, sensor_msgs, geometry_msgs, rosbag, roslib
 from .align import estsimt
@@ -444,13 +445,19 @@ class CameraModel(object):
     def load_camera_from_file( cls, fname, extrinsics_required=True ):
         if fname.endswith('.bag'):
             return cls.load_camera_from_bagfile(fname, extrinsics_required=extrinsics_required)
-        elif fname.endswith('.yaml'):
-            import yaml
-            with open(fname,'r') as f:
-                d = yaml.safe_load(f)
+        elif (fname.endswith('.yaml') or
+              fname.endswith('.json')):
+            if fname.endswith('.yaml'):
+                import yaml
+                with open(fname,'r') as f:
+                    d = yaml.safe_load(f)
+            else:
+                assert fname.endswith('.json')
+                with open(fname,'r') as f:
+                    d = json.load(f)
             return cls.from_dict(d, extrinsics_required=extrinsics_required)
         else:
-            raise Exception("Only supports .bag and .yaml file loading")
+            raise ValueError("only supports: .bag .yaml .json")
 
     @classmethod
     def load_camera_from_bagfile( cls, bag_fname, extrinsics_required=True ):
