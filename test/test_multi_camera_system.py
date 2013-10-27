@@ -6,10 +6,12 @@ def make_default_system():
     lookat = np.array( (0.0, 0.0, 0.0))
 
     center1 = np.array( (0.0, 0.0, 5.0) )
+    distortion1 = np.array( [0.2, 0.3, 0.1, 0.1, 0.1] )
     cam1 = CameraModel.load_camera_simple(name='cam1',
                                           fov_x_degrees=90,
                                           eye=center1,
                                           lookat=lookat,
+                                          distortion_coefficients=distortion1,
                                           )
 
     center2 = np.array( (0.5, 0.0, 0.0) )

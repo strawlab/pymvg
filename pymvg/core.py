@@ -605,6 +605,7 @@ class CameraModel(object):
                             lookat=(0,0,-1),
                             up=None,
                             name='simple',
+                            distortion_coefficients=None,
                             ):
         aspect = float(width)/float(height)
         fov_y_degrees = fov_x_degrees/aspect
@@ -614,7 +615,8 @@ class CameraModel(object):
         M = np.array( [[ f, 0, cx, 0],
                        [ 0, f, cy, 0],
                        [ 0, 0,  1, 0]])
-        c1 = cls.load_camera_from_M( M, width=width, height=height, name=name)
+        c1 = cls.load_camera_from_M( M, width=width, height=height, name=name,
+                                     distortion_coefficients=distortion_coefficients)
         c2 = c1.get_view_camera( eye=eye, lookat=lookat, up=up)
         return c2
 
