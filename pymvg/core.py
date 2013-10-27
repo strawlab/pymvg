@@ -199,7 +199,7 @@ def plain_vec(vec):
         result = vec
     return result
 
-def normalize_pmat(pmat,eps=1e-6):
+def normalize_M(pmat,eps=1e-6):
     pmat_orig = pmat
     M = pmat[:,:3]
     t = pmat[:,3,np.newaxis]
@@ -250,7 +250,7 @@ class CameraModel(object):
     3D world --(step1)----> undistorted 2D ---(step2)----> distorted 2D
 
     Step 1 is accomplished by making the world coordinates a
-    homogeneous vector of length 4, multiplying by a 3x4 matrix pmat
+    homogeneous vector of length 4, multiplying by a 3x4 matrix M
     (built from P, R and t) to get values [r,s,t] in which the
     undistorted 2D coordinates are [r/t, s/t]. (The implementation is
     vectorized so that in fact many points at once can be
@@ -515,9 +515,9 @@ class CameraModel(object):
 
 
     @classmethod
-    def load_camera_from_pmat( cls, pmat, width=None, height=None, name='cam',
-                               distortion_coefficients=None,
-                               _depth=0, eps=1e-15 ):
+    def load_camera_from_M( cls, pmat, width=None, height=None, name='cam',
+                            distortion_coefficients=None,
+                            _depth=0, eps=1e-15 ):
         pmat = np.array(pmat)
         assert pmat.shape==(3,4)
         M = pmat[:,:3]
@@ -536,7 +536,7 @@ class CameraModel(object):
                 if _depth > 0:
                     raise ValueError('cannot scale this pmat: %s'%( repr(pmat,)))
                 new_pmat = pmat/a
-                cam = cls.load_camera_from_pmat( new_pmat, width=width, height=height, name=name, _depth=_depth+1)
+                cam = cls.load_camera_from_M( new_pmat, width=width, height=height, name=name, _depth=_depth+1)
                 return cam
 
         c = center(pmat)
@@ -569,7 +569,7 @@ class CameraModel(object):
         pmat = np.array( [[ 300,   0, 320, 0],
                           [   0, 300, 240, 0],
                           [   0,   0,   1, 0]])
-        return cls.load_camera_from_pmat( pmat, width=640, height=480, name='cam')
+        return cls.load_camera_from_M( pmat, width=640, height=480, name='cam')
 
     @classmethod
     def load_camera_from_ROS_tf( cls,
@@ -603,10 +603,10 @@ class CameraModel(object):
         f = (width/2.0) / np.tan(fov_x_degrees*D2R/2.0)
         cx = width/2.0
         cy = height/2.0
-        pmat = np.array( [[ f, 0, cx, 0],
-                          [ 0, f, cy, 0],
-                          [ 0, 0,  1, 0]])
-        c1 = cls.load_camera_from_pmat( pmat, width=width, height=height, name=name)
+        M = np.array( [[ f, 0, cx, 0],
+                       [ 0, f, cy, 0],
+                       [ 0, 0,  1, 0]])
+        c1 = cls.load_camera_from_M( M, width=width, height=height, name=name)
         c2 = c1.get_view_camera( eye=eye, lookat=lookat, up=up)
         return c2
 
@@ -702,11 +702,11 @@ class CameraModel(object):
         return Rt
     Rt = property(get_Rt)
 
-    def get_pmat(self):
+    def get_M(self):
         P33 = self.P[:3,:3]
-        pmat = np.dot( P33, self.Rt )
-        return pmat
-    pmat = property(get_pmat)
+        M = np.dot( P33, self.Rt )
+        return M
+    M = property(get_M)
 
     def get_translation(self):
         C = np.array(self._camcenter)
@@ -1131,7 +1131,7 @@ class CameraModel(object):
         pts3d_h[3] = 1
 
         # undistorted homogeneous image coords
-        cc = np.dot(self.pmat, pts3d_h)
+        cc = np.dot(self.M, pts3d_h)
 
         # project
         pc = cc[:2]/cc[2]
@@ -1219,7 +1219,7 @@ class MultiCameraSystem:
                 pmat = np.loadtxt(opj(dirname,fname)) # 3 rows x 4 columns
                 if do_normalize_pmat:
                     pmat_orig = pmat
-                    pmat = normalize_pmat(pmat)
+                    pmat = normalize_M(pmat)
                 all_Pmat[cam_id] = pmat
                 all_Res[cam_id] = map(int,res_fd.readline().split())
 
@@ -1350,7 +1350,7 @@ class MultiCameraSystem:
             cam = self._cameras[name]
             if undistort:
                 xy = cam.undistort( [xy] )
-            Pmat = cam.get_pmat() # Pmat is 3 rows x 4 columns
+            Pmat = cam.get_M() # Pmat is 3 rows x 4 columns
             row2 = Pmat[2,:]
             x,y = xy[0,:]
             A.append( x*row2 - Pmat[0,:] )

@@ -7,7 +7,7 @@ from pymvg.core import CameraModel, point_msg_to_tuple, parse_rotation_msg
 from pymvg.ros_compat import geometry_msgs, sensor_msgs
 import pymvg
 
-def make_pmat( focal_length, width, height, R, c):
+def make_M( focal_length, width, height, R, c):
     K = np.eye(3)
     K[0,0] = focal_length
     K[1,1] = focal_length
@@ -16,8 +16,8 @@ def make_pmat( focal_length, width, height, R, c):
     C = np.array(c,copy=True)
     C.shape = (3,1)
     t = -np.dot( R, C)
-    pmat = np.dot(K, np.hstack((R,t)))
-    parts = {'K':K, 'R':R, 't':t, 'pmat':pmat}
+    M = np.dot(K, np.hstack((R,t)))
+    parts = {'K':K, 'R':R, 't':t, 'M':M}
     return parts
 
 def _build_opts():

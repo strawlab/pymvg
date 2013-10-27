@@ -1,5 +1,5 @@
 from __future__ import print_function
-from pymvg.align import estsimt, align_points, align_pmat
+from pymvg.align import estsimt, align_points, align_M
 import numpy as np
 
 def test_align():
@@ -48,15 +48,15 @@ def test_align():
     mean_absdiff = np.mean( abs(Xnew[:3]-new_points).flatten() )
     assert mean_absdiff < 0.05
 
-    pmat_orig = np.array([[1,2,3,4],
-                          [5,6,7,8],
-                          [9,10,11,12]],dtype=np.float)
+    M_orig = np.array([[1,2,3,4],
+                       [5,6,7,8],
+                       [9,10,11,12]],dtype=np.float)
     print('Xnew.T')
     print(Xnew.T)
 
-    pmat_new = align_pmat( s,R,t, pmat_orig )
-    print('pmat_new')
-    print(pmat_new)
+    M_new = align_M( s,R,t, M_orig )
+    print('M_new')
+    print(M_new)
 
     ## print('s',s)
     ## print('R')

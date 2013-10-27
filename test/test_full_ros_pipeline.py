@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import numpy as np
-from utils import make_pmat, _build_test_camera, get_default_options
+from utils import make_M, _build_test_camera, get_default_options
 
 import fill_polygon
 import tarfile, time, os
@@ -95,17 +95,17 @@ class ROSPipelineMimic:
         rquat = tf.transformations.quaternion_about_axis(0.1, (rot_axis.tolist()))
         rmat,_ = get_rotation_matrix_and_quaternion(rquat)
 
-        parts = make_pmat( 1234.56, width, height,
-                           rmat, center)
+        parts = make_M( 1234.56, width, height,
+                        rmat, center)
 
         if self.use_distortion:
             dist = [-0.4, .2, 0, 0, 0]
         else:
             dist = [0, 0, 0, 0, 0]
 
-        self.cam = CameraModel.load_camera_from_pmat(parts['pmat'],
-                                                     width=width,height=height,
-                                                     distortion_coefficients=dist)
+        self.cam = CameraModel.load_camera_from_M(parts['M'],
+                                                  width=width,height=height,
+                                                  distortion_coefficients=dist)
 
     def generate_images(self):
         """make checkerboard images in camera view"""

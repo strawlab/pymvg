@@ -35,7 +35,7 @@ def DLT(X3d, x2d, width=640, height=480):
     a_vec,residuals = DLT_avec_results[:2]
     Mhat = np.array(list(a_vec)+[1])
     Mhat.shape=(3,4)
-    cam = pymvg.CameraModel.load_camera_from_pmat(Mhat,width=width,height=height)
+    cam = pymvg.CameraModel.load_camera_from_M(Mhat,width=width,height=height)
     results = {'cam':cam,
                'residuals':residuals,
                }

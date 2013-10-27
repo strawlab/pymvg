@@ -100,17 +100,17 @@ def check_extrinsic_msg(cam_opts):
         assert np.allclose(parse_rotation_msg(tfm.rotation,force_matrix=True),
                            parse_rotation_msg(r['rotation'],force_matrix=True))
 
-def test_build_from_pmat():
+def test_build_from_M():
     all_options = get_default_options()
     for opts in all_options:
-        yield check_built_from_pmat, opts
+        yield check_built_from_M, opts
 
-def check_built_from_pmat(cam_opts):
-    """check that pmat is preserved in load_camera_from_pmat() factory"""
+def check_built_from_M(cam_opts):
+    """check that M is preserved in load_camera_from_M() factory"""
     cam_orig = _build_test_camera(**cam_opts)
-    pmat_orig = cam_orig.pmat
-    cam = CameraModel.load_camera_from_pmat( pmat_orig )
-    assert np.allclose( cam.pmat, pmat_orig)
+    M_orig = cam_orig.M
+    cam = CameraModel.load_camera_from_M( M_orig )
+    assert np.allclose( cam.M, M_orig)
 
 def test_align():
     all_options = get_default_options()
@@ -120,8 +120,8 @@ def test_align():
 def check_align(cam_opts):
 
     cam_orig = _build_test_camera(**cam_opts)
-    pmat_orig = cam_orig.pmat
-    cam_orig = CameraModel.load_camera_from_pmat( pmat_orig )
+    M_orig = cam_orig.M
+    cam_orig = CameraModel.load_camera_from_M( M_orig )
     R1 = np.eye(3)
     R2 = np.zeros((3,3))
     R2[0,1] = 1
@@ -134,22 +134,22 @@ def check_align(cam_opts):
         for R in [R1, R2]:
             for t in [t1, t2, t3]:
                 cam_actual = cam_orig.get_aligned_camera( s, R, t )
-                pmat_expected = mcsc_align.align_pmat( s,R,t, pmat_orig )
-                cam_expected = CameraModel.load_camera_from_pmat( pmat_expected )
+                M_expected = mcsc_align.align_M( s,R,t, M_orig )
+                cam_expected = CameraModel.load_camera_from_M( M_expected )
                 assert cam_actual==cam_expected
 
-def test_problem_pmat():
-    """check a particular pmat which previously caused problems"""
-    # This pmat (found by the DLT method) was causing me problems.
+def test_problem_M():
+    """check a particular M which previously caused problems"""
+    # This M (found by the DLT method) was causing me problems.
     d = {'width': 848,
          'name': 'camera',
          'height': 480}
-    pmat =  np.array([[ -1.70677031e+03,  -4.10373295e+03,  -3.88568028e+02, 6.89034515e+02],
-                      [ -6.19019195e+02,  -1.01292091e+03,  -2.67534989e+03, 4.51847857e+02],
-                      [ -4.52548832e+00,  -3.78900498e+00,  -7.35860226e-01, 1.00000000e+00]])
-    cam = CameraModel.load_camera_from_pmat( pmat, **d)
+    M =  np.array([[ -1.70677031e+03,  -4.10373295e+03,  -3.88568028e+02, 6.89034515e+02],
+                   [ -6.19019195e+02,  -1.01292091e+03,  -2.67534989e+03, 4.51847857e+02],
+                   [ -4.52548832e+00,  -3.78900498e+00,  -7.35860226e-01, 1.00000000e+00]])
+    cam = CameraModel.load_camera_from_M( M, **d)
 
-    #assert np.allclose( cam.pmat, pmat) # we don't expect this since the intrinsic matrix may not be scaled
+    #assert np.allclose( cam.M, M) # we don't expect this since the intrinsic matrix may not be scaled
 
     verts = np.array([[ 0.042306,  0.015338,  0.036328, 1.0],
                       [ 0.03323,   0.030344,  0.041542, 1.0],
@@ -157,7 +157,7 @@ def test_problem_pmat():
 
     actual = cam.project_3d_to_pixel(verts[:,:3])
 
-    expectedh = np.dot( pmat, verts.T )
+    expectedh = np.dot( M, verts.T )
     expected = (expectedh[:2]/expectedh[2]).T
     assert np.allclose( expected, actual )
 

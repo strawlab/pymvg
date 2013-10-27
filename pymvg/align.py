@@ -75,11 +75,11 @@ def align_points( s,R,T, X ):
     X = np.dot(T,X)
     return X
 
-def align_pmat( s,R,T, P ):
+def align_M( s,R,T, P ):
     T = build_xform(s,R,T)
     P = np.dot(P,np.linalg.inv(T))
     return P
 
-def align_pmat2( M, P ):
+def align_M2( M, P ):
     P = np.dot(P,np.linalg.inv(M))
     return P
