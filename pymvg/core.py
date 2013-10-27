@@ -525,6 +525,7 @@ class CameraModel(object):
     def load_camera_from_M( cls, pmat, width=None, height=None, name='cam',
                             distortion_coefficients=None,
                             _depth=0, eps=1e-15 ):
+        """create CameraModel instance from a camera matrix M"""
         pmat = np.array(pmat)
         assert pmat.shape==(3,4)
         M = pmat[:,:3]
