@@ -4,7 +4,6 @@ import numpy as np
 from utils import make_pmat, _build_test_camera, get_default_options
 
 import fill_polygon
-import scipy.misc
 import tarfile, time, os, StringIO
 import subprocess
 import cv # ubuntu: apt-get install python-opencv
@@ -36,6 +35,7 @@ else:
     from nose.plugins.skip import SkipTest
 
 def get_np_array_as_png_buf(im):
+    import scipy.misc
     output = StringIO.StringIO()
     pil_im = scipy.misc.toimage( im )
     pil_im.save( output, format='PNG')
@@ -161,6 +161,7 @@ class ROSPipelineMimic:
             ccs3d = np.dot( self.cam.rot, wcs3d.T ).T + self.cam.translation
             ccs2d = check_pixels[save_idx] # pixel coords
             if DRAW:
+                import scipy.misc
                 scipy.misc.imsave( 'im%03d.png'%i, imsave )
             self.db.append( {'wc':wcs3d, 'cc':ccs3d, 'pix':ccs2d, 'im':imsave })
 
