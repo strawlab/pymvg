@@ -703,8 +703,8 @@ class CameraModel(object):
     Rt = property(get_Rt)
 
     def get_pmat(self):
-        K = self.P[:3,:3]
-        pmat = np.dot( K, self.Rt )
+        P33 = self.P[:3,:3]
+        pmat = np.dot( P33, self.Rt )
         return pmat
     pmat = property(get_pmat)
 
