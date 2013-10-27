@@ -21,7 +21,10 @@ def normalize(vec):
 def parse_rotation_msg(rotation, force_matrix=False):
     # rotation could either be a quaternion or a 3x3 matrix
 
-    if hasattr(rotation,'x') and hasattr(rotation,'y') and hasattr(rotation,'z') and hasattr(rotation,'w'):
+    if (hasattr(rotation,'x') and
+        hasattr(rotation,'y') and
+        hasattr(rotation,'z') and
+        hasattr(rotation,'w')):
         # convert quaternion message to tuple
         rotation = quaternion_msg_to_tuple(rotation)
 
@@ -62,7 +65,8 @@ def _undistort( xd, yd, D):
 
     for i in range(5):
         r2 = x*x + y*y
-        icdist = (1 + ((k[7]*r2 + k[6])*r2 + k[5])*r2)/(1 + ((k[4]*r2 + k[1])*r2 + k[0])*r2)
+        icdist = (1 + ((k[7]*r2 + k[6])*r2 + k[5])*r2)/ \
+                 (1 + ((k[4]*r2 + k[1])*r2 + k[0])*r2)
         delta_x = 2.0 * (t1)*x*y + (t2)*(r2 + 2.0*x*x)
         delta_y = (t1) * (r2 + 2.0*y*y)+2.0*(t2)*x*y
         x = (xd-delta_x)*icdist
@@ -144,7 +148,10 @@ def get_rotation_matrix_and_quaternion(rotation):
             assert np.allclose(rmat,R2)
     elif rotation.ndim==0:
         assert rotation.dtype == object
-        rotation = (rotation_orig.x, rotation_orig.y, rotation_orig.z, rotation_orig.w)
+        rotation = (rotation_orig.x,
+                    rotation_orig.y,
+                    rotation_orig.z,
+                    rotation_orig.w)
         return get_rotation_matrix_and_quaternion(rotation)
     else:
         assert rotation.ndim==1
