@@ -1312,7 +1312,9 @@ class MultiCameraSystem:
         return not (self==other)
 
     def get_names(self):
-        return self._cameras.keys()
+        result = list(self._cameras.keys())
+        result.sort()
+        return result
 
     def get_camera_dict(self):
         return self._cameras
