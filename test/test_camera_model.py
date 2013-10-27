@@ -308,7 +308,7 @@ def check_view(cam_opts):
     up = [0,-1,0]
     try:
         cam_new3 = cam_orig.get_view_camera(eye=center, lookat=lookat, up=up)
-    except AssertionError, err:
+    except AssertionError as err:
         # we should get this exception
         pass
     else:
