@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 
-import pymvg.pymvg as pymvg
+import pymvg.core as pymvg
 import pymvg.calibration
 
 def test_dlt_old_data():

@@ -8,7 +8,7 @@ def build_Bc(X3d,x2d):
 
     assert len(X3d)==len(x2d)
     if len(X3d) < 6:
-        print 'WARNING: 2 equations and 11 unknowns means we need 6 points!'
+        raise ValueError('2 equations and 11 unknowns means we need 6 points!')
     for i in range(len(X3d)):
         X = X3d[i,0]
         Y = X3d[i,1]

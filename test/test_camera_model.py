@@ -5,8 +5,8 @@ from nose.plugins.skip import SkipTest
 import os, tempfile
 
 from pymvg import CameraModel
-from pymvg.pymvg import point_msg_to_tuple, parse_rotation_msg
-import pymvg
+from pymvg.core import point_msg_to_tuple, parse_rotation_msg
+import pymvg.core as pymvg
 
 from utils import _build_test_camera, get_default_options
 
@@ -308,7 +308,7 @@ def check_view(cam_opts):
     up = [0,-1,0]
     try:
         cam_new3 = cam_orig.get_view_camera(eye=center, lookat=lookat, up=up)
-    except AssertionError, err:
+    except AssertionError as err:
         # we should get this exception
         pass
     else:

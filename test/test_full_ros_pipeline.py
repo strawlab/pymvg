@@ -1,12 +1,19 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 import numpy as np
 from utils import make_pmat, _build_test_camera, get_default_options
 
 import fill_polygon
-import tarfile, time, os, StringIO
+import tarfile, time, os
 import subprocess
 import cv # ubuntu: apt-get install python-opencv
+
+try:
+    # python 2
+    from StringIO import StringIO
+except ImportError:
+    # python 3
+    from io import StringIO
 
 DRAW=int(os.environ.get('DRAW','0'))
 if DRAW:
@@ -15,9 +22,8 @@ if DRAW:
 D2R = np.pi/180.0
 R2D = 1/D2R
 
-from pymvg.pymvg import get_rotation_matrix_and_quaternion
-from pymvg import CameraModel
-import pymvg
+from pymvg.core import get_rotation_matrix_and_quaternion, CameraModel
+import pymvg.core as pymvg
 
 try:
     import roslib
@@ -36,7 +42,7 @@ else:
 
 def get_np_array_as_png_buf(im):
     import scipy.misc
-    output = StringIO.StringIO()
+    output = StringIO()
     pil_im = scipy.misc.toimage( im )
     pil_im.save( output, format='PNG')
     return output.getvalue()
@@ -167,7 +173,7 @@ class ROSPipelineMimic:
 
     def save_tarball(self,tarball_fname):
         def taradd(name, buf):
-            s = StringIO.StringIO(buf)
+            s = StringIO(buf)
             ti = tarfile.TarInfo(name)
             ti.size = len(s.buf)
             ti.uname = 'calibrator'
@@ -250,10 +256,10 @@ def check_ros_pipeline(use_distortion):
     pm.generate_images()
     #pm.save_tarball('/tmp/pipeline-mimic.tar.gz') # optional
     cals = pm.run_ros_calibrator()
-    print cals
+    print(cals)
     err1 = pm.calc_mean_reproj_error(cals['perfect'])
     err2 = pm.calc_mean_reproj_error(cals['good'])
-    print err1,err2
+    print(err1,err2)
 
     if DRAW:
         from mpl_toolkits.mplot3d import Axes3D
@@ -269,8 +275,8 @@ def check_ros_pipeline(use_distortion):
         plot_camera( ax, pm.cam )#, scale=10, axes_size=5.0 )
 
     if DRAW:
-        print 'using perfect point data, mean reprojection error is %s'%err1
-        print 'mean reprojection error is %s'%err2
+        print('using perfect point data, mean reprojection error is %s'%err1)
+        print('mean reprojection error is %s'%err2)
         plt.show()
 
     assert err1 < 1.0

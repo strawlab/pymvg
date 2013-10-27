@@ -2,7 +2,7 @@
 import numpy as np
 import os, re
 
-from ros_compat import tf, sensor_msgs, geometry_msgs, rosbag, roslib
+from .ros_compat import tf, sensor_msgs, geometry_msgs, rosbag, roslib
 
 import warnings
 
@@ -480,7 +480,7 @@ class CameraModel(object):
             elif topic == 'camera_info':
                 intrinsics = msg
             else:
-                print 'skipping message',topic
+                warnings.warn('skipping message topic %r'%topic)
                 continue
 
         bag.close()
@@ -1312,7 +1312,9 @@ class MultiCameraSystem:
         return not (self==other)
 
     def get_names(self):
-        return self._cameras.keys()
+        result = list(self._cameras.keys())
+        result.sort()
+        return result
 
     def get_camera_dict(self):
         return self._cameras

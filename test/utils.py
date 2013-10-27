@@ -3,8 +3,7 @@
 import numpy as np
 import os
 
-from pymvg import CameraModel
-from pymvg.pymvg import point_msg_to_tuple, parse_rotation_msg
+from pymvg.core import CameraModel, point_msg_to_tuple, parse_rotation_msg
 from pymvg.ros_compat import geometry_msgs, sensor_msgs
 import pymvg
 

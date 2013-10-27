@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 from pymvg import CameraModel, MultiCameraSystem
 import os
 import tempfile
@@ -63,7 +64,7 @@ def is_close(sys1,sys2,pts_3d):
         for name in names:
             c1 = sys1.find2d( name, pt_3d )
             c2 = sys2.find2d( name, pt_3d )
-            print '%s: %s %s' % (name, c1, c2)
+            print('%s: %s %s' % (name, c1, c2))
             if not np.allclose(c1,c2):
                 return False
     return True
@@ -111,14 +112,14 @@ def check_mcsc_roundtrip(with_rad_files=False,align_existing=False):
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')
             for name,cam in orig_cams.get_camera_dict().iteritems():
-                print
-                print name,'-'*80
-                print '  center:',cam.get_camcenter()
-                print '  lookat:',cam.get_lookat()
-                print '  up:',cam.get_up()
-                print '  P'
-                print cam.P
-                print
+                print()
+                print(name,'-'*80)
+                print('  center:',cam.get_camcenter())
+                print('  lookat:',cam.get_lookat())
+                print('  up:',cam.get_up())
+                print('  P')
+                print(cam.P)
+                print()
                 plot_camera( ax, cam)#, scale = dim/5.0 )
             ax.plot( pts_3d[:,0], pts_3d[:,1], pts_3d[:,2], 'k.')
             plt.show()
