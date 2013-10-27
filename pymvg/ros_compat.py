@@ -99,7 +99,7 @@ def fake_message_writer( messages, fd ):
         sd = fake_message_encapsulate( topic, value )
         msg_list.append(sd)
     buf = json.dumps(msg_list, sort_keys=True, indent=4)
-    fd.write(buf)
+    fd.write(buf.encode('UTF-8'))
 
 def parse_json_schema(m):
     typ=m['__json_message__']
@@ -132,7 +132,7 @@ class Bag(object):
         if hasattr(file,'write'):
             self.fd = file
         else:
-            self.fd = open(file,mode=mode)
+            self.fd = open(file,mode=mode,encoding='UTF-8')
         if mode=='w':
             self.messages = []
         else:
