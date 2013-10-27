@@ -7,6 +7,7 @@ import os, tempfile
 from pymvg import CameraModel
 from pymvg.core import point_msg_to_tuple, parse_rotation_msg
 import pymvg.core as pymvg
+import pymvg.align as mcsc_align
 
 from utils import _build_test_camera, get_default_options
 
@@ -117,7 +118,6 @@ def test_align():
         yield check_align, opts
 
 def check_align(cam_opts):
-    import multicamselfcal.align as mcsc_align
 
     cam_orig = _build_test_camera(**cam_opts)
     pmat_orig = cam_orig.pmat
