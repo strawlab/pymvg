@@ -3,6 +3,7 @@ import numpy as np
 import os, re
 
 from .ros_compat import tf, sensor_msgs, geometry_msgs, rosbag, roslib
+from .align import estsimt
 
 import warnings
 
@@ -1371,7 +1372,6 @@ class MultiCameraSystem:
     def get_aligned_copy(self, other):
         """return copy of self that is scaled, translated, and rotated to best match other"""
         assert isinstance( other, MultiCameraSystem)
-        import multicamselfcal.align as mcsc_align
 
         orig_names = self.get_names()
         new_names = other.get_names()
@@ -1381,7 +1381,7 @@ class MultiCameraSystem:
         orig_points = np.array([ self._cameras[name].get_camcenter() for name in names ]).T
         new_points = np.array([ other._cameras[name].get_camcenter() for name in names ]).T
 
-        s,R,t = mcsc_align.estsimt(orig_points,new_points)
+        s,R,t = estsimt(orig_points,new_points)
         assert is_rotation_matrix(R)
 
         new_cams = []

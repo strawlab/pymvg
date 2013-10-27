@@ -44,3 +44,12 @@ http://www.lfd.uci.edu/~gohlke/code/transformations.py
 
   Author: Christoph Gohlke
   License: BSD
+
+estsimt() in pymvg/align.py
+---------------------------
+
+Downloaded and converted on 27 October, 2013 from
+https://github.com/strawlab/MultiCamSelfCal/blob/master/MultiCamSelfCal/CoreFunctions/estsimt.m
+
+  Author: Tomas Svoboda, svoboda@cmp.felk.cvut.cz
+  License: unknown
