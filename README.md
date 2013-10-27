@@ -43,5 +43,5 @@ This package is well tested. To run the tests:
 
 ## TODO
 
-- Implement extrinsic camera calibration to find camera pose when intrinsic parameters are known and image coordinates of know 3D points are given
+- Implement extrinsic camera calibration to find camera pose when intrinsic parameters are known and image coordinates of known 3D points are given
 - Fix known failing test test_mcsc.test_mcsc_roundtrip
