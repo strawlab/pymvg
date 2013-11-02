@@ -645,7 +645,7 @@ class CameraModel(object):
             size_str = ''
         center, lookat, up = map(get_vec_str,self.get_view())
 
-        P = self.P[:3,:3]
+        P = self.P[:,:3]
         P0,P1,P2 = [get_vec_str(P[i]) for i in range(3)]
 
         K = self.get_K()[:3,:3]
@@ -714,7 +714,7 @@ class CameraModel(object):
     Rt = property(get_Rt)
 
     def get_M(self):
-        P33 = self.P[:3,:3]
+        P33 = self.P[:,:3]
         M = np.dot( P33, self.Rt )
         return M
     M = property(get_M)
