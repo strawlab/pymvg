@@ -317,6 +317,7 @@ class CameraModel(object):
         self.rect = rect
 
         self._opencv_compatible = (self.P[0,1]==0)
+        assert np.allclose( P[:,3], np.zeros((3,)))
 
     @classmethod
     def from_ros_like(cls,
