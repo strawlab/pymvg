@@ -1,5 +1,6 @@
 import numpy as np
 from pymvg import CameraModel, MultiCameraSystem
+import tempfile, os
 
 def make_default_system():
     '''helper function to generate an instance of MultiCameraSystem'''
@@ -83,6 +84,16 @@ def test_roundtrip_to_dict():
     system1 = make_default_system()
     system2 = MultiCameraSystem.from_dict( system1.to_dict() )
     assert system1==system2
+
+def test_roundtrip_to_pymvg_file():
+    system1 = make_default_system()
+    fname = tempfile.mktemp(suffix='.json')
+    system1.save_to_pymvg_file( fname )
+    try:
+        system2 = MultiCameraSystem.from_pymvg_file( fname )
+        assert system1==system2
+    finally:
+        os.unlink( fname )
 
 def test_align():
     system1 = make_default_system()
