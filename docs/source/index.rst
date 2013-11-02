@@ -11,7 +11,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-
+.. figure:: images/camera_model.png
 
 Indices and tables
 ==================
