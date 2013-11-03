@@ -2,6 +2,7 @@
 import numpy as np
 import os, re
 import json
+from collections import OrderedDict
 
 from .ros_compat import tf, sensor_msgs, geometry_msgs, rosbag, roslib
 from .align import estsimt
@@ -1195,7 +1196,7 @@ class CameraModel(object):
 
 class MultiCameraSystem:
     def __init__(self,cameras):
-        self._cameras={}
+        self._cameras=OrderedDict()
         for camera in cameras:
             assert isinstance(camera, CameraModel)
             name = camera.name
