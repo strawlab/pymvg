@@ -189,7 +189,7 @@ def get_vec_str(vec):
     result = ', '.join( tmps )
     return result
 
-def plain_vec(vec):
+def plain_vec(vec,eps=1e-15):
     '''make a list of plain types'''
     if hasattr( vec, 'dtype' ):
         # assume it's a simple numpy array
@@ -198,7 +198,13 @@ def plain_vec(vec):
     else:
         # no change
         result = vec
-    return result
+    r2=[]
+    for r in result:
+        if abs(r)<eps:
+            r2.append(0)
+        else:
+            r2.append(r)
+    return r2
 
 def normalize_M(pmat,eps=1e-6):
     pmat_orig = pmat
