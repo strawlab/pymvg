@@ -623,7 +623,7 @@ class CameraModel(object):
     # --- end of CameraModel constructors --------------------------------------
 
     def __str__(self):
-        template = '''camera {name!r}{size_str}:
+        template = '''camera "{name!s}"{size_str}:
    extrinsic parameters:
         center  : {center}
         look at : {lookat}
