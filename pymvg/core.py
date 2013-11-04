@@ -274,7 +274,7 @@ def _cam_str(cam):
           _pretty_arr(cam['K']),
           _pretty_vec(cam['D']),
           _pretty_arr(cam['R']),
-          _pretty_arr(cam['rotation']),
+          _pretty_arr(cam['rotation'],18),
           _pretty_vec(cam['translation'])
           )
     return buf
@@ -732,10 +732,31 @@ class CameraModel(object):
         assert isinstance( self, CameraModel )
         if not isinstance( other, CameraModel ):
             return False
-        # hmm, could do better than comparing strings...
-        c1s = str(self)
-        c2s = str(other)
-        return c1s==c2s
+        d1 = self.to_dict()
+        d2 = self.to_dict()
+        try:
+            basestring
+        except NameError:
+            # python3
+            basestring = str
+        for k in d1:
+            if k not in d2:
+                return False
+            v1 = d1[k]
+            v2 = d2[k]
+            if isinstance(v1,basestring):
+                if not v1==v2:
+                    return False
+            elif v1 is None:
+                if not v2 is None:
+                    return False
+            else:
+                if not np.allclose(v1, v2):
+                    return False
+        for k in d2:
+            if k not in d1:
+                return False
+        return True
 
     def __ne__(self,other):
         return not (self==other)
