@@ -13,6 +13,14 @@ Contents:
 
 .. figure:: images/camera_model.png
 
+PyMVG file
+==========
+
+PyMVG defines a file format that allows saving a camera system
+completely. The file is valid JSON. Here is an example:
+
+.. literalinclude:: pymvg_camsystem_example.json
+
 Indices and tables
 ==================
 
