@@ -1213,7 +1213,7 @@ class MultiCameraSystem:
 
     def get_pymvg_str( self ):
         d = self.to_dict()
-        d['__pymvg_file_version__']=1.0
+        d['__pymvg_file_version__']='1.0'
         buf = json.dumps(d,sort_keys=True,indent=4,separators=(',', ': '))
         return buf
 
@@ -1225,7 +1225,7 @@ class MultiCameraSystem:
     @classmethod
     def from_pymvg_str(cls, buf):
         d = json.loads(buf)
-        assert d['__pymvg_file_version__']==1.0
+        assert d['__pymvg_file_version__']=='1.0'
         cam_dict_list = d['camera_system']
         cams = [CameraModel.from_dict(cd) for cd in cam_dict_list]
         return MultiCameraSystem( cameras=cams )
