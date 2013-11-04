@@ -95,6 +95,12 @@ def test_roundtrip_to_pymvg_file():
     finally:
         os.unlink( fname )
 
+def test_roundtrip_to_str():
+    system1 = make_default_system()
+    buf = system1.get_pymvg_str()
+    system2 = MultiCameraSystem.from_pymvg_str( buf )
+    assert system1==system2
+
 def test_align():
     system1 = make_default_system()
     system2 = system1.get_aligned_copy( system1 ) # This should be a no-op.

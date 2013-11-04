@@ -1211,21 +1211,30 @@ class MultiCameraSystem:
         cams = [CameraModel.from_dict(cd) for cd in cam_dict_list]
         return MultiCameraSystem( cameras=cams )
 
-    def save_to_pymvg_file( self, fname ):
+    def get_pymvg_str( self ):
         d = self.to_dict()
         d['__pymvg_file_version__']=1.0
         buf = json.dumps(d,sort_keys=True,indent=4)
+        return buf
+
+    def save_to_pymvg_file( self, fname ):
+        buf = self.get_pymvg_str()
         with open(fname,mode='w') as fd:
             fd.write(buf)
 
     @classmethod
-    def from_pymvg_file(cls, fname):
-        with open(fname,mode='r') as fd:
-            d = json.load(fd)
+    def from_pymvg_str(cls, buf):
+        d = json.loads(buf)
         assert d['__pymvg_file_version__']==1.0
         cam_dict_list = d['camera_system']
         cams = [CameraModel.from_dict(cd) for cd in cam_dict_list]
         return MultiCameraSystem( cameras=cams )
+
+    @classmethod
+    def from_pymvg_file(cls, fname):
+        with open(fname,mode='r') as fd:
+            buf = fd.read()
+        return MultiCameraSystem.from_pymvg_str(buf)
 
     @classmethod
     def from_mcsc(cls, dirname, max_skew_ratio=10 ):
