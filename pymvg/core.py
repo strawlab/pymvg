@@ -1214,7 +1214,7 @@ class MultiCameraSystem:
     def get_pymvg_str( self ):
         d = self.to_dict()
         d['__pymvg_file_version__']=1.0
-        buf = json.dumps(d,sort_keys=True,indent=4)
+        buf = json.dumps(d,sort_keys=True,indent=4,separators=(',', ': '))
         return buf
 
     def save_to_pymvg_file( self, fname ):
