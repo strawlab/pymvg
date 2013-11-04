@@ -244,6 +244,57 @@ def parse_radfile(filename):
                             result.get('kc5',0.0) ))
     return K, distortion
 
+# JSON compatible pretty printing ----------------
+
+def _pretty_vec(row):
+    els = [ json.dumps(el) for el in row ]
+    rowstr = '[ ' + ', '.join(els) + ' ]'
+    return rowstr
+
+def _pretty_arr(arr,indent=11):
+    rowstrs = []
+    for row in arr:
+        rowstr = _pretty_vec(row)
+        rowstrs.append( rowstr )
+    sep = ',\n' + ' '*indent
+    buf = '[' + sep.join(rowstrs) + ']'
+    return buf
+
+def _cam_str(cam):
+    buf = '''{"name": "%s",
+     "width": %d,
+     "height": %d,
+     "P": %s,
+     "K": %s,
+     "D": %s,
+     "R": %s,
+     "rotation": %s,
+     "translation": %s
+    }'''%(cam['name'], cam['width'], cam['height'], _pretty_arr(cam['P']),
+          _pretty_arr(cam['K']),
+          _pretty_vec(cam['D']),
+          _pretty_arr(cam['R']),
+          _pretty_arr(cam['rotation']),
+          _pretty_vec(cam['translation'])
+          )
+    return buf
+
+def pretty_json_dump(d):
+    keys = list(d.keys())
+    assert len(keys)==2
+    assert d['__pymvg_file_version__']=='1.0'
+    cams = d['camera_system']
+    cam_strs = [_cam_str(cam) for cam in cams]
+    cam_strs = ',\n    '.join(cam_strs)
+    buf = '''{ "__pymvg_file_version__": "1.0",
+  "camera_system": [
+    %s
+  ]
+}''' % cam_strs
+    return buf
+
+# end pretty printing ----------
+
 # main class
 class CameraModel(object):
     """an implementation of the Camera Model used by ROS and OpenCV
@@ -1214,7 +1265,7 @@ class MultiCameraSystem:
     def get_pymvg_str( self ):
         d = self.to_dict()
         d['__pymvg_file_version__']='1.0'
-        buf = json.dumps(d,sort_keys=True,indent=4,separators=(',', ': '))
+        buf = pretty_json_dump(d)
         return buf
 
     def save_to_pymvg_file( self, fname ):
