@@ -682,51 +682,7 @@ class CameraModel(object):
     # --- end of CameraModel constructors --------------------------------------
 
     def __str__(self):
-        template = '''camera "{name!s}"{size_str}:
-   extrinsic parameters:
-        center  : {center}
-        look at : {lookat}
-        up      : {up}
-   intrinsic parameters:
-        P       : [[{P0}],
-                   [{P1}],
-                   [{P2}]]
-        K       : [[{K0}],
-                   [{K1}],
-                   [{K2}]]
-        distortion : {D}
-        rectification : {rect}
-'''
-        if self.width is not None:
-            size_str = ' (%dx%d)'%(self.width,self.height)
-        else:
-            size_str = ''
-        center, lookat, up = map(get_vec_str,self.get_view())
-
-        P = self.P[:,:3]
-        P0,P1,P2 = [get_vec_str(P[i]) for i in range(3)]
-
-        K = self.get_K()[:3,:3]
-        K0,K1,K2 = [get_vec_str(K[i]) for i in range(3)]
-
-        D = get_vec_str(self.distortion.flatten())
-
-        if self.rect is None:
-            rect = 'None'
-        else:
-            rtmp = '''[[{r0}],
-                   [{r1}],
-                   [{r2}]]
-'''
-            r = self.rect
-            r0,r1,r2 = [get_vec_str(r[i]) for i in range(3)]
-            d = dict()
-            d.update(locals())
-            rect = rtmp.format( **d )
-
-        d = dict(name=self.name)
-        d.update(locals())
-        return template.format( **d )
+        return _cam_str(self.to_dict())
 
     def __eq__(self,other):
         assert isinstance( self, CameraModel )
