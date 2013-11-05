@@ -6,20 +6,29 @@
 Welcome to PyMVG's documentation!
 =================================
 
+PyMVG file format
+=================
+
+Perhaps the best starting point for PyMVG is its file format. Such a
+file specifies a camera system completely. The file is valid
+JSON. Here is an example:
+
+.. literalinclude:: pymvg_camsystem_example.json
+
+Plotting utilities
+==================
+
+Given the above example, we can plot the camera system.
+
+.. plot:: pyplots/plot_camsystem_example.py
+   :include-source:
+
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
 .. figure:: images/camera_model.png
-
-PyMVG file
-==========
-
-PyMVG defines a file format that allows saving a camera system
-completely. The file is valid JSON. Here is an example:
-
-.. literalinclude:: pymvg_camsystem_example.json
 
 Indices and tables
 ==================
