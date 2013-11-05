@@ -36,6 +36,10 @@ def plot_camera( ax, cam, scale=0.2, show_upper_left=False, axes_size=0.2):
         pts3d = np.vstack((pts3d_near[i,:],pts3d_far[i,:]))
         ax.plot( pts3d[:,0], pts3d[:,1], pts3d[:,2], 'k-' )
 
-    ax.text( C[0], C[1], C[2], cam.name )
+    ax.text( C[0], C[1], C[2], cam.name ) # fails unless using mplot3d
     if show_upper_left:
         ax.text( pts3d_far[0,0], pts3d_far[0,1], pts3d_far[0,2], 'UL' )
+
+def plot_system( ax, system, **kwargs):
+    for name, cam in system.get_camera_dict().iteritems():
+        plot_camera( ax, cam, **kwargs)
