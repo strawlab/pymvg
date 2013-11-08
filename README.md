@@ -42,7 +42,7 @@ above). To run the tests:
 
 To run the tests with external dependencies:
 
-    nosetests -w pymvg/test/external/cv
+    nosetests -w pymvg/test/external/opencv
     nosetests -w pymvg/test/external/ros
     nosetests -w pymvg/test/external/mcsc
 
