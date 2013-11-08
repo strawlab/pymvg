@@ -96,7 +96,7 @@ def test_roundtrip_to_pymvg_file():
         os.unlink( fname )
 
 def test_pymvg_file_in_docs():
-    fname = os.path.join( os.curdir, 'docs', 'source', 'pymvg_camsystem_example.json')
+    fname = os.path.join( os.curdir, '..', 'docs', 'source', 'pymvg_camsystem_example.json')
     system = MultiCameraSystem.from_pymvg_file( fname )
 
 def test_roundtrip_to_str():
