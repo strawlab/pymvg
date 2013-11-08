@@ -96,15 +96,7 @@ def test_roundtrip_to_pymvg_file():
         os.unlink( fname )
 
 def test_pymvg_file_in_docs():
-    base = 'pymvg_camsystem_example.json'
-    fname1 = os.path.join( os.curdir, 'docs', 'source', base)
-    fname2 = os.path.join( os.curdir, '..', 'docs', 'source', base)
-    if os.path.exists(fname1):
-        fname = fname1
-    elif os.path.exists(fname2):
-        fname = fname2
-    else:
-        raise RuntimeError('could not find PyMVG example file')
+    fname = os.path.join( os.curdir, 'docs', 'source', 'pymvg_camsystem_example.json')
     system = MultiCameraSystem.from_pymvg_file( fname )
 
 def test_roundtrip_to_str():
