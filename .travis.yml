@@ -7,7 +7,7 @@ virtualenv:
     system_site_packages: true
 before_install:
     - sudo apt-get update
-    - sudo apt-get install python-opencv python-sphinx
+    - sudo apt-get install python-opencv
 install:
     - pip install numpy
     - pip install matplotlib
@@ -15,6 +15,4 @@ install:
     - python setup.py install
 script:
     - nosetests -w pymvg/test
-# The following tests depend on the stuff we installed with apt-get, which is only for Python 2
     - if [[ $TRAVIS_PYTHON_VERSION == '2.'* ]]; then nosetests -w pymvg/test/external/cv; fi
-    - if [[ $TRAVIS_PYTHON_VERSION == '2.'* ]]; then cd docs; sphinx-build -nW -b singlehtml -d build/doctrees source build/singlehtml; fi
