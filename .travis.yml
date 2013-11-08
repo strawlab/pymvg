@@ -4,7 +4,8 @@ python:
     - 2.7
     - 3.3
 before_install:
-  - sudo apt-get install python-opencv
+    - sudo apt-get update
+    - sudo apt-get install python-opencv
 install:
     - pip install numpy
     - pip install matplotlib
