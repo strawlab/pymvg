@@ -6,7 +6,7 @@ import cv # ubuntu: apt-get install python-opencv
 
 from pymvg.ros_compat import sensor_msgs, geometry_msgs
 
-from utils import _build_test_camera, _build_points_3d, get_default_options
+from pymvg.test.utils import _build_test_camera, _build_points_3d, get_default_options
 from pymvg.npcv import numpy2opencv_image, numpy2opencv_pointmat, \
      opencv_pointmat2numpy
 

@@ -38,11 +38,10 @@ above).
 
 This package is well tested. To run the tests:
 
-    cd test
-    nosetests
+    nosetests -w pymvg/test
 
 ## TODO
 
 - Implement extrinsic camera calibration to find camera pose when intrinsic parameters are known and image coordinates of known 3D points are given
-- Fix known failing test test_mcsc.test_mcsc_roundtrip
+- Fix known failing test pymvg.test.external.mcsc.test_mcsc.test_mcsc_roundtrip
 - Implement OpenGL 3D -> 2d transform for augmented reality applications
