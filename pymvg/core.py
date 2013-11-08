@@ -269,13 +269,13 @@ def _cam_str(cam):
      "K": %s,
      "D": %s,
      "R": %s,
-     "rotation": %s,
+     "Q": %s,
      "translation": %s
     }'''%(cam['name'], cam['width'], cam['height'], _pretty_arr(cam['P']),
           _pretty_arr(cam['K']),
           _pretty_vec(cam['D']),
           _pretty_arr(cam['R']),
-          _pretty_arr(cam['rotation'],18),
+          _pretty_arr(cam['Q']),
           _pretty_vec(cam['translation'])
           )
     return buf
@@ -487,7 +487,7 @@ class CameraModel(object):
                 R=d['R'])
             name = d.get('name',None)
             translation = d.get('translation',None)
-            rotation = d.get('rotation',None)
+            rotation = d.get('Q',None)
 
         if translation is None or rotation is None:
             if extrinsics_required:
@@ -730,40 +730,40 @@ class CameraModel(object):
         else:
             d['R'] = np2plain(self.rect)
         d['translation']=np2plain(self.translation)
-        d['rotation']=np2plain(self.get_rot())
+        d['Q']=np2plain(self.get_Q())
         return d
 
     # -------------------------------------------------
     # properties / getters
 
-    def get_rot(self):
+    def get_Q(self):
         R = tf.transformations.quaternion_matrix(self._rquat)[:3,:3]
         return R
-    rot = property(get_rot)
+    Q = property(get_Q)
 
-    def get_Rt(self):
+    def get_Qt(self):
         t = np.array(self.translation)
         t.shape = 3,1
-        Rt = np.hstack((self.rot,t))
+        Rt = np.hstack((self.Q,t))
         return Rt
-    Rt = property(get_Rt)
+    Qt = property(get_Qt)
 
     def get_M(self):
         P33 = self.P[:,:3]
-        M = np.dot( P33, self.Rt )
+        M = np.dot( P33, self.Qt )
         return M
     M = property(get_M)
 
     def get_translation(self):
         C = np.array(self._camcenter)
         C.shape = (3,1)
-        t = -np.dot(self.rot, C)[:,0]
+        t = -np.dot(self.Q, C)[:,0]
         return t
     translation = property(get_translation)
 
-    def get_rot_inv(self):
-        return np.linalg.pinv(self.rot)
-    rot_inv = property(get_rot_inv)
+    def get_Q_inv(self):
+        return np.linalg.pinv(self.Q)
+    Q_inv = property(get_Q_inv)
 
     def get_t_inv(self):
         ti = np.array(self._camcenter)
@@ -790,7 +790,7 @@ class CameraModel(object):
         return msg
 
     def get_ROS_tf(self):
-        rmat = self.get_rot_inv()
+        rmat = self.get_Q_inv()
         rmat2, rquat2 = get_rotation_matrix_and_quaternion(rmat)
         return self.get_camcenter(), rquat2
 
@@ -833,7 +833,7 @@ class CameraModel(object):
         return np.array(self._rquat)
 
     def get_rotation(self):
-        return self.rot
+        return self.Q
 
     def get_K(self):
         return self.K
@@ -916,7 +916,7 @@ class CameraModel(object):
 
         camnew = CameraModel.from_ros_like(
                               translation = self.translation,
-                              rotation = self.rot,
+                              rotation = self.Q,
                               intrinsics = i,
                               name = self.name + '_mirror',
                               )
@@ -1194,7 +1194,7 @@ class CameraModel(object):
         cam_coords = np.array(pts3d).T
         t = self.get_translation()
         t.shape = (3,1)
-        world_coords = np.dot(self.rot_inv, cam_coords - t)
+        world_coords = np.dot(self.Q_inv, cam_coords - t)
         return world_coords.T
 
     def project_3d_to_camera_frame(self, pts3d):
@@ -1209,7 +1209,7 @@ class CameraModel(object):
         pts3d_h[3] = 1
 
         # undistorted homogeneous image coords
-        cc = np.dot(self.Rt, pts3d_h)
+        cc = np.dot(self.Qt, pts3d_h)
 
         return cc.T
 
