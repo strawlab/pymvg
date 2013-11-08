@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from utils import _build_points_3d, make_M
+from pymvg.test.utils import _build_points_3d, make_M
 import os
 
 import pymvg.core as pymvg

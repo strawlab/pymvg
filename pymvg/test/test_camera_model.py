@@ -9,7 +9,7 @@ from pymvg.core import point_msg_to_tuple, parse_rotation_msg
 import pymvg.core as pymvg
 import pymvg.align as mcsc_align
 
-from utils import _build_test_camera, get_default_options
+from pymvg.test.utils import _build_test_camera, get_default_options
 
 # --------------------- testing -----------------------------
 
