@@ -2,6 +2,7 @@
 import numpy as np
 import os, re
 import json
+import yaml
 from collections import OrderedDict
 
 from .ros_compat import tf, sensor_msgs, geometry_msgs, rosbag, roslib
@@ -507,7 +508,6 @@ class CameraModel(object):
         elif (fname.endswith('.yaml') or
               fname.endswith('.json')):
             if fname.endswith('.yaml'):
-                import yaml
                 with open(fname,'r') as f:
                     d = yaml.safe_load(f)
             else:
