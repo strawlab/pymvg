@@ -36,11 +36,15 @@ See also [opengl-hz](https://github.com/strawlab/opengl-hz).
 
 PyMVG has a large collection of unit tests which ensure correctness
 and fulfilled expectationss for use other software (see 'Ecosystem',
-above).
-
-This package is well tested. To run the tests:
+above). To run the tests:
 
     nosetests -w pymvg/test
+
+To run the tests with external dependencies:
+
+    nosetests -w pymvg/test/external/cv
+    nosetests -w pymvg/test/external/ros
+    nosetests -w pymvg/test/external/mcsc
 
 ## TODO
 
