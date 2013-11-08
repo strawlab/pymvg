@@ -32,6 +32,8 @@ See also [opengl-hz](https://github.com/strawlab/opengl-hz).
 
 ## tests
 
+[![Build Status](https://travis-ci.org/strawlab/pymvg.png)](https://travis-ci.org/strawlab/pymvg)
+
 PyMVG has a large collection of unit tests which ensure correctness
 and fulfilled expectationss for use other software (see 'Ecosystem',
 above).
