@@ -7,4 +7,6 @@ setup(name='pymvg',
                 'pymvg.test.external.ros',
                 'pymvg.test.external.mcsc',
                 ],
+      package_data={ 'pymvg.test': ['*.yaml'],
+                     },
       )
