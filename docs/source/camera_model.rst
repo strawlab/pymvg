@@ -4,7 +4,7 @@ Camera Model
 single camera model
 -------------------
 
-.. figure:: images/camera_model.png
+.. image:: images/camera_model.png
 
 camera system (multiple cameras)
 --------------------------------
