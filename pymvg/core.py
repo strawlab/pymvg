@@ -1368,7 +1368,7 @@ class MultiCameraSystem:
                  'K':KK,
                  'R':rect,
                  'translation':t,
-                 'rotation':rot,
+                 'Q':rot,
                  'D':distortion,
                  'name':cam_id,
                  }
