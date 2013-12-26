@@ -3,6 +3,7 @@
 import numpy as np
 from nose.plugins.skip import SkipTest
 import os, tempfile
+import pickle
 
 from pymvg import CameraModel
 from pymvg.core import point_msg_to_tuple, parse_rotation_msg
@@ -349,3 +350,14 @@ def test_simple_camera():
     cam = CameraModel.load_camera_simple(fov_x_degrees=90,
                                          eye=center,
                                          lookat=lookat)
+
+def test_pickle_roundtrip():
+    all_options = get_default_options()
+    for opts in all_options:
+        yield check_pickle_roundtrip, opts
+
+def check_pickle_roundtrip(cam_opts):
+    cam = _build_test_camera(**cam_opts)
+    buf = pickle.dumps(cam)
+    cam2 = pickle.loads(buf)
+    assert cam==cam2
