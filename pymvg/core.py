@@ -296,11 +296,6 @@ def pretty_json_dump(d):
 
 # end pretty printing ----------
 
-def CameraModel_from_dict(d):
-    """factory function to make CameraModel to enable pickling"""
-    cam = CameraModel.from_dict(d)
-    return cam
-
 # main class
 class CameraModel(object):
     """an implementation of the Camera Model used by ROS and OpenCV
@@ -383,12 +378,14 @@ class CameraModel(object):
         self._opencv_compatible = (self.P[0,1]==0)
         assert np.allclose( P[:,3], np.zeros((3,)))
 
-    def __reduce__(self):
+    def __getstate__(self):
         """allow CameraModel to be pickled"""
-        d = self.to_dict()
-        args = (d,)
-        result = (CameraModel_from_dict, args)
-        return result
+        return self.to_dict()
+
+    def __setstate__(self,state):
+        tmp = CameraModel.from_dict(state)
+        for attr in self.__slots__:
+            setattr( self, attr, getattr( tmp, attr ) )
 
     @classmethod
     def from_ros_like(cls,
