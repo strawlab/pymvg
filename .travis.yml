@@ -16,3 +16,6 @@ install:
 script:
     - nosetests -w pymvg/test
     - if [[ $TRAVIS_PYTHON_VERSION == '2.'* ]]; then nosetests -w pymvg/test/external/opencv; fi
+branches:
+  except:
+    - pristine-tar
