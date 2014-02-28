@@ -50,6 +50,7 @@ All development is done on `our github repository
   pymvg_file_format
   plotting_utilities
   camera_model
+  api_reference
 
 Indices and tables
 ==================
