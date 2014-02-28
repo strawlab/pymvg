@@ -1416,7 +1416,7 @@ class MultiCameraSystem:
 
         Implements a linear triangulation method to find a 3D
         point. For example, see Hartley & Zisserman section 12.2
-        (p.312). Also, 12.8 for intersecting lines.
+        (p.312).
 
         By default, this function will undistort 2D points before
         finding a 3D point.

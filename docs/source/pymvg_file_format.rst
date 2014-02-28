@@ -1,8 +1,8 @@
 PyMVG file format
 =================
 
-Perhaps the best starting point for PyMVG is its file format. Such a
-file specifies a camera system completely. The file is valid
-JSON. Here is an example:
+The PyMVG file format specifies a camera system completely. The file
+is valid JSON. Here is an example that specifies a system of 3
+cameras:
 
 .. literalinclude:: pymvg_camsystem_example.json
