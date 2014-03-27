@@ -4,11 +4,22 @@ import os, re
 import json
 import yaml
 from collections import OrderedDict
-
-from .ros_compat import tf, sensor_msgs, geometry_msgs, rosbag, roslib
 from .align import estsimt
-
 import warnings
+
+try:
+    import roslib
+    roslib.load_manifest('tf')
+    roslib.load_manifest('sensor_msgs')
+    roslib.load_manifest('geometry_msgs')
+    roslib.load_manifest('rosbag')
+    import tf
+    import sensor_msgs
+    import geometry_msgs
+    import rosbag
+
+except ImportError as err:
+    from .ros_compat import tf, sensor_msgs, geometry_msgs, rosbag, roslib
 
 D2R = np.pi/180.0
 
