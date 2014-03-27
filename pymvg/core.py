@@ -1235,12 +1235,15 @@ class MultiCameraSystem:
     def __init__(self,cameras):
         self._cameras=OrderedDict()
         for camera in cameras:
-            assert isinstance(camera, CameraModel)
-            name = camera.name
-            if name in self._cameras:
-                raise ValueError('Cannot create MultiCameraSystem with '
-                                 'multiple identically-named cameras.')
-            self._cameras[name] = camera
+            self.append(camera)
+
+    def append(self,camera):
+        assert isinstance(camera, CameraModel)
+        name = camera.name
+        if name in self._cameras:
+            raise ValueError('Cannot create MultiCameraSystem with '
+                             'multiple identically-named cameras.')
+        self._cameras[name]=camera
 
     @classmethod
     def from_dict(cls, d):
