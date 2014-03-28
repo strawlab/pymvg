@@ -1,6 +1,6 @@
 from distutils.core import setup
 setup(name='pymvg',
-      version='1.0',
+      version='1.1',
       packages=['pymvg',
                 'pymvg.test',
                 'pymvg.test.external.opencv',
