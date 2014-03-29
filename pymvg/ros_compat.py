@@ -100,7 +100,13 @@ def fake_message_writer( messages, fd ):
         sd = fake_message_encapsulate( topic, value )
         msg_list.append(sd)
     buf = json.dumps(msg_list, sort_keys=True, indent=4)
-    utf8 = unicode(buf.encode('UTF-8'))
+    try:
+        # Python 2
+        str_type = unicode
+    except NameError:
+        # Python 3
+        str_type = bytes
+    utf8 = str_type(buf.encode('UTF-8'))
     fd.write(utf8)
 
 def parse_json_schema(m):
