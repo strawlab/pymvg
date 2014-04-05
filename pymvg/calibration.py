@@ -36,7 +36,12 @@ def DLT(X3d, x2d, width=640, height=480):
     Mhat = np.array(list(a_vec)+[1])
     Mhat.shape=(3,4)
     cam = pymvg.CameraModel.load_camera_from_M(Mhat,width=width,height=height)
+    x2d_reproj = cam.project_3d_to_pixel(X3d)
+    dx = x2d_reproj - np.array(x2d)
+    reproj_error = np.sqrt(np.sum(dx**2,axis=1))
+    mean_reproj_error = np.mean(reproj_error)
     results = {'cam':cam,
                'residuals':residuals,
+               'mean_reproj_error':mean_reproj_error,
                }
     return results
