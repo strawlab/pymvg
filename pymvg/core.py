@@ -7,8 +7,12 @@ from collections import OrderedDict
 from .align import estsimt
 import warnings
 
-try:
-    import roslib
+PYMVG_EMULATE_ROS = int(os.environ.get('PYMVG_EMULATE_ROS','0'))
+
+if PYMVG_EMULATE_ROS:
+    from .ros_compat import tf, sensor_msgs, geometry_msgs, rosbag, roslib
+else:
+    import roslib # set environment variable PYMVG_EMULATE_ROS to emulate ROS
     roslib.load_manifest('tf')
     roslib.load_manifest('sensor_msgs')
     roslib.load_manifest('geometry_msgs')
@@ -17,9 +21,6 @@ try:
     import sensor_msgs
     import geometry_msgs
     import rosbag
-
-except ImportError as err:
-    from .ros_compat import tf, sensor_msgs, geometry_msgs, rosbag, roslib
 
 D2R = np.pi/180.0
 
