@@ -8,6 +8,7 @@ import numpy
 import numpy as np
 import json
 import io
+import warnings
 
 class FakeMessage(object):
     """abstract base class"""
@@ -142,6 +143,8 @@ class Bag(object):
         else:
             self.fd = io.open(file,mode=mode,encoding='UTF-8')
         if mode=='w':
+            warnings.warn('pymvg.ros_compat.Bag is writing a file, but this '
+                          'is not a real bag file.')
             self.messages = []
         else:
             self.messages = fake_message_loader( self.fd )
