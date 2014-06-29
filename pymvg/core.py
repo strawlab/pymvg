@@ -8,6 +8,7 @@ from .align import estsimt
 import warnings
 
 from .quaternions import quaternion_matrix, quaternion_from_matrix
+from .ros_compat import sensor_msgs as sensor_msgs_compat
 
 PYMVG_EMULATE_ROS = int(os.environ.get('PYMVG_EMULATE_ROS','0'))
 
@@ -489,7 +490,7 @@ class CameraModel(object):
         if 'image_height' in d:
             # format saved in ~/.ros/camera_info/<camera_name>.yaml
             #only needs w,h,P,K,D,R
-            c = sensor_msgs.msg.CameraInfo(
+            c = sensor_msgs_compat.msg.CameraInfo(
                 height=d['image_height'],
                 width=d['image_width'],
                 P=d['projection_matrix']['data'],
@@ -499,7 +500,7 @@ class CameraModel(object):
             name = d['camera_name']
         else:
             # format saved by roslib.message.strify_message( sensor_msgs.msg.CameraInfo() )
-            c = sensor_msgs.msg.CameraInfo(
+            c = sensor_msgs_compat.msg.CameraInfo(
                 height = d['height'],
                 width = d['width'],
                 P=d['P'],
@@ -639,7 +640,7 @@ class CameraModel(object):
             distortion_coefficients = np.array(distortion_coefficients)
             assert distortion_coefficients.shape == (5,)
 
-        i = sensor_msgs.msg.CameraInfo()
+        i = sensor_msgs_compat.msg.CameraInfo()
         i.width = width
         i.height = height
         i.D = [float(val) for val in distortion_coefficients]
