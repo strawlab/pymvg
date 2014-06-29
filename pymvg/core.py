@@ -7,18 +7,18 @@ from collections import OrderedDict
 from .align import estsimt
 import warnings
 
+from .quaternions import quaternion_matrix, quaternion_from_matrix
+
 PYMVG_EMULATE_ROS = int(os.environ.get('PYMVG_EMULATE_ROS','0'))
 
 if PYMVG_EMULATE_ROS:
-    from .ros_compat import tf, sensor_msgs, geometry_msgs, rosbag, roslib
+    from .ros_compat import sensor_msgs, geometry_msgs, rosbag, roslib
 else:
     import roslib # set environment variable PYMVG_EMULATE_ROS to emulate ROS
-    roslib.load_manifest('tf')
     roslib.load_manifest('sensor_msgs')
     roslib.load_manifest('geometry_msgs')
     roslib.load_manifest('rosbag')
-    import tf
-    import sensor_msgs
+    import sensor_msgs.msg
     import geometry_msgs
     import rosbag
 
@@ -45,7 +45,7 @@ def parse_rotation_msg(rotation, force_matrix=False):
 
     if len(rotation)==4:
         if force_matrix:
-            rotation = tf.transformations.quaternion_matrix(rotation)[:3,:3]
+            rotation = quaternion_matrix(rotation)[:3,:3]
         return rotation
 
     if len(rotation) != 9:
@@ -157,9 +157,9 @@ def get_rotation_matrix_and_quaternion(rotation):
 
         rnew = np.eye(4)
         rnew[:3,:3] = rmat
-        rquat = tf.transformations.quaternion_from_matrix(rnew)
+        rquat = quaternion_from_matrix(rnew)
         if not np.alltrue(np.isnan( rquat )):
-            R2 = tf.transformations.quaternion_matrix(rquat)[:3,:3]
+            R2 = quaternion_matrix(rquat)[:3,:3]
             assert np.allclose(rmat,R2)
     elif rotation.ndim==0:
         assert rotation.dtype == object
@@ -172,7 +172,7 @@ def get_rotation_matrix_and_quaternion(rotation):
         assert rotation.ndim==1
         assert rotation.shape==(4,)
         rquat = rotation
-        rmat = tf.transformations.quaternion_matrix(rquat)[:3,:3]
+        rmat = quaternion_matrix(rquat)[:3,:3]
 
         if not np.alltrue(np.isnan( rmat )):
             assert is_rotation_matrix(rmat)
@@ -758,7 +758,7 @@ class CameraModel(object):
     # properties / getters
 
     def get_Q(self):
-        R = tf.transformations.quaternion_matrix(self._rquat)[:3,:3]
+        R = quaternion_matrix(self._rquat)[:3,:3]
         return R
     Q = property(get_Q)
 
