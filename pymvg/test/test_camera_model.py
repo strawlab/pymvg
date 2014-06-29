@@ -162,34 +162,6 @@ def test_problem_M():
     expected = (expectedh[:2]/expectedh[2]).T
     assert np.allclose( expected, actual )
 
-def test_bagfile_roundtrip():
-    all_options = get_default_options()
-    for opts in all_options:
-        yield check_bagfile_roundtrip, opts
-
-def check_bagfile_roundtrip(cam_opts):
-    """check that roundtrip of camera model to/from a bagfile works"""
-    cam = _build_test_camera(**cam_opts)
-    fname = tempfile.mktemp(suffix='.bag')
-    try:
-        with open(fname,mode='wb') as fd:
-            cam.save_to_bagfile(fd)
-
-        with open(fname,mode='r') as fd:
-            cam2 = CameraModel.load_camera_from_bagfile( fd )
-    finally:
-        os.unlink(fname)
-
-    verts = np.array([[ 0.042306,  0.015338,  0.036328],
-                      [ 0.03323,   0.030344,  0.041542],
-                      [ 0.03323,   0.030344,  0.041542],
-                      [ 0.03323,   0.030344,  0.041542],
-                      [ 0.036396,  0.026464,  0.052408]])
-
-    expected =  cam.project_3d_to_pixel(verts)
-    actual   = cam2.project_3d_to_pixel(verts)
-    assert np.allclose( expected, actual )
-
 def test_distortion_yamlfile_roundtrip():
     all_options = get_default_options()
     for opts in all_options:
