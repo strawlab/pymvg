@@ -169,13 +169,6 @@ class Bag(object):
 class Bunch(object):
     pass
 
-def _get_tf():
-    tf = Bunch()
-    tf.transformations = Bunch()
-    tf.transformations.quaternion_from_matrix = qquaternion_from_matrix
-    tf.transformations.quaternion_matrix = qquaternion_matrix
-    return tf
-
 def _get_sensor_msgs():
     sensor_msgs = Bunch()
     sensor_msgs.msg = Bunch()
@@ -190,19 +183,5 @@ def _get_geometry_msgs():
     geometry_msgs.msg.Transform = Transform
     return geometry_msgs
 
-def _get_rosbag():
-    rosbag = Bunch()
-    rosbag.Bag = Bag
-    return rosbag
-
-def _get_roslib():
-    roslib = Bunch()
-    roslib.message = Bunch()
-    roslib.message.strify_message = strify_message
-    return roslib
-
-tf = _get_tf()
 sensor_msgs = _get_sensor_msgs()
 geometry_msgs = _get_geometry_msgs()
-rosbag = _get_rosbag()
-roslib = _get_roslib()
