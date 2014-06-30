@@ -12,18 +12,29 @@ from .ros_compat import sensor_msgs as sensor_msgs_compat
 
 PYMVG_EMULATE_ROS = int(os.environ.get('PYMVG_EMULATE_ROS','0'))
 
-if PYMVG_EMULATE_ROS:
-    from .ros_compat import sensor_msgs, geometry_msgs, rosbag, roslib
-else:
-    import roslib # set environment variable PYMVG_EMULATE_ROS to emulate ROS
-    roslib.load_manifest('sensor_msgs')
-    roslib.load_manifest('geometry_msgs')
-    roslib.load_manifest('rosbag')
-    import sensor_msgs.msg
-    import geometry_msgs
-    import rosbag
-
 D2R = np.pi/180.0
+
+# handle ROS imports -------------
+
+def get_ROS_name(name):
+    if PYMVG_EMULATE_ROS:
+        from .ros_compat import sensor_msgs, geometry_msgs, rosbag
+    else:
+        import roslib # set environment variable PYMVG_EMULATE_ROS to emulate ROS
+        roslib.load_manifest('sensor_msgs')
+        roslib.load_manifest('geometry_msgs')
+        roslib.load_manifest('rosbag')
+        import sensor_msgs.msg
+        import geometry_msgs
+        import rosbag
+
+    return locals()[name]
+
+# helper class
+
+class Bunch:
+    def __init__(self, **kwds):
+        self.__dict__.update(kwds)
 
 # helper functions ---------------
 
@@ -543,6 +554,7 @@ class CameraModel(object):
     @classmethod
     def load_camera_from_bagfile( cls, bag_fname, extrinsics_required=True ):
         """factory function for class CameraModel"""
+        rosbag = get_ROS_name('rosbag')
         bag = rosbag.Bag(bag_fname, 'r')
         camera_name = None
         translation = None
@@ -803,12 +815,24 @@ class CameraModel(object):
     def get_name(self):
         return self.name
 
-    def get_extrinsics_as_msg(self):
-        msg = geometry_msgs.msg.Transform()
+    def get_extrinsics_as_bunch(self):
+        msg = Bunch()
+        msg.translation = Bunch()
+        msg.rotation = Bunch()
         for i in range(3):
             setattr(msg.translation,'xyz'[i], self.translation[i] )
         for i in range(4):
             setattr(msg.rotation,'xyzw'[i], self._rquat[i] )
+        return msg
+
+    def get_extrinsics_as_msg(self):
+        geometry_msgs = get_ROS_name('geometry_msgs')
+        msg = geometry_msgs.msg.Transform()
+        b = self.get_extrinsics_as_bunch()
+        for name in 'xyz':
+            setattr(msg.translation, name, getattr(b.translation,name) )
+        for name in 'xyzw':
+            setattr(msg.rotation, name, getattr(b.rotation,name) )
         return msg
 
     def get_ROS_tf(self):
@@ -816,17 +840,30 @@ class CameraModel(object):
         rmat2, rquat2 = get_rotation_matrix_and_quaternion(rmat)
         return self.get_camcenter(), rquat2
 
-    def get_intrinsics_as_msg(self):
-        i = sensor_msgs.msg.CameraInfo()
-        # these are from image_geometry ROS package in the utest.cpp file
+    def get_intrinsics_as_bunch(self):
+        i = Bunch()
         i.height = self.height
         i.width = self.width
         assert len(self.distortion) == 5
         i.distortion_model = 'plumb_bob'
-        i.D = list(self.distortion.flatten())
-        i.K = list(self.K.flatten())
-        i.R = list(self.get_rect().flatten())
-        i.P = list(self.P.flatten())
+        i.D = plain_vec(self.distortion.flatten())
+        i.K = plain_vec(self.K.flatten())
+        i.R = plain_vec(self.get_rect().flatten())
+        i.P = plain_vec(self.P.flatten())
+        return i
+
+    def get_intrinsics_as_msg(self):
+        sensor_msgs = get_ROS_name('sensor_msgs')
+        i = sensor_msgs.msg.CameraInfo()
+        b = self.get_intrinsics_as_bunch()
+        # these are from image_geometry ROS package in the utest.cpp file
+        i.height = b.height
+        i.width = b.width
+        i.distortion_model = b.distortion_model
+        i.D = b.D
+        i.K = b.K
+        i.R = b.R
+        i.P = b.P
         return i
 
     def get_camcenter(self):
@@ -891,6 +928,7 @@ class CameraModel(object):
         return self.P[1,3]
 
     def save_to_bagfile(self,fname):
+        rosbag = get_ROS_name('rosbag')
         bagout = rosbag.Bag(fname, 'w')
         topic = self.name + '/tf'
         extrinsics = self.get_extrinsics_as_msg()
@@ -901,8 +939,9 @@ class CameraModel(object):
         bagout.close()
 
     def save_intrinsics_to_yamlfile(self,fname):
-        msg = self.get_intrinsics_as_msg()
-        buf = roslib.message.strify_message(msg)
+        b = self.get_intrinsics_as_bunch()
+        d = b.__dict__
+        buf = yaml.dump(d)
         with open(fname,'w') as fd:
             fd.write( buf )
 
@@ -912,7 +951,7 @@ class CameraModel(object):
         # Keep extrinsic coordinates, but flip intrinsic
         # parameter so that a mirror image is rendered.
 
-        i = self.get_intrinsics_as_msg()
+        i = self.get_intrinsics_as_bunch()
         if axis=='lr':
             i.K[0] = -i.K[0]
             i.P[0] = -i.P[0]
@@ -994,7 +1033,7 @@ class CameraModel(object):
         result = CameraModel.from_ros_like(
                              translation=t,
                              rotation=R,
-                             intrinsics=self.get_intrinsics_as_msg(),
+                             intrinsics=self.get_intrinsics_as_bunch(),
                              name=self.name,
                              )
         return result

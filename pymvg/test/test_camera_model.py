@@ -94,7 +94,7 @@ def check_extrinsic_msg(cam_opts):
     cam_opts['get_input_data']=True
     r = _build_test_camera(**cam_opts)
     cam = r['cam']
-    tfm = cam.get_extrinsics_as_msg()
+    tfm = cam.get_extrinsics_as_bunch()
     if 'translation' in r:
         assert np.allclose(point_msg_to_tuple(tfm.translation), point_msg_to_tuple(r['translation']))
     if 'rotation' in r:
