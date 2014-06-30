@@ -3,7 +3,7 @@ from __future__ import print_function
 import numpy as np
 from pymvg.test.utils import make_M, _build_test_camera, get_default_options
 import pymvg.test.fill_polygon as fill_polygon
-import tarfile, time, os
+import tarfile, time, os, tempfile
 import subprocess
 import cv # ubuntu: apt-get install python-opencv
 
@@ -163,7 +163,7 @@ class ROSPipelineMimic:
                 imsave[:,:,chan] = (im*255).astype(np.uint8)
 
             wcs3d = check_3d[save_idx] # world coords
-            ccs3d = np.dot( self.cam.rot, wcs3d.T ).T + self.cam.translation
+            ccs3d = np.dot( self.cam.get_rotation(), wcs3d.T ).T + self.cam.translation
             ccs2d = check_pixels[save_idx] # pixel coords
             if DRAW:
                 import scipy.misc
@@ -315,6 +315,34 @@ def check_roundtrip_ros_tf(cam_opts):
     p1 = cam1.project_3d_to_pixel(verts)
     p2 = cam2.project_3d_to_pixel(verts)
     assert np.allclose( p1, p2 )
+
+def test_bagfile_roundtrip():
+    all_options = get_default_options()
+    for opts in all_options:
+        yield check_bagfile_roundtrip, opts
+
+def check_bagfile_roundtrip(cam_opts):
+    """check that roundtrip of camera model to/from a bagfile works"""
+    cam = _build_test_camera(**cam_opts)
+    fname = tempfile.mktemp(suffix='.bag')
+    try:
+        with open(fname,mode='wb') as fd:
+            cam.save_to_bagfile(fd)
+
+        with open(fname,mode='r') as fd:
+            cam2 = CameraModel.load_camera_from_bagfile( fd )
+    finally:
+        os.unlink(fname)
+
+    verts = np.array([[ 0.042306,  0.015338,  0.036328],
+                      [ 0.03323,   0.030344,  0.041542],
+                      [ 0.03323,   0.030344,  0.041542],
+                      [ 0.03323,   0.030344,  0.041542],
+                      [ 0.036396,  0.026464,  0.052408]])
+
+    expected =  cam.project_3d_to_pixel(verts)
+    actual   = cam2.project_3d_to_pixel(verts)
+    assert np.allclose( expected, actual )
 
 if __name__=='__main__':
     test_ros_pipeline()
