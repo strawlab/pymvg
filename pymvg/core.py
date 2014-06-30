@@ -10,25 +10,7 @@ import warnings
 from .quaternions import quaternion_matrix, quaternion_from_matrix
 from .ros_compat import sensor_msgs as sensor_msgs_compat
 
-PYMVG_EMULATE_ROS = int(os.environ.get('PYMVG_EMULATE_ROS','0'))
-
 D2R = np.pi/180.0
-
-# handle ROS imports -------------
-
-def get_ROS_name(name):
-    if PYMVG_EMULATE_ROS:
-        from .ros_compat import sensor_msgs, geometry_msgs, rosbag
-    else:
-        import roslib # set environment variable PYMVG_EMULATE_ROS to emulate ROS
-        roslib.load_manifest('sensor_msgs')
-        roslib.load_manifest('geometry_msgs')
-        roslib.load_manifest('rosbag')
-        import sensor_msgs.msg
-        import geometry_msgs
-        import rosbag
-
-    return locals()[name]
 
 # helper class
 
@@ -537,7 +519,9 @@ class CameraModel(object):
     @classmethod
     def load_camera_from_file( cls, fname, extrinsics_required=True ):
         if fname.endswith('.bag'):
-            return cls.load_camera_from_bagfile(fname, extrinsics_required=extrinsics_required)
+            raise NotImplementedError('cannot open .bag file directly. Open '
+                                      'with ROS and call '
+                                      'CameraModel.load_camera_from_opened_bagfile(bag, ...)')
         elif (fname.endswith('.yaml') or
               fname.endswith('.json')):
             if fname.endswith('.yaml'):
@@ -552,10 +536,14 @@ class CameraModel(object):
             raise ValueError("only supports: .bag .yaml .json")
 
     @classmethod
-    def load_camera_from_bagfile( cls, bag_fname, extrinsics_required=True ):
-        """factory function for class CameraModel"""
-        rosbag = get_ROS_name('rosbag')
-        bag = rosbag.Bag(bag_fname, 'r')
+    def load_camera_from_opened_bagfile( cls, bag, extrinsics_required=True ):
+        """factory function for class CameraModel
+
+        arguments
+        ---------
+        bag - an opened rosbag.Bag instance
+        extrinsics_required - are extrinsic parameters required
+        """
         camera_name = None
         translation = None
         rotation = None
@@ -825,16 +813,6 @@ class CameraModel(object):
             setattr(msg.rotation,'xyzw'[i], self._rquat[i] )
         return msg
 
-    def get_extrinsics_as_msg(self):
-        geometry_msgs = get_ROS_name('geometry_msgs')
-        msg = geometry_msgs.msg.Transform()
-        b = self.get_extrinsics_as_bunch()
-        for name in 'xyz':
-            setattr(msg.translation, name, getattr(b.translation,name) )
-        for name in 'xyzw':
-            setattr(msg.rotation, name, getattr(b.rotation,name) )
-        return msg
-
     def get_ROS_tf(self):
         rmat = self.get_Q_inv()
         rmat2, rquat2 = get_rotation_matrix_and_quaternion(rmat)
@@ -850,20 +828,6 @@ class CameraModel(object):
         i.K = plain_vec(self.K.flatten())
         i.R = plain_vec(self.get_rect().flatten())
         i.P = plain_vec(self.P.flatten())
-        return i
-
-    def get_intrinsics_as_msg(self):
-        sensor_msgs = get_ROS_name('sensor_msgs')
-        i = sensor_msgs.msg.CameraInfo()
-        b = self.get_intrinsics_as_bunch()
-        # these are from image_geometry ROS package in the utest.cpp file
-        i.height = b.height
-        i.width = b.width
-        i.distortion_model = b.distortion_model
-        i.D = b.D
-        i.K = b.K
-        i.R = b.R
-        i.P = b.P
         return i
 
     def get_camcenter(self):
@@ -927,15 +891,49 @@ class CameraModel(object):
     def Ty(self):
         return self.P[1,3]
 
-    def save_to_bagfile(self,fname):
-        rosbag = get_ROS_name('rosbag')
+    def save_to_bagfile(self,fname,roslib):
+        """save CameraModel to ROS bag file
+
+        arguments
+        ---------
+        fname - filename or file descriptor to save to
+        roslib - the roslib module
+        """
+
+        roslib.load_manifest('rosbag')
+        roslib.load_manifest('sensor_msgs')
+        roslib.load_manifest('geometry_msgs')
+
+        import sensor_msgs.msg
+        import geometry_msgs
+        import rosbag
+
         bagout = rosbag.Bag(fname, 'w')
+
+        msg = extrinsics = geometry_msgs.msg.Transform()
+        b = self.get_extrinsics_as_bunch()
+        for name in 'xyz':
+            setattr(msg.translation, name, getattr(b.translation,name) )
+        for name in 'xyzw':
+            setattr(msg.rotation, name, getattr(b.rotation,name) )
+
         topic = self.name + '/tf'
-        extrinsics = self.get_extrinsics_as_msg()
         bagout.write(topic, extrinsics)
+
+        msg = intrinsics = sensor_msgs.msg.CameraInfo()
+        b = self.get_intrinsics_as_bunch()
+        # these are from image_geometry ROS package in the utest.cpp file
+        msg.height = b.height
+        msg.width = b.width
+        msg.distortion_model = b.distortion_model
+        msg.D = b.D
+        msg.K = b.K
+        msg.R = b.R
+        msg.P = b.P
+
         topic = self.name + '/camera_info'
-        intrinsics = self.get_intrinsics_as_msg()
         bagout.write(topic, intrinsics)
+
         bagout.close()
 
     def save_intrinsics_to_yamlfile(self,fname):

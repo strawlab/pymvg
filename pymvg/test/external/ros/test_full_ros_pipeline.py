@@ -33,9 +33,11 @@ else:
 
 if have_ros:
     roslib.load_manifest('camera_calibration')
-    import camera_calibration.calibrator
+    roslib.load_manifest('rosbag')
     roslib.load_manifest('tf')
+    import camera_calibration.calibrator
     import tf.transformations
+    import rosbag
 else:
     from nose.plugins.skip import SkipTest
 
@@ -294,7 +296,7 @@ def test_roundtrip_ros_tf():
 def check_roundtrip_ros_tf(cam_opts):
     cam1 = _build_test_camera(**cam_opts)
     translation, rotation = cam1.get_ROS_tf()
-    i = cam1.get_intrinsics_as_msg()
+    i = cam1.get_intrinsics_as_bunch()
     cam2 = CameraModel.load_camera_from_ROS_tf( translation=translation,
                                                 rotation=rotation,
                                                 intrinsics = i,
@@ -327,10 +329,11 @@ def check_bagfile_roundtrip(cam_opts):
     fname = tempfile.mktemp(suffix='.bag')
     try:
         with open(fname,mode='wb') as fd:
-            cam.save_to_bagfile(fd)
+            cam.save_to_bagfile(fd, roslib)
 
         with open(fname,mode='r') as fd:
-            cam2 = CameraModel.load_camera_from_bagfile( fd )
+            bag = rosbag.Bag(fd, 'r')
+            cam2 = CameraModel.load_camera_from_opened_bagfile( bag )
     finally:
         os.unlink(fname)
 
