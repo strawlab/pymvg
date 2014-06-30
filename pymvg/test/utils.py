@@ -67,9 +67,9 @@ def _build_test_camera(**kwargs):
         rotation.w = 1.0
 
     if 'from_yaml_file' in kwargs:
-        cam = CameraModel.load_camera_from_file( o.from_yaml_file,
+        cam = CameraModel.load_camera_from_file( fname=o.from_yaml_file,
                                                  extrinsics_required=False )
-        i = cam.get_intrinsics_as_msg()
+        i = cam.get_intrinsics_as_bunch()
         cam = CameraModel.from_ros_like(
                           translation=point_msg_to_tuple(translation),
                           rotation=parse_rotation_msg(rotation),
