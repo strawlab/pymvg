@@ -216,7 +216,7 @@ def plain_vec(vec,eps=1e-15):
         if abs(r)<eps:
             r2.append(0)
         else:
-            r2.append(r)
+            r2.append(float(r))
     return r2
 
 def normalize_M(pmat,eps=1e-6):
