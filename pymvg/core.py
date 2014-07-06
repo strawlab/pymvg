@@ -881,6 +881,13 @@ class CameraModel(object):
     def get_P(self):
         return self.P
 
+    def get_blender_py_src(self):
+        """return CameraModel as string of Python source code to use in Blender
+        """
+        if self.rect is not None:
+            raise NotImplementedError('')
+        return '1'
+
     def save_to_bagfile(self,fname,roslib):
         """save CameraModel to ROS bag file
 
