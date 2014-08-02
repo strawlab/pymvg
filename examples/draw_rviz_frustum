@@ -24,8 +24,9 @@ import pymvg
 import pymvg.rviz_utils
 
 class MyApp:
-    def __init__(self,name):
+    def __init__(self,name,scale=1.0):
         self.name = name
+        self.scale = scale
         self.intrinsics = None
         self.translation = None
         self.rotation = None
@@ -74,8 +75,8 @@ class MyApp:
 
         self.draw()
 
-    def draw(self,scale=1.0):
-        r = pymvg.rviz_utils.get_frustum_markers( self.cam, scale=scale )
+    def draw(self):
+        r = pymvg.rviz_utils.get_frustum_markers( self.cam, scale=self.scale )
         self.publisher.publish(r['markers'])
 
     def run(self):
@@ -87,9 +88,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--name', type=str, default='pinhole_cal')
+    parser.add_argument('--scale', type=float, default=1.0)
 
     argv = rospy.myargv()
     args = parser.parse_args(argv[1:])
 
-    app = MyApp(args.name)
+    app = MyApp(args.name,scale=args.scale)
     app.run()
