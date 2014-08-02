@@ -91,7 +91,7 @@ class MyApp:
         rospy.spin()
 
 if __name__ == '__main__':
-    rospy.init_node('draw_rviz_frustum')
+    rospy.init_node('draw_rviz_frustum',anonymous=True)
 
     parser = argparse.ArgumentParser()
 
