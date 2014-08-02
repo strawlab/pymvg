@@ -1,0 +1,70 @@
+Background\ ColorR=0
+Background\ ColorG=0
+Background\ ColorB=0
+Fixed\ Frame=/map
+Target\ Frame=/map
+Grid.Alpha=0.5
+Grid.Cell\ Size=1
+Grid.ColorR=0.5
+Grid.ColorG=0.5
+Grid.ColorB=0.5
+Grid.Enabled=1
+Grid.Line\ Style=0
+Grid.Line\ Width=0.03
+Grid.Normal\ Cell\ Count=0
+Grid.OffsetX=0
+Grid.OffsetY=0
+Grid.OffsetZ=0
+Grid.Plane=0
+Grid.Plane\ Cell\ Count=10
+Grid.Reference\ Frame=<Fixed Frame>
+TF.All\ Enabled=1
+TF.Enabled=1
+TF.Frame\ Timeout=15
+TF.Marker\ Scale=0.1
+TF.Show\ Arrows=1
+TF.Show\ Axes=1
+TF.Show\ Names=1
+TF.Update\ Interval=0.05
+cam0\ frustum.=1
+cam0\ frustum.Enabled=1
+cam0\ frustum.Marker\ Array\ Topic=/cam_0/frustum
+cam1\ frustum.=1
+cam1\ frustum.Enabled=1
+cam1\ frustum.Marker\ Array\ Topic=/cam_1/frustum
+cam2\ frustum.=1
+cam2\ frustum.Enabled=1
+cam2\ frustum.Marker\ Array\ Topic=/cam_2/frustum
+Tool\ 2D\ Nav\ GoalTopic=goal
+Tool\ 2D\ Pose\ EstimateTopic=initialpose
+Camera\ Type=rviz::OrbitViewController
+Camera\ Config=0.94779 4.83079 19.9702 0 -1.90735e-06 1.90735e-06
+Property\ Grid\ State=selection=cam0 frustum.Enabled;expanded=.Global Options,TF./cam_0/cam_0,TF./cam_1/cam_1,TF./cam_2/cam_2,TF./cam_3/cam_3,TF./cam_4/cam_4,TF./cam_5/cam_5,TF./map/map,TF.Enabled.TF.Tree,TF./mapTree/map,TF./cam_0Tree/cam_0,TF./cam_1Tree/cam_1,TF./cam_2Tree/cam_2,TF./cam_3Tree/cam_3,TF./cam_4Tree/cam_4,TF./cam_5Tree/cam_5,cam0 frustum.Enabled.cam0 frustum.Status,cam0 frustum.Enabled.cam0 frustum.Namespaces,cam1 frustum.Enabled.cam1 frustum.Namespaces,cam2 frustum.Enabled.cam2 frustum.Namespaces;scrollpos=0,0;splitterpos=150,301;ispageselected=1
+[Display0]
+Name=TF
+Package=rviz
+ClassName=rviz::TFDisplay
+[Display1]
+Name=Grid
+Package=rviz
+ClassName=rviz::GridDisplay
+[Display2]
+Name=cam0 frustum
+Package=rviz
+ClassName=rviz::MarkerArrayDisplay
+[Display3]
+Name=cam1 frustum
+Package=rviz
+ClassName=rviz::MarkerArrayDisplay
+[Display4]
+Name=cam2 frustum
+Package=rviz
+ClassName=rviz::MarkerArrayDisplay
+[TF.]
+cam_0Enabled=1
+cam_1Enabled=1
+cam_2Enabled=1
+cam_3Enabled=1
+cam_4Enabled=1
+cam_5Enabled=1
+mapEnabled=1
