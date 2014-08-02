@@ -95,7 +95,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--name', type=str, default='pinhole_cal')
+    parser.add_argument('--name', type=str, default='cam_0')
     parser.add_argument('--scale', type=float, default=1.0)
 
     argv = rospy.myargv()
