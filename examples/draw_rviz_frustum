@@ -34,10 +34,18 @@ class MyApp:
         self.tl = tf.TransformListener()
         self.cam = None
 
-        rospy.Subscriber(self.get_frame_id()+'/camera_info',
+        ci_name = self.get_frame_id()+'/camera_info'
+        rospy.loginfo('now listening for CameraInfo message on topic %r'%ci_name)
+
+        rospy.Subscriber(ci_name,
                          CameraInfo, self.on_camera_info)
-        self.topic_name = '/pinhole_markers'
-        self.publisher = rospy.Publisher(self.topic_name, MarkerArray)#, latch=latch)
+
+        self.topic_name = self.get_frame_id()+'/frustum'
+        rospy.loginfo('publishing frustum (scale %s) at %r'%(self.scale,
+                                                             self.topic_name))
+        self.publisher = rospy.Publisher(self.topic_name, MarkerArray)
+
+        rospy.loginfo('now listening for transform at %r'%self.get_frame_id())
         rospy.Timer(rospy.Duration(1.0/20.0), self.on_timer) # 20 fps
 
     def get_frame_id(self):
