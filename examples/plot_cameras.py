@@ -1,11 +1,11 @@
 from pymvg.plot_utils import plot_camera
-import pymvg
+from pymvg.camera_model import CameraModel
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 R2D = 180./np.pi
 
-base = pymvg.CameraModel.load_camera_default()
+base = CameraModel.load_camera_default()
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')

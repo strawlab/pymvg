@@ -3,10 +3,10 @@
 import numpy as np
 import os
 
-from pymvg.core import CameraModel, point_msg_to_tuple, parse_rotation_msg, \
-     MultiCameraSystem
+from pymvg.camera_model import CameraModel
+from pymvg.multi_camera_system import MultiCameraSystem
+from pymvg.util import point_msg_to_tuple, parse_rotation_msg
 from pymvg.ros_compat import geometry_msgs, sensor_msgs
-import pymvg
 
 def make_M( focal_length, width, height, R, c):
     K = np.eye(3)

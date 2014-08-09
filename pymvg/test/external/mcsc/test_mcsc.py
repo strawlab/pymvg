@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
-from pymvg import CameraModel, MultiCameraSystem
+from pymvg.camera_model import CameraModel
+from pymvg.multi_camera_system import MultiCameraSystem
 import os
 import tempfile
 import shutil
