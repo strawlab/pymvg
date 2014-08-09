@@ -1463,11 +1463,13 @@ class MultiCameraSystem:
 
     def get_names(self):
         result = list(self._cameras.keys())
-        result.sort()
         return result
 
     def get_camera_dict(self):
         return self._cameras
+
+    def get_camera(self,name):
+        return self._cameras[name]
 
     def to_dict(self):
         return {'camera_system':
