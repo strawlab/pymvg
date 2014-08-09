@@ -50,8 +50,8 @@ def check_projection_to_undistorted1(cam_opts):
         result = cam.project_3d_to_pixel( pt, distorted=False )
         u,v = result[0]
 
-        assert np.allclose(u, cam.cx())
-        assert np.allclose(v, cam.cy())
+        assert np.allclose(u, cam.P[0,2])
+        assert np.allclose(v, cam.P[1,2])
 
 def test_camera_distortion_roundtrip():
     all_options = get_default_options()

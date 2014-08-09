@@ -881,24 +881,6 @@ class CameraModel(object):
     def get_P(self):
         return self.P
 
-    def fx(self):
-        return self.P[0,0]
-
-    def fy(self):
-        return self.P[1,1]
-
-    def cx(self):
-        return self.P[0,2]
-
-    def cy(self):
-        return self.P[1,2]
-
-    def Tx(self):
-        return self.P[0,3]
-
-    def Ty(self):
-        return self.P[1,3]
-
     def save_to_bagfile(self,fname,roslib):
         """save CameraModel to ROS bag file
 
@@ -1204,8 +1186,8 @@ class CameraModel(object):
 
         # transform to 3D point in camera frame
         assert self.is_opencv_compatible()
-        x = (uv_rect_x - self.cx() - self.Tx()) / self.fx()
-        y = (uv_rect_y - self.cy() - self.Ty()) / self.fy()
+        x = (uv_rect_x - self.P[0,2] - self.P[0,3]) / self.P[0,0]
+        y = (uv_rect_y - self.P[1,2] - self.P[1,3]) / self.P[1,1]
         z = np.ones_like(x)
         ray_cam = np.vstack((x,y,z))
         rl = np.sqrt(np.sum(ray_cam**2,axis=0))
