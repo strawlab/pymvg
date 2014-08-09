@@ -399,7 +399,6 @@ class CameraModel(object):
                       rotation=None,
                       intrinsics=None,
                       name=None,
-                      max_skew_ratio=1e15,
                       ):
         """Instantiate a Camera Model.
 
@@ -464,19 +463,11 @@ class CameraModel(object):
                 if np.allclose(rect,np.eye(3)):
                     rect = None
 
-        K_ = P[:3,:3]
-
-        # If skew is 15 orders of magnitude less than focal length, ignore it.
-        if abs(K_[0,1]) > (abs(K_[0,0])/max_skew_ratio):
-            if np.sum(abs(distortion)) != 0.0:
-                skew = K_[0,1]
-                fx = K_[0,0]
-                raise NotImplementedError('distortion/undistortion for skewed pixels not implemented (skew: %s, fx: %s)'%(skew,fx))
         result = cls(name, width, height, _rquat, _camcenter, P, K, distortion, rect)
         return result
 
     @classmethod
-    def from_dict(cls, d, extrinsics_required=True, max_skew_ratio=1e15 ):
+    def from_dict(cls, d, extrinsics_required=True ):
         translation = None
         rotation = None
 
@@ -512,7 +503,6 @@ class CameraModel(object):
                                    rotation=rotation,
                                    intrinsics=c,
                                    name=name,
-                                   max_skew_ratio = max_skew_ratio,
                                    )
         return result
 
@@ -1337,7 +1327,7 @@ class MultiCameraSystem:
         return MultiCameraSystem.from_pymvg_str(buf)
 
     @classmethod
-    def from_mcsc(cls, dirname, max_skew_ratio=10 ):
+    def from_mcsc(cls, dirname ):
         '''create MultiCameraSystem from output directory of MultiCamSelfCal'''
 
         # FIXME: This is a bit convoluted because it's been converted
@@ -1444,7 +1434,7 @@ class MultiCameraSystem:
                  'D':distortion,
                  'name':cam_id,
                  }
-            cam = CameraModel.from_dict(d, max_skew_ratio=max_skew_ratio)
+            cam = CameraModel.from_dict(d)
             cameras.append( cam )
         return MultiCameraSystem( cameras=cameras )
 
