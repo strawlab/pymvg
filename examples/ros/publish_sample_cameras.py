@@ -1,5 +1,4 @@
-from pymvg.plot_utils import plot_camera
-import pymvg
+from pymvg.camera_model import CameraModel
 import numpy as np
 
 import roslib # ROS is required for this example. See http://ros.org
@@ -44,7 +43,7 @@ class CamPub:
                                  '/map',
                                  )
 
-base = pymvg.CameraModel.load_camera_default()
+base = CameraModel.load_camera_default()
 
 n=6
 x = np.linspace(0, 2*n, n)
