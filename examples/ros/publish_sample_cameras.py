@@ -26,6 +26,7 @@ class CamPub:
 
     def on_timer(self,_):
         now = rospy.Time.now()
+        future = now + rospy.Duration(1.0/UPDATES_PER_SECOND)
 
         # publish camera intrinsics
         intrinsics = self.cam.get_intrinsics_as_bunch()
@@ -38,7 +39,7 @@ class CamPub:
         translation, rotation = self.cam.get_ROS_tf()
         self.tf_b.sendTransform( translation,
                                  rotation,
-                                 now,
+                                 future,
                                  self.frame_id,
                                  '/map',
                                  )
