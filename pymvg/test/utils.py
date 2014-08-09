@@ -3,7 +3,8 @@
 import numpy as np
 import os
 
-from pymvg.core import CameraModel, point_msg_to_tuple, parse_rotation_msg
+from pymvg.core import CameraModel, point_msg_to_tuple, parse_rotation_msg, \
+     MultiCameraSystem
 from pymvg.ros_compat import geometry_msgs, sensor_msgs
 import pymvg
 
@@ -40,6 +41,15 @@ def _build_opts():
                      'at_origin':at_origin,
                      'flipped':False})
 
+    # a PyMVG file with skewed pixels
+    test_dir = os.path.split( __file__ )[0]
+    pymvg_base_fname = 'skew_pixels.json'
+    pymvg_fname = os.path.join( test_dir, pymvg_base_fname )
+    opts.append({'from_file':True,
+                 'type':'pymvg',
+                 'filename':pymvg_fname,
+                 }
+                )
     return opts
 opts = _build_opts()
 
@@ -83,6 +93,18 @@ def _build_test_camera(**kwargs):
                               intrinsics=i,
                               name='cam',
                               )
+        elif kwargs['type']=='pymvg':
+            del translation
+            del rotation
+            system = MultiCameraSystem.from_pymvg_file(fname=kwargs['filename'])
+            names = system.get_names()
+
+            names.sort()
+            name = names[0] # get first camera from system
+            cam = system._cameras[name]
+
+            rotation = cam.get_extrinsics_as_bunch().rotation
+            translation = cam.get_extrinsics_as_bunch().translation
         else:
             raise ValueError('unknown file type')
 
