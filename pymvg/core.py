@@ -938,7 +938,8 @@ class CameraModel(object):
         assert axis in ['lr','ud']
         # Keep extrinsic coordinates, but flip intrinsic
         # parameter so that a mirror image is rendered.
-
+        if self.is_distorted_and_skewed():
+            raise NotImplementedError('no mirroring implemented for skewed cameras')
         i = self.get_intrinsics_as_bunch()
         if axis=='lr':
             i.K[0] = -i.K[0]
