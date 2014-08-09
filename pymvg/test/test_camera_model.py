@@ -50,8 +50,8 @@ def check_projection_to_undistorted1(cam_opts):
         result = cam.project_3d_to_pixel( pt, distorted=False )
         u,v = result[0]
 
-        assert np.allclose(u, cam.cx())
-        assert np.allclose(v, cam.cy())
+        assert np.allclose(u, cam.P[0,2])
+        assert np.allclose(v, cam.P[1,2])
 
 def test_camera_distortion_roundtrip():
     all_options = get_default_options()
@@ -109,6 +109,8 @@ def test_build_from_M():
 def check_built_from_M(cam_opts):
     """check that M is preserved in load_camera_from_M() factory"""
     cam_orig = _build_test_camera(**cam_opts)
+    if cam_orig.is_distorted_and_skewed():
+        raise SkipTest('do not expect that skewed camera passes this test')
     M_orig = cam_orig.M
     cam = CameraModel.load_camera_from_M( M_orig )
     assert np.allclose( cam.M, M_orig)
@@ -195,7 +197,10 @@ def test_camera_mirror_projection_roundtrip():
 def check_camera_mirror_projection_roundtrip(cam_opts,distorted=False,axis='lr'):
     """check that a mirrored camera gives reflected pixel coords"""
     cam_orig = _build_test_camera(**cam_opts)
-    cam_mirror = cam_orig.get_mirror_camera(axis=axis)
+    try:
+        cam_mirror = cam_orig.get_mirror_camera(axis=axis)
+    except NotImplementedError as err:
+        raise SkipTest(str(err))
     uv_raw = _generate_uv_raw(cam_orig.width, cam_orig.height)
 
     # Get a collection of 3D points for which we know the pixel location of

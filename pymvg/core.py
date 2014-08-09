@@ -399,7 +399,6 @@ class CameraModel(object):
                       rotation=None,
                       intrinsics=None,
                       name=None,
-                      max_skew_ratio=1e15,
                       ):
         """Instantiate a Camera Model.
 
@@ -464,19 +463,11 @@ class CameraModel(object):
                 if np.allclose(rect,np.eye(3)):
                     rect = None
 
-        K_ = P[:3,:3]
-
-        # If skew is 15 orders of magnitude less than focal length, ignore it.
-        if abs(K_[0,1]) > (abs(K_[0,0])/max_skew_ratio):
-            if np.sum(abs(distortion)) != 0.0:
-                skew = K_[0,1]
-                fx = K_[0,0]
-                raise NotImplementedError('distortion/undistortion for skewed pixels not implemented (skew: %s, fx: %s)'%(skew,fx))
         result = cls(name, width, height, _rquat, _camcenter, P, K, distortion, rect)
         return result
 
     @classmethod
-    def from_dict(cls, d, extrinsics_required=True, max_skew_ratio=1e15 ):
+    def from_dict(cls, d, extrinsics_required=True ):
         translation = None
         rotation = None
 
@@ -512,7 +503,6 @@ class CameraModel(object):
                                    rotation=rotation,
                                    intrinsics=c,
                                    name=name,
-                                   max_skew_ratio = max_skew_ratio,
                                    )
         return result
 
@@ -804,6 +794,20 @@ class CameraModel(object):
         """True iff there is no skew"""
         return self._opencv_compatible
 
+    def is_distorted_and_skewed(self,max_skew_ratio=1e15):
+        """True if pixels are skewed and distorted"""
+
+        # With default value, if skew is 15 orders of magnitude less
+        # than focal length, return False.
+
+        skew = self.P[0,1]
+        fx = self.P[0,0]
+
+        if abs(skew) > (abs(fx)/max_skew_ratio):
+            if np.sum(abs(self.distortion)) != 0.0:
+                return True
+        return False
+
     def get_name(self):
         return self.name
 
@@ -877,24 +881,6 @@ class CameraModel(object):
     def get_P(self):
         return self.P
 
-    def fx(self):
-        return self.P[0,0]
-
-    def fy(self):
-        return self.P[1,1]
-
-    def cx(self):
-        return self.P[0,2]
-
-    def cy(self):
-        return self.P[1,2]
-
-    def Tx(self):
-        return self.P[0,3]
-
-    def Ty(self):
-        return self.P[1,3]
-
     def save_to_bagfile(self,fname,roslib):
         """save CameraModel to ROS bag file
 
@@ -952,7 +938,8 @@ class CameraModel(object):
         assert axis in ['lr','ud']
         # Keep extrinsic coordinates, but flip intrinsic
         # parameter so that a mirror image is rendered.
-
+        if self.is_distorted_and_skewed():
+            raise NotImplementedError('no mirroring implemented for skewed cameras')
         i = self.get_intrinsics_as_bunch()
         if axis=='lr':
             i.K[0] = -i.K[0]
@@ -1198,9 +1185,11 @@ class CameraModel(object):
         uv_rect_x = nparr[:,0]
         uv_rect_y = nparr[:,1]
 
-        # transform to 3D point in camera frame
-        x = (uv_rect_x - self.cx() - self.Tx()) / self.fx()
-        y = (uv_rect_y - self.cy() - self.Ty()) / self.fy()
+        P = self.P/self.P[2,2] # normalize
+
+        # transform to 3D point in camera frame at z=1
+        y = (uv_rect_y            - P[1,2] - P[1,3]) / P[1,1]
+        x = (uv_rect_x - P[0,1]*y - P[0,2] - P[0,3]) / P[0,0]
         z = np.ones_like(x)
         ray_cam = np.vstack((x,y,z))
         rl = np.sqrt(np.sum(ray_cam**2,axis=0))
@@ -1337,7 +1326,7 @@ class MultiCameraSystem:
         return MultiCameraSystem.from_pymvg_str(buf)
 
     @classmethod
-    def from_mcsc(cls, dirname, max_skew_ratio=10 ):
+    def from_mcsc(cls, dirname ):
         '''create MultiCameraSystem from output directory of MultiCamSelfCal'''
 
         # FIXME: This is a bit convoluted because it's been converted
@@ -1444,7 +1433,7 @@ class MultiCameraSystem:
                  'D':distortion,
                  'name':cam_id,
                  }
-            cam = CameraModel.from_dict(d, max_skew_ratio=max_skew_ratio)
+            cam = CameraModel.from_dict(d)
             cameras.append( cam )
         return MultiCameraSystem( cameras=cameras )
 
