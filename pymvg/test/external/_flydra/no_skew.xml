@@ -1,0 +1,123 @@
+  <multi_camera_reconstructor>
+    <single_camera_calibration>
+      <cam_id>theta: 0</cam_id>
+      <calibration_matrix>3.000000e+02  3.200000e+02  0.000000e+00  0.000000e+00;  0.000000e+00  2.400000e+02 -3.000000e+02  1.500000e+03;  0.000000e+00  1.000000e+00  0.000000e+00  0.000000e+00</calibration_matrix>
+      <resolution>640 480</resolution>
+      <non_linear_parameters>
+        <fc1>300.0</fc1>
+        <fc2>300.0</fc2>
+        <cc1>320.0</cc1>
+        <cc2>240.0</cc2>
+        <k1>0.0</k1>
+        <k2>0.0</k2>
+        <p1>0.0</p1>
+        <p2>0.0</p2>
+        <alpha_c>0.0</alpha_c>
+        <fc1p>300.0</fc1p>
+        <fc2p>300.0</fc2p>
+        <cc1p>320.0</cc1p>
+        <cc2p>240.0</cc2p>
+      </non_linear_parameters>
+    </single_camera_calibration>
+    <single_camera_calibration>
+      <cam_id>theta: 72</cam_id>
+      <calibration_matrix>9.270510e+01  3.200000e+02  2.853170e+02 -1.649077e+03;  2.853170e+02  2.400000e+02 -9.270510e+01 -2.212352e+02;  0.000000e+00  1.000000e+00 -1.665335e-16  8.326673e-16</calibration_matrix>
+      <resolution>640 480</resolution>
+      <non_linear_parameters>
+        <fc1>300.00000000000006</fc1>
+        <fc2>300.0</fc2>
+        <cc1>320.0</cc1>
+        <cc2>240.0</cc2>
+        <k1>0.0</k1>
+        <k2>0.0</k2>
+        <p1>0.0</p1>
+        <p2>0.0</p2>
+        <alpha_c>0.0</alpha_c>
+        <fc1p>300.00000000000006</fc1p>
+        <fc2p>300.0</fc2p>
+        <cc1p>320.0</cc1p>
+        <cc2p>240.0</cc2p>
+      </non_linear_parameters>
+    </single_camera_calibration>
+    <single_camera_calibration>
+      <cam_id>theta: 144</cam_id>
+      <calibration_matrix>-2.427051e+02  3.200000e+02  1.763356e+02  2.833066e+02;  1.763356e+02  2.400000e+02  2.427051e+02 -2.059936e+03; -1.665335e-16  1.000000e+00 -3.330669e-16  2.464695e-15</calibration_matrix>
+      <resolution>640 480</resolution>
+      <non_linear_parameters>
+        <fc1>300.0</fc1>
+        <fc2>300.00000000000006</fc2>
+        <cc1>319.99999999999994</cc1>
+        <cc2>239.99999999999997</cc2>
+        <k1>0.0</k1>
+        <k2>0.0</k2>
+        <p1>0.0</p1>
+        <p2>0.0</p2>
+        <alpha_c>0.0</alpha_c>
+        <fc1p>300.0</fc1p>
+        <fc2p>300.00000000000006</fc2p>
+        <cc1p>319.99999999999994</cc1p>
+        <cc2p>239.99999999999997</cc2p>
+      </non_linear_parameters>
+    </single_camera_calibration>
+    <single_camera_calibration>
+      <cam_id>theta: 216</cam_id>
+      <calibration_matrix>-2.427051e+02  3.200000e+02 -1.763356e+02  2.629155e+03; -1.763356e+02  2.400000e+02  2.427051e+02  5.609065e+01; -6.106227e-16  1.000000e+00  5.551115e-16  1.620926e-15</calibration_matrix>
+      <resolution>640 480</resolution>
+      <non_linear_parameters>
+        <fc1>299.99999999999994</fc1>
+        <fc2>300.00000000000006</fc2>
+        <cc1>319.9999999999999</cc1>
+        <cc2>240.00000000000006</cc2>
+        <k1>0.0</k1>
+        <k2>0.0</k2>
+        <p1>0.0</p1>
+        <p2>0.0</p2>
+        <alpha_c>0.0</alpha_c>
+        <fc1p>299.99999999999994</fc1p>
+        <fc2p>300.00000000000006</fc2p>
+        <cc1p>319.9999999999999</cc1p>
+        <cc2p>240.00000000000006</cc2p>
+      </non_linear_parameters>
+    </single_camera_calibration>
+    <single_camera_calibration>
+      <cam_id>theta: 288</cam_id>
+      <calibration_matrix>9.270510e+01  3.200000e+02 -2.853170e+02  5.366158e+02; -2.853170e+02  2.400000e+02 -9.270510e+01  3.202568e+03;  0.000000e+00  1.000000e+00  1.665335e-16 -8.326673e-16</calibration_matrix>
+      <resolution>640 480</resolution>
+      <non_linear_parameters>
+        <fc1>299.99999999999994</fc1>
+        <fc2>299.9999999999999</fc2>
+        <cc1>319.9999999999999</cc1>
+        <cc2>239.99999999999997</cc2>
+        <k1>0.0</k1>
+        <k2>0.0</k2>
+        <p1>0.0</p1>
+        <p2>0.0</p2>
+        <alpha_c>0.0</alpha_c>
+        <fc1p>299.99999999999994</fc1p>
+        <fc2p>299.9999999999999</fc2p>
+        <cc1p>319.9999999999999</cc1p>
+        <cc2p>239.99999999999997</cc2p>
+      </non_linear_parameters>
+    </single_camera_calibration>
+    <single_camera_calibration>
+      <cam_id>theta: 360</cam_id>
+      <calibration_matrix>3.000000e+02  3.200000e+02 -2.457223e-13 -3.600000e+03; -7.993478e-14  2.400000e+02 -3.000000e+02  1.500000e+03;  9.866251e-17  1.000000e+00 -4.440892e-16  1.036496e-15</calibration_matrix>
+      <resolution>640 480</resolution>
+      <non_linear_parameters>
+        <fc1>300.0</fc1>
+        <fc2>300.00000000000006</fc2>
+        <cc1>320.0000000000001</cc1>
+        <cc2>240.00000000000006</cc2>
+        <k1>0.0</k1>
+        <k2>0.0</k2>
+        <p1>0.0</p1>
+        <p2>0.0</p2>
+        <alpha_c>0.0</alpha_c>
+        <fc1p>300.0</fc1p>
+        <fc2p>300.00000000000006</fc2p>
+        <cc1p>320.0000000000001</cc1p>
+        <cc2p>240.00000000000006</cc2p>
+      </non_linear_parameters>
+    </single_camera_calibration>
+    <minimum_eccentricity>1.4</minimum_eccentricity>
+  </multi_camera_reconstructor>

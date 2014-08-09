@@ -1,0 +1,71 @@
+  <multi_camera_reconstructor>
+    <single_camera_calibration>
+      <cam_id>cam1_0</cam_id>
+      <calibration_matrix>-1.886234e+02 -8.701896e+02 -3.351600e+01  2.831477e+03; -1.685489e+02 -8.240027e+00 -8.012579e+02  1.475307e+03;  7.768535e-01 -6.314593e-01 -3.923783e-01  4.765245e+00</calibration_matrix>
+      <resolution>640 480</resolution>
+      <scale_factor>1.0</scale_factor>
+      <non_linear_parameters>
+        <fc1>1000.0</fc1>
+        <fc2>1000.0</fc2>
+        <cc1>319.93114893019845</cc1>
+        <cc2>239.93064356822518</cc2>
+        <k1>-0.56940859618091888</k1>
+        <k2>0.69648271199731071</k2>
+        <p1>0.0</p1>
+        <p2>0.0</p2>
+        <alpha_c>0.0</alpha_c>
+      </non_linear_parameters>
+    </single_camera_calibration>
+    <single_camera_calibration>
+      <cam_id>cam2_0</cam_id>
+      <calibration_matrix>5.736968e+01  3.113799e+02 -6.569891e+02  8.829673e+02;  6.616466e+02 -2.091136e+02 -1.615633e+02  5.952508e+02;  1.295837e-03 -6.933094e-01 -8.219023e-01  4.294258e+00</calibration_matrix>
+      <resolution>640 480</resolution>
+      <scale_factor>1.0</scale_factor>
+      <non_linear_parameters>
+        <fc1>1000.0</fc1>
+        <fc2>1000.0</fc2>
+        <cc1>319.70164160804791</cc1>
+        <cc2>239.91638560952526</cc2>
+        <k1>-0.89221319402274879</k1>
+        <k2>1.0528134757302146</k2>
+        <p1>0.0</p1>
+        <p2>0.0</p2>
+        <alpha_c>0.0</alpha_c>
+      </non_linear_parameters>
+    </single_camera_calibration>
+    <single_camera_calibration>
+      <cam_id>cam3_0</cam_id>
+      <calibration_matrix>4.036513e+01 -1.953167e+02 -8.274936e+02  1.863506e+03; -7.632401e+02  2.450791e+02 -1.951792e+02  9.413397e+02;  8.396681e-02  8.690208e-01 -6.276587e-01  1.960696e+00</calibration_matrix>
+      <resolution>640 480</resolution>
+      <scale_factor>1.0</scale_factor>
+      <non_linear_parameters>
+        <fc1>1000.0</fc1>
+        <fc2>1000.0</fc2>
+        <cc1>320.08021302306037</cc1>
+        <cc2>239.68859407651681</cc2>
+        <k1>-0.67245195590340689</k1>
+        <k2>0.50224397659914033</k2>
+        <p1>0.0</p1>
+        <p2>0.0</p2>
+        <alpha_c>0.0</alpha_c>
+      </non_linear_parameters>
+    </single_camera_calibration>
+    <single_camera_calibration>
+      <cam_id>cam4_0</cam_id>
+      <calibration_matrix>7.185618e+02 -3.771709e+02 -9.097582e+01  1.224998e+03; -7.446775e+01 -1.568292e+02 -7.436105e+02  1.608932e+03;  7.655234e-01  5.700490e-01 -4.951980e-01  2.858398e+00</calibration_matrix>
+      <resolution>640 480</resolution>
+      <scale_factor>1.0</scale_factor>
+      <non_linear_parameters>
+        <fc1>1000.0</fc1>
+        <fc2>1000.0</fc2>
+        <cc1>320.29855105802216</cc1>
+        <cc2>238.90884220980215</cc2>
+        <k1>-0.31556785693760364</k1>
+        <k2>-1.7986822675533454</k2>
+        <p1>0.0</p1>
+        <p2>0.0</p2>
+        <alpha_c>0.0</alpha_c>
+      </non_linear_parameters>
+    </single_camera_calibration>
+    <minimum_eccentricity>1.4</minimum_eccentricity>
+  </multi_camera_reconstructor>
