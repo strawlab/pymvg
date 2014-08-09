@@ -1107,8 +1107,9 @@ class CameraModel(object):
             y = yp
         else:
             assert R.shape==(3,3)
+            Rti = np.linalg.inv(R.T)
             uh = np.vstack( (xp,yp,np.ones_like(xp)) )
-            XYWt = np.dot(R, uh)
+            XYWt = np.dot(Rti, uh)
             X = XYWt[0,:]
             Y = XYWt[1,:]
             W = XYWt[2,:]
