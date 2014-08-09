@@ -8,7 +8,6 @@ setup(name='pymvg',
                 'pymvg.test.external.mcsc',
                 ],
       url='https://github.com/strawlab/pymvg',
-      package_data={ 'pymvg.test': ['*.yaml'],
-                     'pymvg.test': ['*.json'],
+      package_data={ 'pymvg.test': ['*.yaml','*.json'],
                      },
       )
