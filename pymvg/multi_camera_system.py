@@ -261,3 +261,26 @@ class MultiCameraSystem:
             new_cams.append( new_cam )
         result = MultiCameraSystem(new_cams)
         return result
+
+def build_example_system(n=6,z=5.0):
+    base = CameraModel.load_camera_default()
+
+    x = np.linspace(0, 2*n, n)
+    theta = np.linspace(0, 2*np.pi, n)
+    cams = []
+    for i in range(n):
+        # cameras are spaced parallel to the x axis
+        center = np.array( (x[i], 0.0, z) )
+
+        # cameras are looking at +y
+        lookat = center + np.array( (0,1,0))
+
+        # camera up direction rotates around the y axis
+        up = -np.sin(theta[i]), 0, np.cos(theta[i])
+
+        cam = base.get_view_camera(center,lookat,up)
+        cam.name = 'theta: %.0f'%( np.degrees(theta[i]) )
+        cams.append(cam)
+
+    system = MultiCameraSystem(cams)
+    return system
