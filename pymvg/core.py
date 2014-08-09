@@ -794,6 +794,20 @@ class CameraModel(object):
         """True iff there is no skew"""
         return self._opencv_compatible
 
+    def is_distorted_and_skewed(self,max_skew_ratio=1e15):
+        """True if pixels are skewed and distorted"""
+
+        # With default value, if skew is 15 orders of magnitude less
+        # than focal length, return False.
+
+        skew = self.P[0,1]
+        fx = self.P[0,0]
+
+        if abs(skew) > (abs(fx)/max_skew_ratio):
+            if np.sum(abs(self.distortion)) != 0.0:
+                return True
+        return False
+
     def get_name(self):
         return self.name
 
