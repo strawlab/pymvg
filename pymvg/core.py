@@ -729,8 +729,12 @@ class CameraModel(object):
                 if not v2 is None:
                     return False
             else:
-                if not np.allclose(v1, v2):
-                    return False
+                if type(v1)==type(u'unicode string') and type(v1)==type(v2):
+                    if not v1==v2:
+                        return False
+                else:
+                    if not np.allclose(np.array(v1), np.array(v2)):
+                        return False
         for k in d2:
             if k not in d1:
                 return False
