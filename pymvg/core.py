@@ -1184,10 +1184,11 @@ class CameraModel(object):
         uv_rect_x = nparr[:,0]
         uv_rect_y = nparr[:,1]
 
-        # transform to 3D point in camera frame
-        assert self.is_opencv_compatible()
-        x = (uv_rect_x - self.P[0,2] - self.P[0,3]) / self.P[0,0]
-        y = (uv_rect_y - self.P[1,2] - self.P[1,3]) / self.P[1,1]
+        P = self.P/self.P[2,2] # normalize
+
+        # transform to 3D point in camera frame at z=1
+        y = (uv_rect_y            - P[1,2] - P[1,3]) / P[1,1]
+        x = (uv_rect_x - P[0,1]*y - P[0,2] - P[0,3]) / P[0,0]
         z = np.ones_like(x)
         ray_cam = np.vstack((x,y,z))
         rl = np.sqrt(np.sum(ray_cam**2,axis=0))
