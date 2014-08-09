@@ -29,11 +29,17 @@ def _build_opts():
                 opts.append(dict(at_origin=at_origin,
                                  ROS_test_data=ROS_test_data,
                                  flipped=flipped))
+    # data from a ROS yaml file
     test_dir = os.path.split( __file__ )[0]
     yaml_base_fname = 'roscal.yaml'
     yaml_fname = os.path.join( test_dir, yaml_base_fname )
-    opts.append({'from_yaml_file':yaml_fname,'at_origin':True,'flipped':False})
-    opts.append({'from_yaml_file':yaml_fname,'at_origin':False,'flipped':False})
+    for at_origin in [True,False]:
+        opts.append({'from_file':True,
+                     'type':'ros',
+                     'filename':yaml_fname,
+                     'at_origin':at_origin,
+                     'flipped':False})
+
     return opts
 opts = _build_opts()
 
@@ -43,7 +49,7 @@ class Bunch:
 
 def _build_test_camera(**kwargs):
     o = Bunch(**kwargs)
-    if not o.at_origin:
+    if not kwargs.get('at_origin',False):
         translation = geometry_msgs.msg.Point()
         translation.x = 0.273485679077
         translation.y = 0.0707310128808
@@ -66,16 +72,19 @@ def _build_test_camera(**kwargs):
         rotation.z = 0.0
         rotation.w = 1.0
 
-    if 'from_yaml_file' in kwargs:
-        cam = CameraModel.load_camera_from_file( fname=o.from_yaml_file,
-                                                 extrinsics_required=False )
-        i = cam.get_intrinsics_as_bunch()
-        cam = CameraModel.from_ros_like(
-                          translation=point_msg_to_tuple(translation),
-                          rotation=parse_rotation_msg(rotation),
-                          intrinsics=i,
-                          name='cam',
-                          )
+    if 'from_file' in kwargs:
+        if kwargs['type']=='ros':
+            cam = CameraModel.load_camera_from_file( fname=kwargs['filename'],
+                                                     extrinsics_required=False )
+            i = cam.get_intrinsics_as_bunch()
+            cam = CameraModel.from_ros_like(
+                              translation=point_msg_to_tuple(translation),
+                              rotation=parse_rotation_msg(rotation),
+                              intrinsics=i,
+                              name='cam',
+                              )
+        else:
+            raise ValueError('unknown file type')
 
     else:
 
