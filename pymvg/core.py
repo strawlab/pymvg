@@ -935,7 +935,7 @@ class CameraModel(object):
         msg.R = b.R
         msg.P = b.P
 
-        topic = self.name + '/camera_info'
+        topic = self.name.encode('ascii') + '/camera_info'
         bagout.write(topic, intrinsics)
 
         bagout.close()
