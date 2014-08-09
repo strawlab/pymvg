@@ -9,5 +9,6 @@ setup(name='pymvg',
                 ],
       url='https://github.com/strawlab/pymvg',
       package_data={ 'pymvg.test': ['*.yaml'],
+                     'pymvg.test': ['*.json'],
                      },
       )
