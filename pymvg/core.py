@@ -1203,6 +1203,7 @@ class CameraModel(object):
         uv_rect_y = nparr[:,1]
 
         # transform to 3D point in camera frame
+        assert self.is_opencv_compatible()
         x = (uv_rect_x - self.cx() - self.Tx()) / self.fx()
         y = (uv_rect_y - self.cy() - self.Ty()) / self.fy()
         z = np.ones_like(x)
