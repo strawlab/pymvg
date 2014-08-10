@@ -14,6 +14,14 @@ class Bunch:
 
 # helper functions ---------------
 
+def is_string(value):
+    try:
+        # Python 2
+        return isinstance(value,basestring)
+    except:
+        # Python 3
+        return isinstance(value,str)
+
 def point_msg_to_tuple(d):
     return d.x, d.y, d.z
 

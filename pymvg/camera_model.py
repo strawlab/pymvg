@@ -3,7 +3,7 @@ import yaml
 
 from .util import _undistort, get_rotation_matrix_and_quaternion, np2plain, \
      Bunch, plain_vec, my_rq, is_rotation_matrix, center, normalize, \
-     point_msg_to_tuple, parse_rotation_msg
+     point_msg_to_tuple, parse_rotation_msg, _cam_str, is_string
 from .quaternions import quaternion_matrix, quaternion_from_matrix
 from .ros_compat import sensor_msgs as sensor_msgs_compat
 
@@ -406,29 +406,20 @@ class CameraModel(object):
             return False
         d1 = self.to_dict()
         d2 = self.to_dict()
-        try:
-            basestring
-        except NameError:
-            # python3
-            basestring = str
         for k in d1:
             if k not in d2:
                 return False
             v1 = d1[k]
             v2 = d2[k]
-            if isinstance(v1,basestring):
+            if is_string(v1):
                 if not v1==v2:
                     return False
             elif v1 is None:
                 if not v2 is None:
                     return False
             else:
-                if type(v1)==type(u'unicode string') and type(v1)==type(v2):
-                    if not v1==v2:
-                        return False
-                else:
-                    if not np.allclose(np.array(v1), np.array(v2)):
-                        return False
+                if not np.allclose(np.array(v1), np.array(v2)):
+                    return False
         for k in d2:
             if k not in d1:
                 return False
