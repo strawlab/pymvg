@@ -405,7 +405,7 @@ class CameraModel(object):
         if not isinstance( other, CameraModel ):
             return False
         d1 = self.to_dict()
-        d2 = self.to_dict()
+        d2 = other.to_dict()
         for k in d1:
             if k not in d2:
                 return False
