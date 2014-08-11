@@ -50,6 +50,16 @@ def _build_opts():
                  'filename':pymvg_fname,
                  }
                 )
+
+    # a PyMVG file generated synthetically (this was giving me trouble with rotations)
+    test_dir = os.path.split( __file__ )[0]
+    pymvg_base_fname = 'synthetic.json'
+    pymvg_fname = os.path.join( test_dir, pymvg_base_fname )
+    opts.append({'from_file':True,
+                 'type':'pymvg',
+                 'filename':pymvg_fname,
+                 }
+                )
     return opts
 opts = _build_opts()
 
