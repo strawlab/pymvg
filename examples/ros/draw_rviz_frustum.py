@@ -76,9 +76,11 @@ class MyApp:
                 self.rotation is None or
                 self.intrinsics is None):
                 return
-            newcam = CameraModel.from_ros_like( translation=self.translation,
-                                                rotation=self.rotation,
-                                                intrinsics=self.intrinsics)
+            newcam = CameraModel.load_camera_from_ROS_tf( translation=self.translation,
+                                                          rotation=self.rotation,
+                                                          intrinsics=self.intrinsics,
+                                                          name=self.get_frame_id(),
+                                                          )
         self.cam = newcam
 
         self.draw()
