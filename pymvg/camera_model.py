@@ -7,6 +7,13 @@ from .util import _undistort, get_rotation_matrix_and_quaternion, np2plain, \
 from .quaternions import quaternion_matrix, quaternion_from_matrix
 from .ros_compat import sensor_msgs as sensor_msgs_compat
 
+# Define matrices to point ROS transforms such than +Z is directly
+# ahead and +X is right.
+rot_90 = np.array( [[ 0,0,1],
+                    [ -1,0,0],
+                    [ 0,-1,0]], dtype=np.float)
+rot_90i = np.linalg.pinv(rot_90)
+
 class CameraModel(object):
     """an implementation of the Camera Model used by ROS and OpenCV
 
@@ -359,7 +366,9 @@ class CameraModel(object):
                                  translation=None,
                                  rotation=None,
                                  **kwargs):
-        rmat, rquat = get_rotation_matrix_and_quaternion(rotation)
+        rmatx, rquatx = get_rotation_matrix_and_quaternion(rotation)
+        rmat = np.dot( rot_90i,rmatx)
+        rmat, rquat = get_rotation_matrix_and_quaternion(rmat)
         if hasattr(translation,'x'):
             translation = (translation.x, translation.y, translation.z)
         C = np.array(translation)
@@ -514,7 +523,8 @@ class CameraModel(object):
         return msg
 
     def get_ROS_tf(self):
-        rmat = self.get_Q()
+        rmatx = self.get_Q()
+        rmat = np.dot( rot_90,rmatx)
         rmat2, rquat2 = get_rotation_matrix_and_quaternion(rmat)
         return self.get_camcenter(), rquat2
 
