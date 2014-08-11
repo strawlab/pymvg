@@ -234,7 +234,7 @@ class ROSPipelineMimic:
         return {'good':msg, 'perfect':msg2}
 
     def calc_mean_reproj_error(self,msg):
-        ros_cam = CameraModel.from_ros_like(intrinsics=msg)
+        ros_cam = CameraModel._from_parts(intrinsics=msg)
         all_ims = []
         for imd in self.db:
             ros_pix  = ros_cam.project_3d_to_pixel(imd['cc'], distorted=True)

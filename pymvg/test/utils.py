@@ -97,7 +97,7 @@ def _build_test_camera(**kwargs):
             cam = CameraModel.load_camera_from_file( fname=kwargs['filename'],
                                                      extrinsics_required=False )
             i = cam.get_intrinsics_as_bunch()
-            cam = CameraModel.from_ros_like(
+            cam = CameraModel._from_parts(
                               translation=point_msg_to_tuple(translation),
                               rotation=parse_rotation_msg(rotation),
                               intrinsics=i,
@@ -146,7 +146,7 @@ def _build_test_camera(**kwargs):
             i.R = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
             i.P = [442.17529296875, 0.0, 334.589001099812, 0.0, 0.0, 474.757141113281, 228.646131377705, 0.0, 0.0, 0.0, 1.0, 0.0]
 
-        cam = CameraModel.from_ros_like(
+        cam = CameraModel._from_parts(
                           translation=point_msg_to_tuple(translation),
                           rotation=parse_rotation_msg(rotation),
                           intrinsics=i,

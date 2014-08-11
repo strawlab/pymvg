@@ -98,7 +98,7 @@ class CameraModel(object):
             setattr( self, attr, getattr( tmp, attr ) )
 
     @classmethod
-    def from_ros_like(cls,
+    def _from_parts(cls,
                       translation=None,
                       rotation=None,
                       intrinsics=None,
@@ -203,7 +203,7 @@ class CameraModel(object):
             if extrinsics_required:
                 raise ValueError('extrinsic parameters are required, but not provided')
 
-        result = cls.from_ros_like(translation=translation,
+        result = cls._from_parts(translation=translation,
                                    rotation=rotation,
                                    intrinsics=c,
                                    name=name,
@@ -288,7 +288,7 @@ class CameraModel(object):
         if intrinsics is None:
             raise ValueError('no intrinsic parameters in bag file')
 
-        result = cls.from_ros_like(translation=translation,
+        result = cls._from_parts(translation=translation,
                                    rotation=rotation,
                                    intrinsics=intrinsics,
                                    name=camera_name,
@@ -341,7 +341,7 @@ class CameraModel(object):
         i.K = list(K.flatten())
         i.R = list(np.eye(3).flatten())
         i.P = list(P.flatten())
-        result = cls.from_ros_like(translation = t,
+        result = cls._from_parts(translation = t,
                                    rotation = R,
                                    intrinsics = i,
                                    name=name)
@@ -370,7 +370,7 @@ class CameraModel(object):
 
         t = -np.dot( rmat2, C)[:,0]
 
-        return cls.from_ros_like(translation=t, rotation=rquat2, **kwargs)
+        return cls._from_parts(translation=t, rotation=rquat2, **kwargs)
 
     @classmethod
     def load_camera_simple( cls,
@@ -659,7 +659,7 @@ class CameraModel(object):
                 i.K[5] = (self.height-i.K[5])
                 i.P[6] = (self.height-i.P[6])
 
-        camnew = CameraModel.from_ros_like(
+        camnew = CameraModel._from_parts(
                               translation = self.translation,
                               rotation = self.Q,
                               intrinsics = i,
@@ -714,7 +714,7 @@ class CameraModel(object):
         eye.shape = (3,1)
         t = -np.dot(R,eye)
 
-        result = CameraModel.from_ros_like(
+        result = CameraModel._from_parts(
                              translation=t,
                              rotation=R,
                              intrinsics=self.get_intrinsics_as_bunch(),
