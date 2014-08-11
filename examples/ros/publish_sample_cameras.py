@@ -11,7 +11,10 @@ cam_pubs = []
 
 rospy.init_node("publish_sample_cameras")
 
-system = build_example_system()
+n=6
+z=5.0
+system = build_example_system(n=n,z=z)
+
 for name in system.get_names():
     cam_pubs.append(ROSPublisher(system.get_camera(name)))
 
