@@ -365,12 +365,9 @@ class CameraModel(object):
         C = np.array(translation)
         C.shape = 3,1
 
-        r2 =  np.linalg.pinv(rmat)
-        rmat2, rquat2 = get_rotation_matrix_and_quaternion(r2)
+        t = -np.dot( rmat, C)[:,0]
 
-        t = -np.dot( rmat2, C)[:,0]
-
-        return cls._from_parts(translation=t, rotation=rquat2, **kwargs)
+        return cls._from_parts(translation=t, rotation=rquat, **kwargs)
 
     @classmethod
     def load_camera_simple( cls,
@@ -517,7 +514,7 @@ class CameraModel(object):
         return msg
 
     def get_ROS_tf(self):
-        rmat = self.get_Q_inv()
+        rmat = self.get_Q()
         rmat2, rquat2 = get_rotation_matrix_and_quaternion(rmat)
         return self.get_camcenter(), rquat2
 
