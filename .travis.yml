@@ -10,7 +10,10 @@ install:
     - pip install numpy
     - pip install matplotlib
     - pip install pyyaml
+    - pip install coveralls # for coverage testing
     - python setup.py install
 script:
-    - nosetests -w pymvg/test
+    - nosetests --with-coverage --cover-package=pymvg -w pymvg/test
     - if [[ $TRAVIS_PYTHON_VERSION == '2.'* ]]; then nosetests -w pymvg/test/external/opencv; fi
+after_success:
+    - coveralls
