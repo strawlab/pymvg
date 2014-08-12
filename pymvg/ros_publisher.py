@@ -1,5 +1,5 @@
 """ros_publisher - publish camera information to ROS"""
-import roslib # ROS is required for this example. See http://ros.org
+import roslib # ROS is required for this module. See http://ros.org
 roslib.load_manifest('tf')
 
 import rospy
