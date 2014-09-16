@@ -42,7 +42,7 @@ Ecosystem
 PyMVG is designed to interoperate with `OpenCV <http://opencv.org>`_,
 `ROS <http://ros.org>`_, and `MultiCamSelfCal
 <https://github.com/strawlab/MultiCamSelfCal>`_. Unit tests ensure
-exact compatibility the relevant parts of these packages.
+exact compatibility with the relevant parts of these packages.
 
 See also `opengl-hz <https://github.com/strawlab/opengl-hz>`_.
 
