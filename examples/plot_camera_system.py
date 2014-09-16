@@ -1,5 +1,5 @@
-from pymvg.plot_utils import plot_camera
 from pymvg.multi_camera_system import build_example_system
+from pymvg.plot_utils import plot_system
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
@@ -11,8 +11,7 @@ system = build_example_system(n=n,z=z)
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
-for name in system.get_names():
-    plot_camera( ax, system.get_camera(name), scale = z/5.0 )
+plot_system( ax, system, scale=z/5.0 )
 
 if 1:
     # put some points to force mpl's view dimensions

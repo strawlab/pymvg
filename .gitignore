@@ -1,3 +1,4 @@
 build
 pymvg.egg-info
 dist
+.coverage

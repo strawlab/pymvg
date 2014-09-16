@@ -1,4 +1,4 @@
-import pymvg
+import pymvg.camera_model
 import numpy as np
 
 def build_Bc(X3d,x2d):
@@ -35,7 +35,7 @@ def DLT(X3d, x2d, width=640, height=480):
     a_vec,residuals = DLT_avec_results[:2]
     Mhat = np.array(list(a_vec)+[1])
     Mhat.shape=(3,4)
-    cam = pymvg.CameraModel.load_camera_from_M(Mhat,width=width,height=height)
+    cam = pymvg.camera_model.CameraModel.load_camera_from_M(Mhat,width=width,height=height)
     x2d_reproj = cam.project_3d_to_pixel(X3d)
     dx = x2d_reproj - np.array(x2d)
     reproj_error = np.sqrt(np.sum(dx**2,axis=1))

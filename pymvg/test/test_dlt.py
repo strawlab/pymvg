@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import numpy as np
 
-import pymvg.core as pymvg
 import pymvg.calibration
+import pymvg.camera_model
 
 def test_dlt_old_data():
     # some old real data
@@ -45,7 +45,7 @@ def test_dlt_roundtrip():
                          scale*z ] ).T
     pts_3d += np.array(lookat)
 
-    cam_orig = pymvg.CameraModel.load_camera_default()
+    cam_orig = pymvg.camera_model.CameraModel.load_camera_default()
     cam = cam_orig.get_view_camera(eye, lookat, up)
 
     x2d_orig = cam.project_3d_to_pixel(pts_3d)

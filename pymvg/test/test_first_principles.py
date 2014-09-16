@@ -4,10 +4,8 @@ import numpy as np
 from pymvg.test.utils import _build_points_3d, make_M
 import os
 
-import pymvg.core as pymvg
-from pymvg import CameraModel
-
-normalize = pymvg.normalize
+from pymvg.util import normalize
+from pymvg.camera_model import CameraModel
 
 DRAW=int(os.environ.get('DRAW','0'))
 if DRAW:

@@ -5,9 +5,8 @@ from nose.plugins.skip import SkipTest
 import os, tempfile
 import pickle
 
-from pymvg import CameraModel
-from pymvg.core import point_msg_to_tuple, parse_rotation_msg
-import pymvg.core as pymvg
+from pymvg.camera_model import CameraModel
+from pymvg.util import point_msg_to_tuple, parse_rotation_msg
 import pymvg.align as mcsc_align
 
 from pymvg.test.utils import _build_test_camera, get_default_options
@@ -327,6 +326,25 @@ def test_simple_camera():
     cam = CameraModel.load_camera_simple(fov_x_degrees=90,
                                          eye=center,
                                          lookat=lookat)
+
+def test_equality():
+    center = np.array( (0, 0.0, 5) )
+    lookat = center + np.array( (0,1,0))
+    cam_apple1 = CameraModel.load_camera_simple(fov_x_degrees=90,
+                                                eye=center,
+                                                lookat=lookat,
+                                                name='apple')
+    cam_apple2 = CameraModel.load_camera_simple(fov_x_degrees=90,
+                                                eye=center,
+                                                lookat=lookat,
+                                                name='apple')
+    cam_orange = CameraModel.load_camera_simple(fov_x_degrees=30,
+                                                eye=center,
+                                                lookat=lookat,
+                                                name='orange')
+    assert cam_apple1==cam_apple2
+    assert cam_apple1!=cam_orange
+    assert not cam_apple1==cam_orange
 
 def test_pickle_roundtrip():
     all_options = get_default_options()

@@ -3,10 +3,10 @@
 import numpy as np
 import os
 
-from pymvg.core import CameraModel, point_msg_to_tuple, parse_rotation_msg, \
-     MultiCameraSystem
+from pymvg.camera_model import CameraModel
+from pymvg.multi_camera_system import MultiCameraSystem
+from pymvg.util import point_msg_to_tuple, parse_rotation_msg
 from pymvg.ros_compat import geometry_msgs, sensor_msgs
-import pymvg
 
 def make_M( focal_length, width, height, R, c):
     K = np.eye(3)
@@ -50,6 +50,16 @@ def _build_opts():
                  'filename':pymvg_fname,
                  }
                 )
+
+    # a PyMVG file generated synthetically (this was giving me trouble with rotations)
+    test_dir = os.path.split( __file__ )[0]
+    pymvg_base_fname = 'synthetic.json'
+    pymvg_fname = os.path.join( test_dir, pymvg_base_fname )
+    opts.append({'from_file':True,
+                 'type':'pymvg',
+                 'filename':pymvg_fname,
+                 }
+                )
     return opts
 opts = _build_opts()
 
@@ -87,7 +97,7 @@ def _build_test_camera(**kwargs):
             cam = CameraModel.load_camera_from_file( fname=kwargs['filename'],
                                                      extrinsics_required=False )
             i = cam.get_intrinsics_as_bunch()
-            cam = CameraModel.from_ros_like(
+            cam = CameraModel._from_parts(
                               translation=point_msg_to_tuple(translation),
                               rotation=parse_rotation_msg(rotation),
                               intrinsics=i,
@@ -136,7 +146,7 @@ def _build_test_camera(**kwargs):
             i.R = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
             i.P = [442.17529296875, 0.0, 334.589001099812, 0.0, 0.0, 474.757141113281, 228.646131377705, 0.0, 0.0, 0.0, 1.0, 0.0]
 
-        cam = CameraModel.from_ros_like(
+        cam = CameraModel._from_parts(
                           translation=point_msg_to_tuple(translation),
                           rotation=parse_rotation_msg(rotation),
                           intrinsics=i,

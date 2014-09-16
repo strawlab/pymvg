@@ -21,8 +21,8 @@ if DRAW:
 D2R = np.pi/180.0
 R2D = 1/D2R
 
-from pymvg.core import get_rotation_matrix_and_quaternion, CameraModel
-import pymvg.core as pymvg
+from pymvg.util import get_rotation_matrix_and_quaternion
+from pymvg.camera_model import CameraModel
 
 try:
     import roslib
@@ -234,7 +234,7 @@ class ROSPipelineMimic:
         return {'good':msg, 'perfect':msg2}
 
     def calc_mean_reproj_error(self,msg):
-        ros_cam = CameraModel.from_ros_like(intrinsics=msg)
+        ros_cam = CameraModel._from_parts(intrinsics=msg)
         all_ims = []
         for imd in self.db:
             ros_pix  = ros_cam.project_3d_to_pixel(imd['cc'], distorted=True)
@@ -301,22 +301,7 @@ def check_roundtrip_ros_tf(cam_opts):
                                                 rotation=rotation,
                                                 intrinsics = i,
                                                 name = cam1.name)
-
-    assert np.allclose( cam1.get_camcenter(),
-                        cam2.get_camcenter() )
-
-    assert np.allclose( cam1.get_rotation_quat(),
-                        cam2.get_rotation_quat() )
-
-    verts = np.array([[ 0.042306,  0.015338,  0.036328],
-                      [ 0.03323,   0.030344,  0.041542],
-                      [ 0.03323,   0.030344,  0.041542],
-                      [ 0.03323,   0.030344,  0.041542],
-                      [ 0.036396,  0.026464,  0.052408]])
-
-    p1 = cam1.project_3d_to_pixel(verts)
-    p2 = cam2.project_3d_to_pixel(verts)
-    assert np.allclose( p1, p2 )
+    assert cam1==cam2
 
 def test_bagfile_roundtrip():
     all_options = get_default_options()

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
-from pymvg import CameraModel, MultiCameraSystem
+from pymvg.camera_model import CameraModel
+from pymvg.multi_camera_system import MultiCameraSystem
 import os
 import tempfile
 import shutil
@@ -48,7 +49,7 @@ def make_default_system(with_separate_distorions=False):
 def test_load_mcsc():
     mydir = os.path.dirname(__file__)
     mcsc_dirname = os.path.join(mydir,'mcsc_output_20130726')
-    cam_system = MultiCameraSystem.from_mcsc( mcsc_dirname, max_skew_ratio=10 )
+    cam_system = MultiCameraSystem.from_mcsc( mcsc_dirname )
 
 def get_default_points():
     N = 500
@@ -170,7 +171,7 @@ def check_mcsc_roundtrip(with_rad_files=False,align_existing=False):
                               )
 
         result = mcsc.execute(silent=True)
-        raw_cams = MultiCameraSystem.from_mcsc( result, max_skew_ratio=10 )
+        raw_cams = MultiCameraSystem.from_mcsc( result )
         if align_existing:
             aligned_cams = raw_cams
         else:

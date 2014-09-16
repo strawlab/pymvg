@@ -1,5 +1,6 @@
 import numpy as np
-from pymvg import CameraModel, MultiCameraSystem
+from pymvg.camera_model import CameraModel
+from pymvg.multi_camera_system import MultiCameraSystem
 import sys
 
 def make_default_system():

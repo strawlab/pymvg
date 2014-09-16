@@ -20,7 +20,7 @@ from visualization_msgs.msg import Marker, MarkerArray
 
 import flyvr.simple_geom as simple_geom
 import flyvr.display_client as display_client
-import pymvg
+from pymvg.camera_model import CameraModel
 import pymvg.rviz_utils
 
 class MyApp:
@@ -76,9 +76,11 @@ class MyApp:
                 self.rotation is None or
                 self.intrinsics is None):
                 return
-            newcam = pymvg.CameraModel.from_ros_like( translation=self.translation,
-                                                      rotation=self.rotation,
-                                                      intrinsics=self.intrinsics)
+            newcam = CameraModel.load_camera_from_ROS_tf( translation=self.translation,
+                                                          rotation=self.rotation,
+                                                          intrinsics=self.intrinsics,
+                                                          name=self.get_frame_id(),
+                                                          )
         self.cam = newcam
 
         self.draw()

@@ -1,308 +1,19 @@
-#!/usr/bin/env python
 import numpy as np
-import os, re
-import json
 import yaml
-from collections import OrderedDict
-from .align import estsimt
-import warnings
 
+from .util import _undistort, get_rotation_matrix_and_quaternion, np2plain, \
+     Bunch, plain_vec, my_rq, is_rotation_matrix, center, normalize, \
+     point_msg_to_tuple, parse_rotation_msg, _cam_str, is_string
 from .quaternions import quaternion_matrix, quaternion_from_matrix
 from .ros_compat import sensor_msgs as sensor_msgs_compat
 
-D2R = np.pi/180.0
+# Define matrices to point ROS transforms such than +Z is directly
+# ahead and +X is right.
+rot_90 = np.array( [[ 0,0,1],
+                    [ -1,0,0],
+                    [ 0,-1,0]], dtype=np.float)
+rot_90i = np.linalg.pinv(rot_90)
 
-# helper class
-
-class Bunch:
-    def __init__(self, **kwds):
-        self.__dict__.update(kwds)
-
-# helper functions ---------------
-
-def point_msg_to_tuple(d):
-    return d.x, d.y, d.z
-
-def normalize(vec):
-    mag = np.sqrt(np.sum(vec**2))
-    return vec/mag
-
-def parse_rotation_msg(rotation, force_matrix=False):
-    # rotation could either be a quaternion or a 3x3 matrix
-
-    if (hasattr(rotation,'x') and
-        hasattr(rotation,'y') and
-        hasattr(rotation,'z') and
-        hasattr(rotation,'w')):
-        # convert quaternion message to tuple
-        rotation = quaternion_msg_to_tuple(rotation)
-
-    if len(rotation)==4:
-        if force_matrix:
-            rotation = quaternion_matrix(rotation)[:3,:3]
-        return rotation
-
-    if len(rotation) != 9:
-        raise ValueError('expected rotation to be a quaternion or 3x3 matrix')
-    rotation = np.array( rotation )
-    rotation.shape = 3,3
-    return rotation
-
-def np2plain(arr):
-    '''convert numpy array to plain python (for serializing to yaml or json)'''
-    arr = np.array(arr)
-    if arr.ndim==1:
-        result = plain_vec(arr)
-    elif arr.ndim==2:
-        result = [ plain_vec(row) for row in arr ]
-    else:
-        raise NotImplementedError
-    return result
-
-def quaternion_msg_to_tuple(d):
-    return d.x, d.y, d.z, d.w
-
-def _undistort( xd, yd, D):
-    # See OpenCV modules/imgprc/src/undistort.cpp
-    x = np.array(xd,copy=True)
-    y = np.array(yd,copy=True)
-
-    k1, k2, t1, t2, k3 = D[:5]
-    k = list(D)
-    if len(k)==5:
-        k = k + [0,0,0]
-
-    for i in range(5):
-        r2 = x*x + y*y
-        icdist = (1 + ((k[7]*r2 + k[6])*r2 + k[5])*r2)/ \
-                 (1 + ((k[4]*r2 + k[1])*r2 + k[0])*r2)
-        delta_x = 2.0 * (t1)*x*y + (t2)*(r2 + 2.0*x*x)
-        delta_y = (t1) * (r2 + 2.0*y*y)+2.0*(t2)*x*y
-        x = (xd-delta_x)*icdist
-        y = (yd-delta_y)*icdist
-    return x,y
-
-
-def rq(A):
-    # see first comment at
-    # http://leohart.wordpress.com/2010/07/23/rq-decomposition-from-qr-decomposition/
-    from numpy.linalg import qr
-    from numpy import flipud
-    Q,R = qr(flipud(A).T)
-    R = flipud(R.T)
-    Q = Q.T
-    return R[:,::-1],Q[::-1,:]
-
-def my_rq(M):
-    """RQ decomposition, ensures diagonal of R is positive"""
-    R,K = rq(M)
-    n = R.shape[0]
-    for i in range(n):
-        if R[i,i]<0:
-            # I checked this with Mathematica. Works if R is upper-triangular.
-            R[:,i] = -R[:,i]
-            K[i,:] = -K[i,:]
-    return R,K
-
-def center(P,eps=1e-8):
-    orig_determinant = np.linalg.det
-    def determinant( A ):
-        return orig_determinant( np.asarray( A ) )
-    # camera center
-    X = determinant( [ P[:,1], P[:,2], P[:,3] ] )
-    Y = -determinant( [ P[:,0], P[:,2], P[:,3] ] )
-    Z = determinant( [ P[:,0], P[:,1], P[:,3] ] )
-    T = -determinant( [ P[:,0], P[:,1], P[:,2] ] )
-
-    assert abs(T)>eps, "cannot calculate 3D camera center: camera at infinity"
-    C_ = np.array( [[ X/T, Y/T, Z/T ]] ).T
-    return C_
-
-def is_rotation_matrix(R):
-    # check if rotation matrix is really a pure rotation matrix
-
-    # test: inverse is transpose
-    testI = np.dot(R.T,R)
-    if not np.allclose( testI, np.eye(len(R)) ):
-        return False
-
-    # test: determinant is unity
-    dr = abs(np.linalg.det(R))
-    if not np.allclose(dr,1):
-        return False
-
-    # test: has one eigenvalue of unity
-    l, W = np.linalg.eig(R)
-    eps = 1e-8
-    i = np.where(abs(np.real(l) - 1.0) < eps)[0]
-    if not len(i):
-        return False
-    return True
-
-def get_rotation_matrix_and_quaternion(rotation):
-    rotation_orig = rotation
-    rotation = np.array(rotation)
-    if rotation.ndim==2:
-        assert rotation.shape==(3,3)
-        if not np.alltrue(np.isnan( rotation )):
-            assert is_rotation_matrix(rotation)
-
-        rmat = rotation
-
-        rnew = np.eye(4)
-        rnew[:3,:3] = rmat
-        rquat = quaternion_from_matrix(rnew)
-        if not np.alltrue(np.isnan( rquat )):
-            R2 = quaternion_matrix(rquat)[:3,:3]
-            assert np.allclose(rmat,R2)
-    elif rotation.ndim==0:
-        assert rotation.dtype == object
-        rotation = (rotation_orig.x,
-                    rotation_orig.y,
-                    rotation_orig.z,
-                    rotation_orig.w)
-        return get_rotation_matrix_and_quaternion(rotation)
-    else:
-        assert rotation.ndim==1
-        assert rotation.shape==(4,)
-        rquat = rotation
-        rmat = quaternion_matrix(rquat)[:3,:3]
-
-        if not np.alltrue(np.isnan( rmat )):
-            assert is_rotation_matrix(rmat)
-
-    return rmat, rquat
-
-def get_vec_str(vec):
-    assert vec.ndim==1
-    # use numpy for printing (suppresses small values when others are large)
-    tmp = np.array_repr(vec, precision=5, suppress_small=True)
-    assert tmp.startswith('array([')
-    tmp = tmp[7:]
-    assert tmp.endswith('])')
-    tmp = tmp[:-2]
-    tmp = tmp.strip()
-    tmps = [t.strip() for t in tmp.split(',')]
-
-    # convert -0 to 0
-    tmps2 = []
-    for t in tmps:
-        if t=='-0.':
-            tmps2.append('0.')
-        else:
-            tmps2.append(t)
-    tmps = tmps2
-
-    tmps = ['% 8s'%(t,) for t in tmps ]
-    result = ', '.join( tmps )
-    return result
-
-def plain_vec(vec,eps=1e-15):
-    '''make a list of plain types'''
-    if hasattr( vec, 'dtype' ):
-        # assume it's a simple numpy array
-        # TODO: FIXME: could make this much better
-        result = [ float(el) for el in vec ]
-    else:
-        # no change
-        result = vec
-    r2=[]
-    for r in result:
-        if abs(r)<eps:
-            r2.append(0)
-        else:
-            r2.append(float(r))
-    return r2
-
-def normalize_M(pmat,eps=1e-6):
-    pmat_orig = pmat
-    M = pmat[:,:3]
-    t = pmat[:,3,np.newaxis]
-    K,R = my_rq(M)
-    if abs(K[2,2]-1.0)>eps:
-        pmat = pmat/K[2,2]
-    assert np.allclose(center(pmat_orig),center(pmat))
-    return pmat
-
-def parse_radfile(filename):
-    result = {}
-    regex = re.compile(r'^(?P<key>[_a-zA-Z][a-zA-Z0-9_.]*)\s*=\s*(?P<value>.*)$')
-    with open(filename,mode='r') as fd:
-        for line in fd.readlines():
-            line = line[:line.find('#')] # strip comments
-            line = line.strip() # strip whitespace
-            if len(line)==0:
-                # discard empty lines
-                continue
-            matchobj = regex.match(line)
-            assert matchobj is not None
-            d = matchobj.groupdict()
-            result[ d['key'] ] = float(d['value'])
-
-    K = np.zeros((3,3))
-    for i in range(3):
-        for j in range(3):
-            K[i,j] = result[ 'K%d%d'%(i+1, j+1) ]
-
-    distortion = np.array(( result['kc1'],
-                            result['kc2'],
-                            result['kc3'],
-                            result['kc4'],
-                            result.get('kc5',0.0) ))
-    return K, distortion
-
-# JSON compatible pretty printing ----------------
-
-def _pretty_vec(row):
-    els = [ json.dumps(el) for el in row ]
-    rowstr = '[ ' + ', '.join(els) + ' ]'
-    return rowstr
-
-def _pretty_arr(arr,indent=11):
-    rowstrs = []
-    for row in arr:
-        rowstr = _pretty_vec(row)
-        rowstrs.append( rowstr )
-    sep = ',\n' + ' '*indent
-    buf = '[' + sep.join(rowstrs) + ']'
-    return buf
-
-def _cam_str(cam):
-    buf = '''{"name": "%s",
-     "width": %d,
-     "height": %d,
-     "P": %s,
-     "K": %s,
-     "D": %s,
-     "R": %s,
-     "Q": %s,
-     "translation": %s
-    }'''%(cam['name'], cam['width'], cam['height'], _pretty_arr(cam['P']),
-          _pretty_arr(cam['K']),
-          _pretty_vec(cam['D']),
-          _pretty_arr(cam['R']),
-          _pretty_arr(cam['Q']),
-          _pretty_vec(cam['translation'])
-          )
-    return buf
-
-def pretty_json_dump(d):
-    keys = list(d.keys())
-    assert len(keys)==2
-    assert d['__pymvg_file_version__']=='1.0'
-    cams = d['camera_system']
-    cam_strs = [_cam_str(cam) for cam in cams]
-    cam_strs = ',\n    '.join(cam_strs)
-    buf = '''{ "__pymvg_file_version__": "1.0",
-  "camera_system": [
-    %s
-  ]
-}''' % cam_strs
-    return buf
-
-# end pretty printing ----------
-
-# main class
 class CameraModel(object):
     """an implementation of the Camera Model used by ROS and OpenCV
 
@@ -394,7 +105,7 @@ class CameraModel(object):
             setattr( self, attr, getattr( tmp, attr ) )
 
     @classmethod
-    def from_ros_like(cls,
+    def _from_parts(cls,
                       translation=None,
                       rotation=None,
                       intrinsics=None,
@@ -499,7 +210,7 @@ class CameraModel(object):
             if extrinsics_required:
                 raise ValueError('extrinsic parameters are required, but not provided')
 
-        result = cls.from_ros_like(translation=translation,
+        result = cls._from_parts(translation=translation,
                                    rotation=rotation,
                                    intrinsics=c,
                                    name=name,
@@ -584,7 +295,7 @@ class CameraModel(object):
         if intrinsics is None:
             raise ValueError('no intrinsic parameters in bag file')
 
-        result = cls.from_ros_like(translation=translation,
+        result = cls._from_parts(translation=translation,
                                    rotation=rotation,
                                    intrinsics=intrinsics,
                                    name=camera_name,
@@ -637,7 +348,7 @@ class CameraModel(object):
         i.K = list(K.flatten())
         i.R = list(np.eye(3).flatten())
         i.P = list(P.flatten())
-        result = cls.from_ros_like(translation = t,
+        result = cls._from_parts(translation = t,
                                    rotation = R,
                                    intrinsics = i,
                                    name=name)
@@ -655,18 +366,17 @@ class CameraModel(object):
                                  translation=None,
                                  rotation=None,
                                  **kwargs):
-        rmat, rquat = get_rotation_matrix_and_quaternion(rotation)
+        rmatx, rquatx = get_rotation_matrix_and_quaternion(rotation)
+        rmat = np.dot( rot_90i,rmatx)
+        rmat, rquat = get_rotation_matrix_and_quaternion(rmat)
         if hasattr(translation,'x'):
             translation = (translation.x, translation.y, translation.z)
         C = np.array(translation)
         C.shape = 3,1
 
-        r2 =  np.linalg.pinv(rmat)
-        rmat2, rquat2 = get_rotation_matrix_and_quaternion(r2)
+        t = -np.dot( rmat, C)[:,0]
 
-        t = -np.dot( rmat2, C)[:,0]
-
-        return cls.from_ros_like(translation=t, rotation=rquat2, **kwargs)
+        return cls._from_parts(translation=t, rotation=rquat, **kwargs)
 
     @classmethod
     def load_camera_simple( cls,
@@ -680,7 +390,7 @@ class CameraModel(object):
                             ):
         aspect = float(width)/float(height)
         fov_y_degrees = fov_x_degrees/aspect
-        f = (width/2.0) / np.tan(fov_x_degrees*D2R/2.0)
+        f = (width/2.0) / np.tan(np.radians(fov_x_degrees)/2.0)
         cx = width/2.0
         cy = height/2.0
         M = np.array( [[ f, 0, cx, 0],
@@ -701,30 +411,21 @@ class CameraModel(object):
         if not isinstance( other, CameraModel ):
             return False
         d1 = self.to_dict()
-        d2 = self.to_dict()
-        try:
-            basestring
-        except NameError:
-            # python3
-            basestring = str
+        d2 = other.to_dict()
         for k in d1:
             if k not in d2:
                 return False
             v1 = d1[k]
             v2 = d2[k]
-            if isinstance(v1,basestring):
+            if is_string(v1):
                 if not v1==v2:
                     return False
             elif v1 is None:
                 if not v2 is None:
                     return False
             else:
-                if type(v1)==type(u'unicode string') and type(v1)==type(v2):
-                    if not v1==v2:
-                        return False
-                else:
-                    if not np.allclose(np.array(v1), np.array(v2)):
-                        return False
+                if not np.allclose(np.array(v1), np.array(v2)):
+                    return False
         for k in d2:
             if k not in d1:
                 return False
@@ -822,7 +523,8 @@ class CameraModel(object):
         return msg
 
     def get_ROS_tf(self):
-        rmat = self.get_Q_inv()
+        rmatx = self.get_Q()
+        rmat = np.dot( rot_90,rmatx)
         rmat2, rquat2 = get_rotation_matrix_and_quaternion(rmat)
         return self.get_camcenter(), rquat2
 
@@ -971,7 +673,7 @@ class CameraModel(object):
                 i.K[5] = (self.height-i.K[5])
                 i.P[6] = (self.height-i.P[6])
 
-        camnew = CameraModel.from_ros_like(
+        camnew = CameraModel._from_parts(
                               translation = self.translation,
                               rotation = self.Q,
                               intrinsics = i,
@@ -1026,7 +728,7 @@ class CameraModel(object):
         eye.shape = (3,1)
         t = -np.dot(R,eye)
 
-        result = CameraModel.from_ros_like(
+        result = CameraModel._from_parts(
                              translation=t,
                              rotation=R,
                              intrinsics=self.get_intrinsics_as_bunch(),
@@ -1286,256 +988,3 @@ class CameraModel(object):
         assert nparr.ndim==2
         assert nparr.shape[1]==3
         return np.zeros( nparr.shape ) + self.t_inv.T
-
-class MultiCameraSystem:
-    def __init__(self,cameras):
-        self._cameras=OrderedDict()
-        for camera in cameras:
-            self.append(camera)
-
-    def append(self,camera):
-        assert isinstance(camera, CameraModel)
-        name = camera.name
-        if name in self._cameras:
-            raise ValueError('Cannot create MultiCameraSystem with '
-                             'multiple identically-named cameras.')
-        self._cameras[name]=camera
-
-    @classmethod
-    def from_dict(cls, d):
-        cam_dict_list = d['camera_system']
-        cams = [CameraModel.from_dict(cd) for cd in cam_dict_list]
-        return MultiCameraSystem( cameras=cams )
-
-    def get_pymvg_str( self ):
-        d = self.to_dict()
-        d['__pymvg_file_version__']='1.0'
-        buf = pretty_json_dump(d)
-        return buf
-
-    def save_to_pymvg_file( self, fname ):
-        buf = self.get_pymvg_str()
-        with open(fname,mode='w') as fd:
-            fd.write(buf)
-
-    @classmethod
-    def from_pymvg_str(cls, buf):
-        d = json.loads(buf)
-        assert d['__pymvg_file_version__']=='1.0'
-        cam_dict_list = d['camera_system']
-        cams = [CameraModel.from_dict(cd) for cd in cam_dict_list]
-        return MultiCameraSystem( cameras=cams )
-
-    @classmethod
-    def from_pymvg_file(cls, fname):
-        with open(fname,mode='r') as fd:
-            buf = fd.read()
-        return MultiCameraSystem.from_pymvg_str(buf)
-
-    @classmethod
-    def from_mcsc(cls, dirname ):
-        '''create MultiCameraSystem from output directory of MultiCamSelfCal'''
-
-        # FIXME: This is a bit convoluted because it's been converted
-        # from multiple layers of internal code. It should really be
-        # simplified and cleaned up.
-
-        do_normalize_pmat=True
-
-        all_Pmat = {}
-        all_Res = {}
-        all_K = {}
-        all_distortion = {}
-
-        opj = os.path.join
-
-        with open(opj(dirname,'camera_order.txt'),mode='r') as fd:
-            cam_ids = fd.read().strip().split('\n')
-
-        with open(os.path.join(dirname,'Res.dat'),'r') as res_fd:
-            for i, cam_id in enumerate(cam_ids):
-                fname = 'camera%d.Pmat.cal'%(i+1)
-                pmat = np.loadtxt(opj(dirname,fname)) # 3 rows x 4 columns
-                if do_normalize_pmat:
-                    pmat_orig = pmat
-                    pmat = normalize_M(pmat)
-                all_Pmat[cam_id] = pmat
-                all_Res[cam_id] = map(int,res_fd.readline().split())
-
-        # load non linear parameters
-        rad_files = [ f for f in os.listdir(dirname) if f.endswith('.rad') ]
-        for cam_id_enum, cam_id in enumerate(cam_ids):
-            filename = os.path.join(dirname,
-                                    'basename%d.rad'%(cam_id_enum+1,))
-            if os.path.exists(filename):
-                K, distortion = parse_radfile(filename)
-                all_K[cam_id] = K
-                all_distortion[cam_id] = distortion
-            else:
-                if len(rad_files):
-                    raise RuntimeError(
-                        '.rad files present but none named "%s"'%filename)
-                warnings.warn('no non-linear data (e.g. radial distortion) '
-                              'in calibration for %s'%cam_id)
-                all_K[cam_id] = None
-                all_distortion[cam_id] = None
-
-        cameras = []
-        for cam_id in cam_ids:
-            w,h = all_Res[cam_id]
-            Pmat = all_Pmat[cam_id]
-            M = Pmat[:,:3]
-            K,R = my_rq(M)
-            if not is_rotation_matrix(R):
-                # RQ may return left-handed rotation matrix. Make right-handed.
-                R2 = -R
-                K2 = -K
-                assert np.allclose(np.dot(K2,R2), np.dot(K,R))
-                K,R = K2,R2
-
-            P = np.zeros((3,4))
-            P[:3,:3] = K
-            KK = all_K[cam_id] # from rad file or None
-            distortion = all_distortion[cam_id]
-
-            # (ab)use PyMVG's rectification to do coordinate transform
-            # for MCSC's undistortion.
-
-            # The intrinsic parameters used for 3D -> 2D.
-            ex = P[0,0]
-            bx = P[0,2]
-            Sx = P[0,3]
-            ey = P[1,1]
-            by = P[1,2]
-            Sy = P[1,3]
-
-            if KK is None:
-                rect = np.eye(3)
-                KK = P[:,:3]
-            else:
-                # Parameters used to define undistortion coordinates.
-                fx = KK[0,0]
-                fy = KK[1,1]
-                cx = KK[0,2]
-                cy = KK[1,2]
-
-                rect = np.array([[ ex/fx,     0, (bx+Sx-cx)/fx ],
-                                 [     0, ey/fy, (by+Sy-cy)/fy ],
-                                 [     0,     0,       1       ]]).T
-
-            if distortion is None:
-                distortion = np.zeros((5,))
-
-            C = center(Pmat)
-            rot = R
-            t = -np.dot(rot, C)[:,0]
-
-            d = {'width':w,
-                 'height':h,
-                 'P':P,
-                 'K':KK,
-                 'R':rect,
-                 'translation':t,
-                 'Q':rot,
-                 'D':distortion,
-                 'name':cam_id,
-                 }
-            cam = CameraModel.from_dict(d)
-            cameras.append( cam )
-        return MultiCameraSystem( cameras=cameras )
-
-    def __eq__(self, other):
-        assert isinstance( self, MultiCameraSystem )
-        if not isinstance( other, MultiCameraSystem ):
-            return False
-        if len(self.get_names()) != len(other.get_names()):
-            return False
-        for name in self.get_names():
-            if self._cameras[name] != other._cameras[name]:
-                return False
-        return True
-
-    def __ne__(self,other):
-        return not (self==other)
-
-    def get_names(self):
-        result = list(self._cameras.keys())
-        return result
-
-    def get_camera_dict(self):
-        return self._cameras
-
-    def get_camera(self,name):
-        return self._cameras[name]
-
-    def to_dict(self):
-        return {'camera_system':
-                [self._cameras[name].to_dict() for name in self._cameras]}
-
-    def find3d(self,pts,undistort=True):
-        """Find 3D coordinate using all data given
-
-        Implements a linear triangulation method to find a 3D
-        point. For example, see Hartley & Zisserman section 12.2
-        (p.312).
-
-        By default, this function will undistort 2D points before
-        finding a 3D point.
-        """
-        # for info on SVD, see Hartley & Zisserman (2003) p. 593 (see
-        # also p. 587)
-        # Construct matrices
-        A=[]
-        P=[]
-        for name,xy in pts:
-            cam = self._cameras[name]
-            if undistort:
-                xy = cam.undistort( [xy] )
-            Pmat = cam.get_M() # Pmat is 3 rows x 4 columns
-            row2 = Pmat[2,:]
-            x,y = xy[0,:]
-            A.append( x*row2 - Pmat[0,:] )
-            A.append( y*row2 - Pmat[1,:] )
-
-        # Calculate best point
-        A=np.array(A)
-        u,d,vt=np.linalg.svd(A)
-        X = vt[-1,0:3]/vt[-1,3] # normalize
-        return X
-
-    def find2d(self,camera_name,xyz,distorted=True):
-        cam = self._cameras[camera_name]
-
-        xyz = np.array(xyz)
-        rank1 = xyz.ndim==1
-
-        xyz = np.atleast_2d(xyz)
-        pix = cam.project_3d_to_pixel( xyz, distorted=distorted ).T
-
-        if rank1:
-            # convert back to rank1
-            pix = pix[:,0]
-        return pix
-
-    def get_aligned_copy(self, other):
-        """return copy of self that is scaled, translated, and rotated to best match other"""
-        assert isinstance( other, MultiCameraSystem)
-
-        orig_names = self.get_names()
-        new_names = other.get_names()
-        names = set(orig_names).intersection( new_names )
-        if len(names) < 3:
-            raise ValueError('need 3 or more cameras in common to align.')
-        orig_points = np.array([ self._cameras[name].get_camcenter() for name in names ]).T
-        new_points = np.array([ other._cameras[name].get_camcenter() for name in names ]).T
-
-        s,R,t = estsimt(orig_points,new_points)
-        assert is_rotation_matrix(R)
-
-        new_cams = []
-        for name in self.get_names():
-            orig_cam = self._cameras[name]
-            new_cam = orig_cam.get_aligned_camera(s,R,t)
-            new_cams.append( new_cam )
-        result = MultiCameraSystem(new_cams)
-        return result
