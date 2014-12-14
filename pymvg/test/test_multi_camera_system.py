@@ -1,8 +1,10 @@
 import numpy as np
 import pymvg
 from pymvg.camera_model import CameraModel
-from pymvg.multi_camera_system import MultiCameraSystem
+from pymvg.multi_camera_system import MultiCameraSystem, build_example_system
 import tempfile, os
+
+import nose.tools
 
 def make_default_system():
     '''helper function to generate an instance of MultiCameraSystem'''
@@ -66,6 +68,26 @@ def test_roundtrip():
         actual = system.find3d( pts )
         assert np.allclose( expected, actual )
 
+def test_no_duplicate_names():
+    cam1a = CameraModel.load_camera_simple(name='cam1')
+    cam1b = CameraModel.load_camera_simple(name='cam1')
+    cams = [cam1a,cam1b]
+    nose.tools.assert_raises(ValueError, MultiCameraSystem, cams)
+
+def test_equals():
+    system = make_default_system()
+    assert system != 1234
+
+    system2 = MultiCameraSystem([CameraModel.load_camera_simple(name='cam%d'%i) for i in range(2)])
+    system3 = MultiCameraSystem([CameraModel.load_camera_simple(name='cam%d'%i) for i in range(3)])
+    assert system2 != system3
+
+    system4 = make_default_system()
+    d = system4.to_dict()
+    d['camera_system'][0]['width'] += 1
+    system5 = MultiCameraSystem.from_dict( d )
+    assert system4 != system5
+
 def test_single_and_multiple_points_find2d():
     '''ensure that find2d works with single points and multiple points'''
     system = make_default_system()
@@ -86,6 +108,18 @@ def test_roundtrip_to_dict():
     system1 = make_default_system()
     system2 = MultiCameraSystem.from_dict( system1.to_dict() )
     assert system1==system2
+
+def test_getters():
+    system1 = make_default_system()
+    d = system1.to_dict()
+    names1 = system1.get_camera_dict().keys()
+    names2 = [cd['name'] for cd in d['camera_system']]
+    assert set(names1)==set(names2)
+
+    for idx in range(len(names1)):
+        cam1 = system1.get_camera( names1[idx] )
+        cam2 = CameraModel.from_dict(d['camera_system'][idx])
+        assert cam1==cam2
 
 def test_roundtrip_to_pymvg_file():
     system1 = make_default_system()
@@ -114,3 +148,16 @@ def test_align():
     system1 = make_default_system()
     system2 = system1.get_aligned_copy( system1 ) # This should be a no-op.
     assert system1==system2
+
+def test_align():
+    system1 = make_default_system()
+    system2 = system1.get_aligned_copy( system1 ) # This should be a no-op.
+    assert system1==system2
+
+    system3 = MultiCameraSystem([CameraModel.load_camera_simple(name='cam%d'%i) for i in range(2)])
+    nose.tools.assert_raises(ValueError, system3.get_aligned_copy, system1)
+
+def test_build_example_system():
+    for n in range(2,100,5):
+        system = build_example_system(n=n)
+        assert n==len(system.get_names())
