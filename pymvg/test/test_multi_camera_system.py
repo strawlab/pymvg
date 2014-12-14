@@ -112,7 +112,7 @@ def test_roundtrip_to_dict():
 def test_getters():
     system1 = make_default_system()
     d = system1.to_dict()
-    names1 = system1.get_camera_dict().keys()
+    names1 = list(system1.get_camera_dict().keys())
     names2 = [cd['name'] for cd in d['camera_system']]
     assert set(names1)==set(names2)
 
