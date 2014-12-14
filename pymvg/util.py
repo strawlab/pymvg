@@ -175,30 +175,6 @@ def get_rotation_matrix_and_quaternion(rotation):
 
     return rmat, rquat
 
-def get_vec_str(vec):
-    assert vec.ndim==1
-    # use numpy for printing (suppresses small values when others are large)
-    tmp = np.array_repr(vec, precision=5, suppress_small=True)
-    assert tmp.startswith('array([')
-    tmp = tmp[7:]
-    assert tmp.endswith('])')
-    tmp = tmp[:-2]
-    tmp = tmp.strip()
-    tmps = [t.strip() for t in tmp.split(',')]
-
-    # convert -0 to 0
-    tmps2 = []
-    for t in tmps:
-        if t=='-0.':
-            tmps2.append('0.')
-        else:
-            tmps2.append(t)
-    tmps = tmps2
-
-    tmps = ['% 8s'%(t,) for t in tmps ]
-    result = ', '.join( tmps )
-    return result
-
 def plain_vec(vec,eps=1e-15):
     '''make a list of plain types'''
     if hasattr( vec, 'dtype' ):
