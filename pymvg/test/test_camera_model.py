@@ -356,3 +356,18 @@ def check_pickle_roundtrip(cam_opts):
     buf = pickle.dumps(cam)
     cam2 = pickle.loads(buf)
     assert cam==cam2
+
+def test_camcenter_like():
+    all_options = get_default_options()
+    for opts in all_options:
+        yield check_camcenter_like, opts
+
+def check_camcenter_like(cam_opts):
+    cam = _build_test_camera(**cam_opts)
+    cc_expected = cam.get_camcenter()
+    for n in range(4):
+        nparr = np.zeros( (n,3), dtype=np.float )
+        cc = cam.camcenter_like( nparr )
+        for i in range(n):
+            this_cc = cc[i]
+            assert np.allclose(cc_expected,this_cc)

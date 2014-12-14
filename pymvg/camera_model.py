@@ -977,6 +977,7 @@ class CameraModel(object):
     # misc. helpers
 
     def camcenter_like(self,nparr):
+        """create numpy array of camcenters like another array"""
         nparr = np.array(nparr,copy=False)
         assert nparr.ndim==2
         assert nparr.shape[1]==3
