@@ -46,11 +46,6 @@ def make_default_system(with_separate_distorions=False):
     system = MultiCameraSystem(cameras)
     return system
 
-def test_load_mcsc():
-    mydir = os.path.dirname(__file__)
-    mcsc_dirname = os.path.join(mydir,'mcsc_output_20130726')
-    cam_system = MultiCameraSystem.from_mcsc( mcsc_dirname )
-
 def get_default_points():
     N = 500
     pts_3d = 1.0*np.random.randn(N,3)

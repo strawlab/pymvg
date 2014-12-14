@@ -161,3 +161,9 @@ def test_build_example_system():
     for n in range(2,100,5):
         system = build_example_system(n=n)
         assert n==len(system.get_names())
+
+def test_load_mcsc():
+    mydir = os.path.dirname(__file__)
+    mcsc_dir = os.path.join(mydir,'external','mcsc')
+    mcsc_dirname = os.path.join(mcsc_dir,'mcsc_output_20130726')
+    cam_system = MultiCameraSystem.from_mcsc( mcsc_dirname )
