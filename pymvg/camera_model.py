@@ -237,7 +237,7 @@ class CameraModel(object):
             raise ValueError("only supports: .bag .yaml .json")
 
     @classmethod
-    def load_camera_from_opened_bagfile( cls, bag, extrinsics_required=True ):
+    def load_camera_from_opened_bagfile( cls, bag, extrinsics_required=True ): # pragma: no cover
         """factory function for class CameraModel
 
         arguments
@@ -583,7 +583,7 @@ class CameraModel(object):
     def get_P(self):
         return self.P
 
-    def save_to_bagfile(self,fname,roslib):
+    def save_to_bagfile(self,fname,roslib): # pragma: no cover
         """save CameraModel to ROS bag file
 
         arguments
