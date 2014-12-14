@@ -3,5 +3,3 @@
 [run]
 branch = True
 source = pymvg
-omit =
-        pymvg/test/*
