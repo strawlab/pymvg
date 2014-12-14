@@ -14,6 +14,6 @@ install:
     - python setup.py install
 script:
     - nosetests  --with-doctest --with-coverage --cover-package=pymvg --exclude-dir=test/external --where=pymvg
-    - if [[ $TRAVIS_PYTHON_VERSION == '2.'* ]]; then nosetests -w pymvg/test/external/opencv; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == '2.'* ]]; then nosetests --where=pymvg/test/external/opencv; fi
 after_success:
     - coveralls
