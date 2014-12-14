@@ -21,7 +21,7 @@ from visualization_msgs.msg import Marker, MarkerArray
 import flyvr.simple_geom as simple_geom
 import flyvr.display_client as display_client
 from pymvg.camera_model import CameraModel
-import pymvg.rviz_utils
+import pymvg.extern.ros.rviz_utils as rviz_utils
 
 class MyApp:
     def __init__(self,name,scale=1.0):
@@ -86,7 +86,7 @@ class MyApp:
         self.draw()
 
     def draw(self):
-        r = pymvg.rviz_utils.get_frustum_markers( self.cam, scale=self.scale )
+        r = rviz_utils.get_frustum_markers( self.cam, scale=self.scale )
         self.publisher.publish(r['markers'])
 
     def run(self):

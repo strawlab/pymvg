@@ -1,7 +1,7 @@
 import numpy as np
 
 from pymvg.multi_camera_system import build_example_system
-from pymvg.ros_publisher import ROSPublisher
+from pymvg.extern.ros.ros_publisher import ROSPublisher
 
 import roslib # ROS is required for this example. See http://ros.org
 roslib.load_manifest('rospy')
