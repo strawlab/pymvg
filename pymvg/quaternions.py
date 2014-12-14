@@ -12,9 +12,6 @@ _EPS = numpy.finfo(float).eps * 4.0
 def quaternion_matrix(quaternion):
     """Return homogeneous rotation matrix from quaternion.
 
-    >>> M = quaternion_matrix([0.99810947, 0.06146124, 0, 0])
-    >>> numpy.allclose(M, rotation_matrix(0.123, [1, 0, 0]))
-    True
     >>> M = quaternion_matrix([1, 0, 0, 0])
     >>> numpy.allclose(M, numpy.identity(4))
     True
@@ -48,10 +45,6 @@ def quaternion_from_matrix(matrix, isprecise=False):
     >>> q = quaternion_from_matrix(numpy.diag([1, -1, -1, 1]))
     >>> numpy.allclose(q, [0, 1, 0, 0]) or numpy.allclose(q, [0, -1, 0, 0])
     True
-    >>> R = rotation_matrix(0.123, (1, 2, 3))
-    >>> q = quaternion_from_matrix(R, True)
-    >>> numpy.allclose(q, [0.9981095, 0.0164262, 0.0328524, 0.0492786])
-    True
     >>> R = [[-0.545, 0.797, 0.260, 0], [0.733, 0.603, -0.313, 0],
     ...      [-0.407, 0.021, -0.913, 0], [0, 0, 0, 1]]
     >>> q = quaternion_from_matrix(R)
@@ -61,10 +54,6 @@ def quaternion_from_matrix(matrix, isprecise=False):
     ...      [-0.677, -0.498, 0.529, 0], [0, 0, 0, 1]]
     >>> q = quaternion_from_matrix(R)
     >>> numpy.allclose(q, [0.82336615, -0.13610694, 0.46344705, -0.29792603])
-    True
-    >>> R = random_rotation_matrix()
-    >>> q = quaternion_from_matrix(R)
-    >>> is_same_transform(R, quaternion_matrix(q))
     True
 
     """
