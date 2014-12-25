@@ -69,7 +69,8 @@ def _undistort( xd, yd, D):
     x = np.array(xd,copy=True)
     y = np.array(yd,copy=True)
 
-    k1, k2, t1, t2, k3 = D[:5]
+    t1,t2 = D[2:4]
+
     k = list(D)
     if len(k)==5:
         k = k + [0,0,0]
