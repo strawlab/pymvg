@@ -314,10 +314,9 @@ class CameraModel(object):
         K,R = my_rq(M)
         if not is_rotation_matrix(R):
             # RQ may return left-handed rotation matrix. Make right-handed.
-            R2 = -R
-            K2 = -K
-            assert np.allclose(np.dot(K2,R2), np.dot(K,R))
-            K,R = K2,R2
+            assert np.allclose(np.dot(-K,-R), np.dot(K,R))
+            R = -R
+            K = -K
         a = K[2,2]
         if a==0:
             warnings.warn('ill-conditioned intrinsic camera parameters')
