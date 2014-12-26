@@ -860,7 +860,7 @@ class CameraModel(object):
         if len(D)==8:
             barrel /= (1.0 + D[5]*r2 + D[6]*r4 + D[7]*r6)
         xpp = xp*barrel + p1*a1 + p2*(r2+2*(xp*xp))
-        ypp = yp*barrel + p1*(r2+2*(yp*yp)) + p2*a1;
+        ypp = yp*barrel + p1*(r2+2*(yp*yp)) + p2*a1
 
         K = self.get_K()
         fx = K[0,0]
