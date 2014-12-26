@@ -703,6 +703,10 @@ class CameraModel(object):
         if up is None:
             up = np.array((0,-1,0))
             gen_up = True
+        else:
+            up = np.array(up)
+            assert up.ndim==1
+            assert up.shape[0]==3
         lv = lookat - eye
         f = normalize(lv)
         old_settings = np.seterr(invalid='ignore')
