@@ -14,7 +14,7 @@ Documentation is available [here](http://pymvg.readthedocs.org/).
 [![Coverage Status](https://coveralls.io/repos/strawlab/pymvg/badge.png?branch=master)](https://coveralls.io/r/strawlab/pymvg?branch=master)
 
 PyMVG has a large collection of unit tests which ensure correctness
-and fulfilled expectationss for use other software (see 'Ecosystem',
+and fulfilled expectations for use other software (see 'Ecosystem',
 above). To run the tests:
 
     nosetests -w pymvg/test
