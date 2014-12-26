@@ -121,7 +121,7 @@ def center(P,eps=1e-8):
     C_ = np.array( [[ X/T, Y/T, Z/T ]] ).T
     return C_
 
-def is_rotation_matrix(R):
+def is_rotation_matrix(R,eps=1e-8):
     # check if rotation matrix is really a pure rotation matrix
 
     # test: inverse is transpose
@@ -131,12 +131,11 @@ def is_rotation_matrix(R):
 
     # test: determinant is unity
     dr = abs(np.linalg.det(R))
-    if not np.allclose(dr,1):
+    if not (abs(dr-1.0)<eps):
         return False
 
     # test: has one eigenvalue of unity
     l, W = np.linalg.eig(R)
-    eps = 1e-8
     i = np.where(abs(np.real(l) - 1.0) < eps)[0]
     if not len(i):
         return False
