@@ -107,6 +107,7 @@ class CameraModel(object):
     @classmethod
     def _from_parts(cls,
                       translation=None,
+                      camcenter=None,
                       rotation=None,
                       intrinsics=None,
                       name=None,
@@ -117,6 +118,8 @@ class CameraModel(object):
         ------
         translation : converted to np.array with shape (3,)
           the translational position of the camera (note: not the camera center)
+        camcenter : converted to np.array with shape (3,)
+          the camera center (mutually exclusive with translation parameter)
         rotation : converted to np.array with shape (4,) or (3,3)
           the camera orientation as a quaternion or a 3x3 rotation vector
         intrinsics : a ROS CameraInfo message
@@ -124,6 +127,14 @@ class CameraModel(object):
         name : string
           the name of the camera
         """
+        if translation is not None and camcenter is not None:
+            raise RuntimeError('translation and camcenter arguments are mutually exclusive')
+        set_camcenter_from_translation = True
+        if camcenter is not None:
+            set_camcenter_from_translation = False
+            camcenter = np.array(camcenter)
+            assert camcenter.ndim==1
+            assert camcenter.shape[0]==3
         if translation is None:
             translation = (0,0,0)
         if rotation is None:
@@ -133,10 +144,11 @@ class CameraModel(object):
 
         rmat, rquat = get_rotation_matrix_and_quaternion(rotation)
 
-        t = np.array(translation)
-        t.shape = 3,1
-        _camcenter = -np.dot( rmat.T, t )[:,0]
-        del t
+        if set_camcenter_from_translation:
+            t = np.array(translation)
+            t.shape = 3,1
+            camcenter = -np.dot( rmat.T, t )[:,0]
+            del t
 
         _rquat = rquat
 
@@ -174,7 +186,7 @@ class CameraModel(object):
                 if np.allclose(rect,np.eye(3)):
                     rect = None
 
-        result = cls(name, width, height, _rquat, _camcenter, P, K, distortion, rect)
+        result = cls(name, width, height, _rquat, camcenter, P, K, distortion, rect)
         return result
 
     @classmethod
@@ -328,8 +340,7 @@ class CameraModel(object):
                 cam = cls.load_camera_from_M( new_pmat, width=width, height=height, name=name, _depth=_depth+1)
                 return cam
 
-        c = center(pmat)
-        t = -np.dot(R,c)
+        camcenter = center(pmat)[:,0]
 
         P = np.zeros( (3,4) )
         P[:3,:3]=K
@@ -347,7 +358,7 @@ class CameraModel(object):
         i.K = list(K.flatten())
         i.R = list(np.eye(3).flatten())
         i.P = list(P.flatten())
-        result = cls._from_parts(translation = t,
+        result = cls._from_parts(camcenter = camcenter,
                                    rotation = R,
                                    intrinsics = i,
                                    name=name)
@@ -371,11 +382,9 @@ class CameraModel(object):
         if hasattr(translation,'x'):
             translation = (translation.x, translation.y, translation.z)
         C = np.array(translation)
-        C.shape = 3,1
+        C.shape = (3,)
 
-        t = -np.dot( rmat, C)[:,0]
-
-        return cls._from_parts(translation=t, rotation=rquat, **kwargs)
+        return cls._from_parts(camcenter=C, rotation=rquat, **kwargs)
 
     @classmethod
     def load_camera_simple( cls,
