@@ -130,7 +130,7 @@ def is_rotation_matrix(R,eps=1e-8):
         return False
 
     # test: determinant is unity
-    dr = abs(np.linalg.det(R))
+    dr = np.linalg.det(R)
     if not (abs(dr-1.0)<eps):
         return False
 
