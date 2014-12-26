@@ -674,7 +674,7 @@ class CameraModel(object):
                 i.K[5] = (self.height-i.K[5])
                 i.P[6] = (self.height-i.P[6])
 
-        camnew = CameraModel._from_parts(
+        camnew = self._from_parts(
                               translation = self.translation,
                               rotation = self.Q,
                               intrinsics = i,
@@ -733,7 +733,7 @@ class CameraModel(object):
         eye.shape = (3,1)
         t = -np.dot(R,eye)
 
-        result = CameraModel._from_parts(
+        result = self._from_parts(
                              translation=t,
                              rotation=R,
                              intrinsics=self.get_intrinsics_as_bunch(),
