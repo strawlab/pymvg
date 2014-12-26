@@ -196,7 +196,6 @@ def plain_vec(vec,eps=1e-15):
 def normalize_M(pmat,eps=1e-6):
     pmat_orig = pmat
     M = pmat[:,:3]
-    t = pmat[:,3,np.newaxis]
     K,R = my_rq(M)
     if abs(K[2,2]-1.0)>eps:
         pmat = pmat/K[2,2]
