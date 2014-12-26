@@ -98,6 +98,9 @@ def rq(A):
 
 def my_rq(M):
     """RQ decomposition, ensures diagonal of R is positive"""
+    # note the side-effects this has:
+    # http://ksimek.github.io/2012/08/14/decompose/ (TODO: check for
+    # these effects in PyMVG.)
     R,K = rq(M)
     n = R.shape[0]
     for i in range(n):
