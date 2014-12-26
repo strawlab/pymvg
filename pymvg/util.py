@@ -136,7 +136,7 @@ def is_rotation_matrix(R,eps=1e-8):
 
     # test: has one eigenvalue of unity
     l, W = np.linalg.eig(R)
-    i = np.where(abs(np.real(l) - 1.0) < eps)[0]
+    i = np.where(abs(np.real(l) - 1.0) < eps)[0] # XXX do we need to check for complex part?
     if not len(i):
         return False
     return True
