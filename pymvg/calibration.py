@@ -1,6 +1,5 @@
 import numpy
 import numpy.linalg
-import scipy.optimize
 import pymvg.camera_model
 
 def create_matrix_A(hom_points_3d, hom_points_2d):
@@ -65,7 +64,7 @@ def get_homogeneous_coordinates(points):
 def DLT(X3d, x2d, width=640, height=480):
     """Given 3D coordinates X3d and 2d coordinates x2d, find camera model"""
 
-    # Implementation of DLT algorithm from 
+    # Implementation of DLT algorithm from
     # "Hartley & Zisserman - Multiple View Geometry in computer vision - 2nd Edition"
 
     # Normalize 2d points and keep transformation matrix
@@ -87,8 +86,6 @@ def DLT(X3d, x2d, width=640, height=480):
     A = create_matrix_A(normalized_points_3d, normalized_points_2d)
 
     # solve via singular value decomposition
-    # XXX: We do not require U, maybe there is a faster way to compute s and V
-    # XXX: in numpy the returned V is already transposed!
     _, singular_values, VT = numpy.linalg.svd(A, full_matrices=False)
     sol_idx = numpy.argmin(singular_values)
     assert sol_idx == 11
@@ -99,7 +96,6 @@ def DLT(X3d, x2d, width=640, height=480):
     # Denormalize
     P = numpy.dot(Tinv, numpy.dot(P_n, U))
 
-    print P
     cam = pymvg.camera_model.CameraModel.load_camera_from_M(P,width=width,height=height)
     x2d_reproj = cam.project_3d_to_pixel(X3d)
     dx = x2d_reproj - numpy.array(x2d)
