@@ -63,6 +63,10 @@ def get_homogeneous_coordinates(points):
 def DLT(X3d, x2d, width=640, height=480):
     """Given 3D coordinates X3d and 2d coordinates x2d, find camera model"""
 
+    # Note: may want to implement Hatze (1988). This returns
+    # orthogonal rotation matrix. See notes and implementation in
+    # https://github.com/NatPRoach/HawkMothCode/blob/master/ManualExtractionCode/DLTcal5.m
+
     # Implementation of DLT algorithm from
     # "Hartley & Zisserman - Multiple View Geometry in computer vision - 2nd Edition"
 
