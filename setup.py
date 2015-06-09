@@ -16,6 +16,9 @@ class NoseTestCommand(Command):
 import pymvg as this
 
 setup(name='pymvg',
+      description = 'Python Multi-View Geometry',
+      author='Andrew Straw',
+      author_email='strawman@astraw.com',
       version=this.__version__,
       packages=['pymvg',
                 'pymvg.test',
