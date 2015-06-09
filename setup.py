@@ -13,8 +13,10 @@ class NoseTestCommand(Command):
         import nose
         nose.run_exit(argv=['nosetests'])
 
+import pymvg as this
+
 setup(name='pymvg',
-      version='1.1',
+      version=this.__version__,
       packages=['pymvg',
                 'pymvg.test',
                 'pymvg.test.external.opencv',
