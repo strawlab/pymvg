@@ -209,7 +209,6 @@ class MultiCameraSystem:
         # also p. 587)
         # Construct matrices
         A=[]
-        P=[]
         for name,xy in pts:
             cam = self._cameras[name]
             if undistort:
