@@ -875,13 +875,13 @@ class CameraModel(object):
         ypp = yp*barrel + p1*(r2+2*(yp*yp)) + p2*a1
 
         K = self.get_K()
-        fx = K[0,0]
-        cx = K[0,2]
-        fy = K[1,1]
-        cy = K[1,2]
+        kfx = K[0,0]
+        kcx = K[0,2]
+        kfy = K[1,1]
+        kcy = K[1,2]
 
-        u = xpp*fx + cx
-        v = ypp*fy + cy
+        u = xpp*kfx + kcx
+        v = ypp*kfy + kcy
         return np.vstack( (u,v) ).T
 
     # --------------------------------------------------
