@@ -28,7 +28,7 @@ def get_normalize_2d_matrix(points_2d):
 
     pts_mean = points_2d.mean(axis=0)
     centered_pts_2d = points_2d - pts_mean
-    s = 1 / np.linalg.norm(centered_pts_2d, axis=1).mean()
+    s = 1 / np.linalg.norm(centered_pts_2d).mean()
     xm, ym = pts_mean
     T = np.array([[s, 0, -s*xm],
                      [0, s, -s*ym],
@@ -41,7 +41,7 @@ def get_normalize_3d_matrix(points_3d):
 
     pts_mean = points_3d.mean(axis=0)
     centered_pts_3d = points_3d - pts_mean
-    s = 1 / np.linalg.norm(centered_pts_3d, axis=1).mean()
+    s = 1 / np.linalg.norm(centered_pts_3d).mean()
     xm, ym, zm = pts_mean
     U = np.array([[s, 0, 0, -s*xm],
                      [0, s, 0, -s*ym],
