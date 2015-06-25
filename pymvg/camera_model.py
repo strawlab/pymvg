@@ -771,7 +771,7 @@ class CameraModel(object):
         assert nparr.ndim==2
         assert nparr.shape[1]==2
 
-        if np.sum(abs(self.distortion)) == 0.0:
+        if np.sum(abs(self.distortion)) == 0.0 and self.rect is None:
             # no distortion necessary, just copy inputs
             return np.array(nparr,copy=True)
 
