@@ -7,12 +7,17 @@ from .util import _undistort, get_rotation_matrix_and_quaternion, np2plain, \
 from .quaternions import quaternion_matrix, quaternion_from_matrix
 from .ros_compat import sensor_msgs as sensor_msgs_compat
 
+import warnings
+
 # Define matrices to point ROS transforms such than +Z is directly
 # ahead and +X is right.
 rot_90 = np.array( [[ 0,0,1],
                     [ -1,0,0],
                     [ 0,-1,0]], dtype=np.float)
 rot_90i = np.linalg.pinv(rot_90)
+
+def warn_deprecation(attr):
+    warnings.warn('CameraModel property %r will be removed'%attr, DeprecationWarning)
 
 class CameraModel(object):
     """an implementation of the Camera Model used by ROS and OpenCV
@@ -469,38 +474,56 @@ class CameraModel(object):
     def get_Q(self):
         R = quaternion_matrix(self._rquat)[:3,:3]
         return R
-    Q = property(get_Q)
+    def _get_Q(self):
+        warn_deprecation( 'Q' )
+        return self.get_Q()
+    Q = property(_get_Q)
 
     def get_Qt(self):
         t = np.array(self.translation)
         t.shape = 3,1
         Rt = np.hstack((self.Q,t))
         return Rt
-    Qt = property(get_Qt)
+    def _get_Qt(self):
+        warn_deprecation( 'Qt' )
+        return self.get_Qt()
+    Qt = property(_get_Qt)
 
     def get_M(self):
         Qt = self._cache['Qt']
         P33 = self.P[:,:3]
         M = np.dot( P33, Qt )
         return M
-    M = property(get_M)
+    def _get_M(self):
+        warn_deprecation( 'M' )
+        return self.get_M()
+    M = property(_get_M)
 
     def get_translation(self):
         C = np.array(self._camcenter)
         C.shape = (3,1)
         t = -np.dot(self.Q, C)[:,0]
         return t
-    translation = property(get_translation)
+    def _get_translation(self):
+        warn_deprecation( 'translation' )
+        return self.get_translation()
+    translation = property(_get_translation)
 
     def get_Q_inv(self):
         return np.linalg.pinv(self.Q)
-    Q_inv = property(get_Q_inv)
+    def _get_Q_inv(self):
+        warn_deprecation( 'Q_inv')
+        return self.get_Q_inv()
+    Q_inv = property(_get_Q_inv)
 
     def get_t_inv(self):
         ti = np.array(self._camcenter)
         ti.shape = 3,1
         return ti
-    t_inv = property(get_t_inv)
+    def _get_t_inv(self):
+        warn_deprecation( 't_inv' )
+        return self.get_t_inv()
+    t_inv = property(_get_t_inv)
 
     # -------------------------------------------------
     # other getters
