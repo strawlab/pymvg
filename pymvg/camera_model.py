@@ -74,6 +74,8 @@ class CameraModel(object):
         # the distortion model
         'distortion', # (distortion params) the distortion, np.array with shape (5,1) or (8,1)
         'rect', # (distortion params) the rectification, None or np.array with shape (3,3)
+
+        '_cache', # cached computational results
         ]
     AXIS_FORWARD = np.array((0,0,1),dtype=np.float)
     AXIS_UP = np.array((0,-1,0),dtype=np.float)
@@ -94,6 +96,9 @@ class CameraModel(object):
 
         self._opencv_compatible = (self.P[0,1]==0)
         assert np.allclose( P[:,3], np.zeros((3,)))
+        self._cache = {}
+        self._cache['Qt'] = self.get_Qt()
+        self._cache['M'] = self.get_M()
 
     def __getstate__(self):
         """allow CameraModel to be pickled"""
@@ -474,8 +479,9 @@ class CameraModel(object):
     Qt = property(get_Qt)
 
     def get_M(self):
+        Qt = self._cache['Qt']
         P33 = self.P[:,:3]
-        M = np.dot( P33, self.Qt )
+        M = np.dot( P33, Qt )
         return M
     M = property(get_M)
 
@@ -955,8 +961,10 @@ class CameraModel(object):
         pts3d_h[:3,:] = pts3d.T
         pts3d_h[3] = 1
 
+        M = self._cache['M']
+
         # undistorted homogeneous image coords
-        cc = np.dot(self.M, pts3d_h)
+        cc = np.dot(M, pts3d_h)
 
         # project
         pc = cc[:2]/cc[2]
