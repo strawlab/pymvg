@@ -807,10 +807,6 @@ class CameraModel(object):
         assert nparr.ndim==2
         assert nparr.shape[1]==2
 
-        if np.sum(abs(self.distortion)) == 0.0 and self.rect is None:
-            # no distortion necessary, just copy inputs
-            return np.array(nparr,copy=True)
-
         u = nparr[:,0]
         v = nparr[:,1]
 
@@ -868,10 +864,6 @@ class CameraModel(object):
         nparr = np.array(nparr,copy=False)
         assert nparr.ndim==2
         assert nparr.shape[1]==2
-
-        if np.sum(abs(self.distortion)) == 0.0 and self.rect is None:
-            # no distortion necessary, just copy inputs
-            return np.array(nparr,copy=True)
 
         uv_rect_x = nparr[:,0]
         uv_rect_y = nparr[:,1]
