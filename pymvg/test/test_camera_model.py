@@ -108,7 +108,7 @@ def test_build_from_M():
 def check_built_from_M(cam_opts):
     """check that M is preserved in load_camera_from_M() factory"""
     cam_orig = _build_test_camera(**cam_opts)
-    if cam_orig.is_distorted_and_skewed():
+    if cam_orig.is_skewed():
         raise SkipTest('do not expect that skewed camera passes this test')
     M_orig = cam_orig.M
     cam = CameraModel.load_camera_from_M( M_orig )
