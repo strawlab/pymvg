@@ -196,10 +196,7 @@ def test_camera_mirror_projection_roundtrip():
 def check_camera_mirror_projection_roundtrip(cam_opts,distorted=False,axis='lr'):
     """check that a mirrored camera gives reflected pixel coords"""
     cam_orig = _build_test_camera(**cam_opts)
-    try:
-        cam_mirror = cam_orig.get_mirror_camera(axis=axis)
-    except NotImplementedError as err:
-        raise SkipTest(str(err))
+    cam_mirror = cam_orig.get_mirror_camera(axis=axis)
     uv_raw = _generate_uv_raw(cam_orig.width, cam_orig.height)
 
     # Get a collection of 3D points for which we know the pixel location of

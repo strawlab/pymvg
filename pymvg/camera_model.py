@@ -684,16 +684,13 @@ class CameraModel(object):
         assert axis in ['lr','ud']
         # Keep extrinsic coordinates, but flip intrinsic
         # parameter so that a mirror image is rendered.
-        if self.is_skewed():
-            raise NotImplementedError('no mirroring implemented for skewed cameras')
         i = self.get_intrinsics_as_bunch()
         if axis=='lr':
             i.K[0] = -i.K[0]
             i.P[0] = -i.P[0]
 
             if not hold_center:
-                # This flips the X coordinate but preserves the
-                # optical center.
+                i.P[1] = -i.P[1]
 
                 i.K[2] = (self.width-i.K[2])
                 i.P[2] = (self.width-i.P[2])
@@ -703,10 +700,6 @@ class CameraModel(object):
             i.P[5] = -i.P[5]
 
             if not hold_center:
-
-                # This flips the Y coordinate but preserves the
-                # optical center.
-
                 i.K[5] = (self.height-i.K[5])
                 i.P[6] = (self.height-i.P[6])
 
