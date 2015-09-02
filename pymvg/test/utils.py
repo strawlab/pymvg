@@ -43,6 +43,16 @@ def _build_opts():
 
     # a PyMVG file with skewed pixels
     test_dir = os.path.split( __file__ )[0]
+    pymvg_base_fname = 'skew_pixels_no_distortion.json'
+    pymvg_fname = os.path.join( test_dir, pymvg_base_fname )
+    opts.append({'from_file':True,
+                 'type':'pymvg',
+                 'filename':pymvg_fname,
+                 }
+                )
+
+    # a PyMVG file with skewed, distorted pixels
+    test_dir = os.path.split( __file__ )[0]
     pymvg_base_fname = 'skew_pixels.json'
     pymvg_fname = os.path.join( test_dir, pymvg_base_fname )
     opts.append({'from_file':True,
