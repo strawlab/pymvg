@@ -506,6 +506,14 @@ class CameraModel(object):
     def is_distorted_and_skewed(self,max_skew_ratio=1e15):
         """True if pixels are skewed and distorted"""
 
+        if self.is_skewed(max_skew_ratio=max_skew_ratio):
+            if np.sum(abs(self.distortion)) != 0.0:
+                return True
+        return False
+
+    def is_skewed(self,max_skew_ratio=1e15):
+        """True if pixels are skewed"""
+
         # With default value, if skew is 15 orders of magnitude less
         # than focal length, return False.
 
@@ -513,8 +521,7 @@ class CameraModel(object):
         fx = self.P[0,0]
 
         if abs(skew) > (abs(fx)/max_skew_ratio):
-            if np.sum(abs(self.distortion)) != 0.0:
-                return True
+            return True
         return False
 
     def get_name(self):
@@ -648,7 +655,7 @@ class CameraModel(object):
         assert axis in ['lr','ud']
         # Keep extrinsic coordinates, but flip intrinsic
         # parameter so that a mirror image is rendered.
-        if self.is_distorted_and_skewed():
+        if self.is_skewed():
             raise NotImplementedError('no mirroring implemented for skewed cameras')
         i = self.get_intrinsics_as_bunch()
         if axis=='lr':
