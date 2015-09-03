@@ -95,6 +95,9 @@ class CameraModel(object):
         self._rquat = _rquat
         self._camcenter = _camcenter
         self.P = P
+        eps = 1e-8
+        if abs(self.P[2,2]-1.0) > eps:
+            raise ValueError('matrix P must have element (2,2) near 1.0')
         self.K = K
         self.distortion = distortion
         self.rect = rect
@@ -196,6 +199,7 @@ class CameraModel(object):
                 if np.allclose(rect,np.eye(3)):
                     rect = None
 
+        P = P/P[2,2] # normalize
         result = cls(name, width, height, _rquat, camcenter, P, K, distortion, rect)
         return result
 
