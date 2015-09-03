@@ -108,9 +108,9 @@ def test_build_from_M():
 def check_built_from_M(cam_opts):
     """check that M is preserved in load_camera_from_M() factory"""
     cam_orig = _build_test_camera(**cam_opts)
-    M_orig = cam_orig.M
+    M_orig = cam_orig.get_M()
     cam = CameraModel.load_camera_from_M( M_orig )
-    assert np.allclose( cam.M, M_orig)
+    assert np.allclose( cam.get_M(), M_orig)
 
 def test_align():
     all_options = get_default_options()
@@ -120,7 +120,7 @@ def test_align():
 def check_align(cam_opts):
 
     cam_orig = _build_test_camera(**cam_opts)
-    M_orig = cam_orig.M
+    M_orig = cam_orig.get_M()
     cam_orig = CameraModel.load_camera_from_M( M_orig )
     R1 = np.eye(3)
     R2 = np.zeros((3,3))
@@ -291,7 +291,7 @@ def test_camcenter():
     all_options = get_default_options()
     for opts in all_options:
         cam = _build_test_camera(**opts)
-        assert np.allclose( cam.get_camcenter(), cam.t_inv.T )
+        assert np.allclose( cam.get_camcenter(), cam.get_t_inv().T )
 
 def test_stages():
     all_options = get_default_options()

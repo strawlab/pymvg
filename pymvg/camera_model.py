@@ -105,8 +105,12 @@ class CameraModel(object):
         self._opencv_compatible = (self.P[0,1]==0)
         assert np.allclose( P[:,3], np.zeros((3,)))
         self._cache = {}
+        self._cache['Q'] = self.get_Q()
+        self._cache['translation'] = self.get_translation()
         self._cache['Qt'] = self.get_Qt()
         self._cache['M'] = self.get_M()
+        self._cache['Q_inv'] = self.get_Q_inv()
+        self._cache['t_inv'] = self.get_t_inv()
 
     def __getstate__(self):
         """allow CameraModel to be pickled"""
@@ -468,7 +472,7 @@ class CameraModel(object):
             d['R'] = np2plain(np.eye(3))
         else:
             d['R'] = np2plain(self.rect)
-        d['translation']=np2plain(self.translation)
+        d['translation']=np2plain(self._cache['translation'])
         d['Q']=np2plain(self.get_Q())
         return d
 
@@ -484,9 +488,10 @@ class CameraModel(object):
     Q = property(_get_Q)
 
     def get_Qt(self):
-        t = np.array(self.translation)
+        Q = self._cache['Q']
+        t = np.array(self._cache['translation'],copy=True)
         t.shape = 3,1
-        Rt = np.hstack((self.Q,t))
+        Rt = np.hstack((Q,t))
         return Rt
     def _get_Qt(self):
         warn_deprecation( 'Qt' )
@@ -504,9 +509,10 @@ class CameraModel(object):
     M = property(_get_M)
 
     def get_translation(self):
+        Q = self._cache['Q']
         C = np.array(self._camcenter)
         C.shape = (3,1)
-        t = -np.dot(self.Q, C)[:,0]
+        t = -np.dot(Q, C)[:,0]
         return t
     def _get_translation(self):
         warn_deprecation( 'translation' )
@@ -514,7 +520,8 @@ class CameraModel(object):
     translation = property(_get_translation)
 
     def get_Q_inv(self):
-        return np.linalg.pinv(self.Q)
+        Q = self._cache['Q']
+        return np.linalg.pinv(Q)
     def _get_Q_inv(self):
         warn_deprecation( 'Q_inv')
         return self.get_Q_inv()
@@ -564,8 +571,9 @@ class CameraModel(object):
         msg = Bunch()
         msg.translation = Bunch()
         msg.rotation = Bunch()
+        translation = self._cache['translation']
         for i in range(3):
-            setattr(msg.translation,'xyz'[i], self.translation[i] )
+            setattr(msg.translation,'xyz'[i], translation[i] )
         for i in range(4):
             setattr(msg.rotation,'xyzw'[i], self._rquat[i] )
         return msg
@@ -589,7 +597,8 @@ class CameraModel(object):
         return i
 
     def get_camcenter(self):
-        return self.t_inv[:,0] # drop dimension
+        t_inv = self._cache['t_inv']
+        return t_inv[:,0] # drop dimension
 
     def get_lookat(self,distance=1.0):
         world_coords = self.project_camera_frame_to_3d( [distance*self.AXIS_FORWARD] )
@@ -614,7 +623,7 @@ class CameraModel(object):
         return np.array(self._rquat)
 
     def get_rotation(self):
-        return self.Q
+        return self._cache['Q']
 
     def get_K(self):
         return self.K
@@ -707,9 +716,11 @@ class CameraModel(object):
                 i.K[5] = (self.height-i.K[5])
                 i.P[6] = (self.height-i.P[6])
 
+        translation = self._cache['translation']
+        Q = self._cache['Q']
         camnew = self._from_parts(
-                              translation = self.translation,
-                              rotation = self.Q,
+                              translation = translation,
+                              rotation = Q,
                               intrinsics = i,
                               name = self.name + '_mirror',
                               )
@@ -990,10 +1001,11 @@ class CameraModel(object):
 
     def project_camera_frame_to_3d(self, pts3d):
         """take 3D coordinates in camera frame and convert to world frame"""
+        Q_inv = self._cache['Q_inv']
         cam_coords = np.array(pts3d).T
         t = self.get_translation()
         t.shape = (3,1)
-        world_coords = np.dot(self.Q_inv, cam_coords - t)
+        world_coords = np.dot(Q_inv, cam_coords - t)
         return world_coords.T
 
     def project_3d_to_camera_frame(self, pts3d):
@@ -1008,7 +1020,8 @@ class CameraModel(object):
         pts3d_h[3] = 1
 
         # undistorted homogeneous image coords
-        cc = np.dot(self.Qt, pts3d_h)
+        Qt = self._cache['Qt']
+        cc = np.dot(Qt, pts3d_h)
 
         return cc.T
 
@@ -1020,4 +1033,5 @@ class CameraModel(object):
         nparr = np.array(nparr,copy=False)
         assert nparr.ndim==2
         assert nparr.shape[1]==3
-        return np.zeros( nparr.shape ) + self.t_inv.T
+        t_inv = self._cache['t_inv']
+        return np.zeros( nparr.shape ) + t_inv.T
