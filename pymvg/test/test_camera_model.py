@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import numpy as np
-from nose.plugins.skip import SkipTest
 import os, tempfile
 import pickle
 
