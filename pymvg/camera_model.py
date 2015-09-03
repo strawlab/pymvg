@@ -203,7 +203,14 @@ class CameraModel(object):
                 if np.allclose(rect,np.eye(3)):
                     rect = None
 
-        P = P/P[2,2] # normalize
+        denom = P[2,2]
+        if denom != 1.0:
+            if rect is not None:
+                warnings.warn(
+                    'A non-normalized P matrix and a rectification matrix were '
+                    'supplied. This case is not well tested and the behavior '
+                    'should be considered undefined.')
+            P = P/denom # normalize
         result = cls(name, width, height, _rquat, camcenter, P, K, distortion, rect)
         return result
 
