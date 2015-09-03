@@ -693,7 +693,14 @@ class CameraModel(object):
             fd.write( buf )
 
     def get_mirror_camera(self,axis='lr',hold_center=False):
-        """return a copy of this camera whose x coordinate is (image_width-x)"""
+        """return a copy of this camera whose x coordinate is (image_width-x)
+
+        arguments
+        ---------
+
+        axis - string. Specifies the axis of the mirroring, either 'lr' or 'ud'.
+        hold_center - boolean. Preserve the optical center?
+        """
         assert axis in ['lr','ud']
         # Keep extrinsic coordinates, but flip intrinsic
         # parameter so that a mirror image is rendered.
