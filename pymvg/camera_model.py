@@ -748,11 +748,12 @@ class CameraModel(object):
         la2 = cc+lv2
 
         camnew = self.get_view_camera(cc, la2, up2).get_mirror_camera(hold_center=True)
-        camnew.distortion[3] = -self.distortion[3]
+        camnew.distortion[3] = -camnew.distortion[3]
 
         if camnew.rect is not None:
-            raise NotImplementedError('No support for flipping cameras '
-                                      'that require rectifcation')
+            camnew.rect[0,:] = -camnew.rect[0,:]
+            camnew.distortion[3] = -camnew.distortion[3]
+            camnew.K[0,0] = -camnew.K[0,0]
         return camnew
 
     def get_view_camera(self, eye, lookat, up=None):
