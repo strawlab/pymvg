@@ -9,9 +9,7 @@ addons:
         packages:
             - python-opencv python-tk
 install:
-    - pip install numpy
-    - pip install matplotlib
-    - pip install pyyaml
+    - pip install -r requirements.txt
     - pip install nose-exclude # for --exclude-dir option in call to nosetests
     - pip install coveralls # for coverage testing
     - python setup.py install
