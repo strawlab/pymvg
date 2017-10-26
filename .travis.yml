@@ -8,7 +8,7 @@ sudo: false
 addons:
     apt:
         packages:
-            - python-opencv
+            - python-opencv python-tk
 install:
     - pip install numpy
     - pip install matplotlib
