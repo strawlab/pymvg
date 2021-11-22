@@ -197,6 +197,11 @@ class MultiCameraSystem:
 
     def find3d(self,pts,undistort=True):
         """Find 3D coordinate using all data given
+        
+        In:
+            pts: list(tuple(name, xy)), where xy is np.array([[x, y]]) is 
+            the list of pixel coordinates to triangulate
+            undistort: bool, if True use pymvg _undistort
 
         Implements a linear triangulation method to find a 3D
         point. For example, see Hartley & Zisserman section 12.2
@@ -212,7 +217,7 @@ class MultiCameraSystem:
         for name,xy in pts:
             cam = self._cameras[name]
             if undistort:
-                xy = cam.undistort( [xy] )
+                xy = cam.undistort(xy)
             Pmat = cam.get_M() # Pmat is 3 rows x 4 columns
             row2 = Pmat[2,:]
             x,y = xy[0,:]
