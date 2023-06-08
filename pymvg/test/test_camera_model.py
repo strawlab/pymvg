@@ -360,7 +360,7 @@ def check_camcenter_like(cam_opts):
     cam = _build_test_camera(**cam_opts)
     cc_expected = cam.get_camcenter()
     for n in range(4):
-        nparr = np.zeros( (n,3), dtype=np.float )
+        nparr = np.zeros( (n,3), dtype=float )
         cc = cam.camcenter_like( nparr )
         for i in range(n):
             this_cc = cc[i]

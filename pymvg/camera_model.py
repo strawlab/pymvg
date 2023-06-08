@@ -13,7 +13,7 @@ import warnings
 # ahead and +X is right.
 rot_90 = np.array( [[ 0,0,1],
                     [ -1,0,0],
-                    [ 0,-1,0]], dtype=np.float)
+                    [ 0,-1,0]], dtype=float)
 rot_90i = np.linalg.pinv(rot_90)
 
 def warn_deprecation(attr):
@@ -82,9 +82,9 @@ class CameraModel(object):
 
         '_cache', # cached computational results
         ]
-    AXIS_FORWARD = np.array((0,0,1),dtype=np.float)
-    AXIS_UP = np.array((0,-1,0),dtype=np.float)
-    AXIS_RIGHT = np.array((1,0,0),dtype=np.float)
+    AXIS_FORWARD = np.array((0,0,1),dtype=float)
+    AXIS_UP = np.array((0,-1,0),dtype=float)
+    AXIS_RIGHT = np.array((1,0,0),dtype=float)
 
     # --- start of CameraModel constructors ------------------------------------
 
@@ -176,16 +176,16 @@ class CameraModel(object):
             height = msg.height
             shape = (msg.height, msg.width)
 
-            P = np.array(msg.P,dtype=np.float)
+            P = np.array(msg.P,dtype=float)
             P.shape = (3,4)
             if not np.allclose(P[:,3], np.zeros((3,))):
                 raise NotImplementedError('not tested when 4th column of P is nonzero')
 
-            K = np.array( msg.K, dtype=np.float)
+            K = np.array( msg.K, dtype=float)
             K.shape = (3,3)
             assert K.ndim == 2
 
-            distortion = np.array(msg.D, dtype=np.float)
+            distortion = np.array(msg.D, dtype=float)
             if len(distortion) == 5:
                 distortion.shape = (5,)
             elif len(distortion) == 8:
@@ -198,7 +198,7 @@ class CameraModel(object):
             if msg.R is None:
                 rect = None
             else:
-                rect = np.array( msg.R, dtype=np.float )
+                rect = np.array( msg.R, dtype=float )
                 rect.shape = (3,3)
                 if np.allclose(rect,np.eye(3)):
                     rect = None

@@ -63,7 +63,7 @@ def test_fill():
              ]
     shape = (5,5,3)
     results = []
-    for dtype in [np.float, np.int, np.uint8]:
+    for dtype in [float, int, np.uint8]:
         image = np.zeros( shape, dtype=dtype )
         fill_polygon( poly, image, fill_value=255 )
         results.append( image )

@@ -10,7 +10,7 @@ def numpy2opencv_image(arr):
     assert arr.ndim==2
     if arr.dtype in [np.float32]:
         result = cv.CreateMat( arr.shape[0], arr.shape[1], cv.CV_32FC1)
-    elif arr.dtype in [np.float64, np.float]:
+    elif arr.dtype in [np.float64, float]:
         result = cv.CreateMat( arr.shape[0], arr.shape[1], cv.CV_64FC1)
     elif arr.dtype in [np.uint8]:
         result = cv.CreateMat( arr.shape[0], arr.shape[1], cv.CV_8UC1)
@@ -34,7 +34,7 @@ def opencv_image2numpy( cvimage ):
         assert cvimage.nChannels == 1
         assert cvimage.depth == 32
         assert cvimage.origin == 0
-        result = np.empty( (height,width), dtype=np.float )
+        result = np.empty( (height,width), dtype=float )
         for i in range(height):
             for j in range(width):
                 result[i,j] = cvimage[i,j]
