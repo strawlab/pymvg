@@ -9,6 +9,24 @@ from pymvg.util import point_msg_to_tuple, parse_rotation_msg
 import pymvg.align as mcsc_align
 
 from pymvg.test.utils import _build_test_camera, get_default_options
+from unittest import SkipTest
+import pytest
+
+def pytest_generate_tests(metafunc):
+    if "cam_opts" in metafunc.fixturenames:
+        all_options = get_default_options()
+        metafunc.parametrize("cam_opts", all_options)
+    if "simple_cam_opts" in metafunc.fixturenames:
+        all_options = []
+        at_origin=True # this test mathematically only makes sense of camera at origin
+        for ROS_test_data in (True,False):
+            opts = dict(at_origin=at_origin,ROS_test_data=ROS_test_data)
+            all_options.append(opts)
+        metafunc.parametrize("simple_cam_opts", all_options)
+    if "distorted" in metafunc.fixturenames:
+        metafunc.parametrize("distorted", [True, False])
+    if "axis" in metafunc.fixturenames:
+        metafunc.parametrize("axis", ["lr", "ud"])
 
 # --------------------- testing -----------------------------
 
@@ -23,26 +41,15 @@ def _generate_uv_raw(width,height):
             uv_raws.append(uv_raw)
     return np.array(uv_raws)
 
-def test_dict_roundtrip():
-    all_options = get_default_options()
-    for opts in all_options:
-        yield check_dict_roundtrip, opts
-
-def check_dict_roundtrip(cam_opts):
+def test_dict_roundtrip(cam_opts):
     cam = _build_test_camera(**cam_opts)
     d = cam.to_dict()
     cam2 = CameraModel.from_dict(d)
     assert cam==cam2
 
-def test_projection_to_undistorted1():
-    at_origin=True # this test mathematically only makes sense of camera at origin
-    for ROS_test_data in (True,False):
-        opts = dict(at_origin=at_origin,ROS_test_data=ROS_test_data)
-        yield check_projection_to_undistorted1, opts
-
-def check_projection_to_undistorted1(cam_opts):
+def test_projection_to_undistorted1(simple_cam_opts):
     """check that points along optical axis are imaged onto principal point"""
-    cam = _build_test_camera(**cam_opts)
+    cam = _build_test_camera(**simple_cam_opts)
     for z in np.linspace(0.1, 10, 20):
         pt = np.array([[0,0,z]])
         result = cam.project_3d_to_pixel( pt, distorted=False )
@@ -51,12 +58,7 @@ def check_projection_to_undistorted1(cam_opts):
         assert np.allclose(u, cam.P[0,2])
         assert np.allclose(v, cam.P[1,2])
 
-def test_camera_distortion_roundtrip():
-    all_options = get_default_options()
-    for opts in all_options:
-        yield check_camera_distortion_roundtrip, opts
-
-def check_camera_distortion_roundtrip(cam_opts):
+def test_camera_distortion_roundtrip(cam_opts):
     """check that uv == distort( undistort( uv ))"""
     cam = _build_test_camera(**cam_opts)
     uv_raw = _generate_uv_raw(cam.width, cam.height)
@@ -65,13 +67,7 @@ def check_camera_distortion_roundtrip(cam_opts):
     assert uv_raw.shape == uv_unrect.shape
     assert np.allclose(uv_raw, uv_unrect, atol=1.0) # within one pixel
 
-def test_camera_projection_roundtrip():
-    all_options = get_default_options()
-    for distorted in (True,False):
-        for opts in all_options:
-            yield check_camera_projection_roundtrip, opts, distorted
-
-def check_camera_projection_roundtrip(cam_opts,distorted=False):
+def test_camera_projection_roundtrip(cam_opts,distorted):
     """check that uv == project_to_2d( project_to_3d( uv ))"""
     cam = _build_test_camera(**cam_opts)
     uv_raw = _generate_uv_raw(cam.width, cam.height)
@@ -81,12 +77,7 @@ def check_camera_projection_roundtrip(cam_opts,distorted=False):
     assert uv_raw.shape == uv_unrect.shape
     assert np.allclose(uv_raw, uv_unrect, atol=1.0) # within one pixel
 
-def test_extrinsic_msg():
-    all_options = get_default_options()
-    for opts in all_options:
-        yield check_extrinsic_msg, opts
-
-def check_extrinsic_msg(cam_opts):
+def test_extrinsic_msg(cam_opts):
     """check that ROS message contains actual camera extrinsic parameters"""
     cam_opts = cam_opts.copy()
     cam_opts['get_input_data']=True
@@ -99,25 +90,14 @@ def check_extrinsic_msg(cam_opts):
         assert np.allclose(parse_rotation_msg(tfm.rotation,force_matrix=True),
                            parse_rotation_msg(r['rotation'],force_matrix=True))
 
-def test_build_from_M():
-    all_options = get_default_options()
-    for opts in all_options:
-        yield check_built_from_M, opts
-
-def check_built_from_M(cam_opts):
+def test_built_from_M(cam_opts):
     """check that M is preserved in load_camera_from_M() factory"""
     cam_orig = _build_test_camera(**cam_opts)
     M_orig = cam_orig.get_M()
     cam = CameraModel.load_camera_from_M( M_orig )
     assert np.allclose( cam.get_M(), M_orig)
 
-def test_align():
-    all_options = get_default_options()
-    for opts in all_options:
-        yield check_align, opts
-
-def check_align(cam_opts):
-
+def test_align(cam_opts):
     cam_orig = _build_test_camera(**cam_opts)
     M_orig = cam_orig.get_M()
     cam_orig = CameraModel.load_camera_from_M( M_orig )
@@ -160,12 +140,7 @@ def test_problem_M():
     expected = (expectedh[:2]/expectedh[2]).T
     assert np.allclose( expected, actual )
 
-def test_distortion_yamlfile_roundtrip():
-    all_options = get_default_options()
-    for opts in all_options:
-        yield check_distortion_yamlfile_roundtrip, opts
-
-def check_distortion_yamlfile_roundtrip(cam_opts):
+def test_distortion_yamlfile_roundtrip(cam_opts):
     """check that roundtrip of camera model to/from a yaml file works"""
     cam = _build_test_camera(**cam_opts)
     fname = tempfile.mktemp(suffix='.yaml')
@@ -183,14 +158,7 @@ def check_distortion_yamlfile_roundtrip(cam_opts):
     reloaded_undistorted = cam2.undistort( distorted )
     assert np.allclose( orig_undistorted, reloaded_undistorted )
 
-def test_camera_mirror_projection_roundtrip():
-    all_options = get_default_options()
-    for axis in ('lr','ud'):
-        for distorted in (True,False):
-            for opts in all_options:
-                yield check_camera_mirror_projection_roundtrip, opts, distorted, axis
-
-def check_camera_mirror_projection_roundtrip(cam_opts,distorted=False,axis='lr'):
+def test_camera_mirror_projection_roundtrip(cam_opts,distorted,axis):
     """check that a mirrored camera gives reflected pixel coords"""
     cam_orig = _build_test_camera(**cam_opts)
     cam_mirror = cam_orig.get_mirror_camera(axis=axis)
@@ -209,12 +177,7 @@ def check_camera_mirror_projection_roundtrip(cam_opts,distorted=False,axis='lr')
     assert expected.shape == uv_mirror.shape
     assert np.allclose(expected, uv_mirror, atol=1.0) # within one pixel
 
-def test_flip():
-    all_options = get_default_options()
-    for opts in all_options:
-        yield check_flip, opts
-
-def check_flip(cam_opts):
+def test_flip(cam_opts):
     cam_orig = _build_test_camera(**cam_opts)
     try:
         cam_flip = cam_orig.get_flipped_camera()
@@ -240,12 +203,7 @@ def check_flip(cam_opts):
     actual   = cam_flip.project_3d_to_pixel(verts)
     assert np.allclose( expected, actual )
 
-def test_view():
-    all_options = get_default_options()
-    for opts in all_options:
-        yield check_view, opts
-
-def check_view(cam_opts):
+def test_view(cam_opts):
     """check that we can reset camera extrinsic parameters"""
 
     # This is not a very good test. (Should maybe check more eye
@@ -285,20 +243,12 @@ def check_view(cam_opts):
     else:
         assert 1==0, "did not fail test"
 
-def test_camcenter():
+def test_camcenter(cam_opts):
     """check that our idea of camera center is theoretically expected value"""
-    all_options = get_default_options()
-    for opts in all_options:
-        cam = _build_test_camera(**opts)
-        assert np.allclose( cam.get_camcenter(), cam.get_t_inv().T )
+    cam = _build_test_camera(**cam_opts)
+    assert np.allclose( cam.get_camcenter(), cam.get_t_inv().T )
 
-def test_stages():
-    all_options = get_default_options()
-    for distorted in (True,False):
-        for opts in all_options:
-            yield check_stages, opts, distorted
-
-def check_stages(cam_opts, distorted=False):
+def test_stages(cam_opts, distorted):
     """check the sum of all stages equals all stages summed"""
     cam = _build_test_camera(**cam_opts)
 
@@ -340,23 +290,13 @@ def test_equality():
     assert cam_apple1!=cam_orange
     assert not cam_apple1==cam_orange
 
-def test_pickle_roundtrip():
-    all_options = get_default_options()
-    for opts in all_options:
-        yield check_pickle_roundtrip, opts
-
-def check_pickle_roundtrip(cam_opts):
+def test_pickle_roundtrip(cam_opts):
     cam = _build_test_camera(**cam_opts)
     buf = pickle.dumps(cam)
     cam2 = pickle.loads(buf)
     assert cam==cam2
 
-def test_camcenter_like():
-    all_options = get_default_options()
-    for opts in all_options:
-        yield check_camcenter_like, opts
-
-def check_camcenter_like(cam_opts):
+def test_camcenter_like(cam_opts):
     cam = _build_test_camera(**cam_opts)
     cc_expected = cam.get_camcenter()
     for n in range(4):

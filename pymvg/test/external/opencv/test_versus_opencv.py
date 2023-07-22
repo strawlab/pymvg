@@ -2,7 +2,9 @@
 from __future__ import print_function
 import os
 import numpy as np
-import cv # ubuntu: apt-get install python-opencv
+
+import cv2 as cv # ubuntu: sudo apt-get install python3-opencv
+from unittest import SkipTest
 
 from pymvg.ros_compat import sensor_msgs, geometry_msgs
 
@@ -19,12 +21,14 @@ if DEBUG:
 else:
     debug = noop
 
-def test_undistortion():
-    all_options = get_default_options()
-    for opts in all_options:
-        yield check_undistortion, opts
+def pytest_generate_tests(metafunc):
+    if "cam_opts" in metafunc.fixturenames:
+        all_options = get_default_options()
+        metafunc.parametrize("cam_opts", all_options)
+    if "distorted" in metafunc.fixturenames:
+        metafunc.parametrize("distorted", [True, False])
 
-def check_undistortion(cam_opts):
+def test_undistortion(cam_opts):
     cam = _build_test_camera(**cam_opts)
 
     step = 5
@@ -51,24 +55,16 @@ def check_undistortion(cam_opts):
     if cam.is_opencv_compatible():
         assert np.allclose(undistorted_cv, undistorted_np)
     else:
-        from nose.plugins.skip import SkipTest
         raise SkipTest("Test %s is skipped: %s" %(
             check_undistortion.__name__,
             'camera model is not OpenCV compatible, skipping test'))
 
-def test_projection():
-    all_options = get_default_options()
-    for opts in all_options:
-        for distorted in (True,False):
-            yield check_projection, opts, distorted
-
-def check_projection(cam_opts,distorted=True):
+def test_projection(cam_opts,distorted):
     cam = _build_test_camera(**cam_opts)
     R = cam.get_rect()
     if not np.allclose(R, np.eye(3)):
         # opencv's ProjectPoints2 does not take into account
         # rectifciation matrix, thus we skip this test.
-        from nose.plugins.skip import SkipTest
         raise SkipTest("Test %s is skipped: %s" %(
             check_projection.__name__,
             'cannot check if rectification matrix is not unity'))
@@ -115,7 +111,6 @@ def check_projection(cam_opts,distorted=True):
             debug()
             raise
     else:
-        from nose.plugins.skip import SkipTest
         raise SkipTest("Test %s is skipped: %s" %(
             check_projection.__name__,
             'camera model is not OpenCV compatible, skipping test'))

@@ -5,14 +5,9 @@ from pymvg.test.utils import make_M, _build_test_camera, get_default_options
 import pymvg.test.fill_polygon as fill_polygon
 import tarfile, time, os, tempfile
 import subprocess
-import cv # ubuntu: apt-get install python-opencv
+import cv2 as cv # ubuntu: sudo apt-get install python3-opencv
 
-try:
-    # python 2
-    from StringIO import StringIO
-except ImportError:
-    # python 3
-    from io import StringIO
+from io import StringIO
 
 DRAW=int(os.environ.get('DRAW','0'))
 if DRAW:
@@ -26,7 +21,7 @@ from pymvg.camera_model import CameraModel
 
 try:
     import roslib
-except ImportError:
+except ModuleNotFoundError:
     have_ros = False
 else:
     have_ros = True
@@ -39,7 +34,12 @@ if have_ros:
     import tf.transformations
     import rosbag
 else:
-    from nose.plugins.skip import SkipTest
+    from unittest import SkipTest
+
+def pytest_generate_tests(metafunc):
+    if "cam_opts" in metafunc.fixturenames:
+        all_options = get_default_options()
+        metafunc.parametrize("cam_opts", all_options)
 
 def get_np_array_as_png_buf(im):
     import scipy.misc
@@ -245,13 +245,8 @@ class ROSPipelineMimic:
         mean_err = np.mean(all_ims)
         return mean_err
 
-def test_ros_pipeline():
-    if not have_ros:
-        raise SkipTest("no ROS, skipping")
-    yield check_ros_pipeline, dict(use_distortion=True)
-    yield check_ros_pipeline, dict(use_distortion=False)
-
-def check_ros_pipeline(use_distortion):
+@pytest.mark.parametrize("use_distortion", [True, False])
+def test_ros_pipeline(use_distortion):
     pm = ROSPipelineMimic(use_distortion=use_distortion)
     pm.generate_camera()
     pm.generate_images()
@@ -287,13 +282,8 @@ def check_ros_pipeline(use_distortion):
     # important. Nevertheless, this is an annoyingly large error.
     assert err2 < 30.0
 
+def test_roundtrip_ros_tf(cam_opts):
 
-def test_roundtrip_ros_tf():
-    all_options = get_default_options()
-    for opts in all_options:
-        yield check_roundtrip_ros_tf, opts
-
-def check_roundtrip_ros_tf(cam_opts):
     cam1 = _build_test_camera(**cam_opts)
     translation, rotation = cam1.get_ROS_tf()
     i = cam1.get_intrinsics_as_bunch()
@@ -303,13 +293,9 @@ def check_roundtrip_ros_tf(cam_opts):
                                                 name = cam1.name)
     assert cam1==cam2
 
-def test_bagfile_roundtrip():
-    all_options = get_default_options()
-    for opts in all_options:
-        yield check_bagfile_roundtrip, opts
-
-def check_bagfile_roundtrip(cam_opts):
+def test_bagfile_roundtrip(cam_opts):
     """check that roundtrip of camera model to/from a bagfile works"""
+
     cam = _build_test_camera(**cam_opts)
     fname = tempfile.mktemp(suffix='.bag')
     try:

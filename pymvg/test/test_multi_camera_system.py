@@ -3,8 +3,7 @@ import pymvg
 from pymvg.camera_model import CameraModel
 from pymvg.multi_camera_system import MultiCameraSystem, build_example_system
 import tempfile, os
-
-import nose.tools
+import pytest
 
 def make_default_system():
     '''helper function to generate an instance of MultiCameraSystem'''
@@ -72,7 +71,7 @@ def test_no_duplicate_names():
     cam1a = CameraModel.load_camera_simple(name='cam1')
     cam1b = CameraModel.load_camera_simple(name='cam1')
     cams = [cam1a,cam1b]
-    nose.tools.assert_raises(ValueError, MultiCameraSystem, cams)
+    pytest.raises(ValueError, MultiCameraSystem, cams)
 
 def test_equals():
     system = make_default_system()
@@ -155,7 +154,7 @@ def test_align():
     assert system1==system2
 
     system3 = MultiCameraSystem([CameraModel.load_camera_simple(name='cam%d'%i) for i in range(2)])
-    nose.tools.assert_raises(ValueError, system3.get_aligned_copy, system1)
+    pytest.raises(ValueError, system3.get_aligned_copy, system1)
 
 def test_build_example_system():
     for n in range(2,100,5):

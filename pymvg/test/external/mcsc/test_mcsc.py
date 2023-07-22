@@ -65,23 +65,7 @@ def is_close(sys1,sys2,pts_3d):
                 return False
     return True
 
-def test_mcsc_roundtrip():
-    if 1:
-        # mcsc python uses logging module. This sends logs to stdout.
-        import logging, sys
-
-        logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
-        rootLogger = logging.getLogger()
-
-        consoleHandler = logging.StreamHandler(sys.stdout)
-        consoleHandler.setFormatter(logFormatter)
-        rootLogger.addHandler(consoleHandler)
-
-    for with_rad_files in [False]:#,True]:
-        for align_existing in [False]:#True,False]:
-            yield check_mcsc_roundtrip, with_rad_files, align_existing
-
-def check_mcsc_roundtrip(with_rad_files=False,align_existing=False):
+def test_mcsc_roundtrip(with_rad_files=False,align_existing=False):
     np.random.seed(3)
     mcscdir = os.path.join( os.path.dirname(mcsce.__file__),
                             '..', '..', 'MultiCamSelfCal' )

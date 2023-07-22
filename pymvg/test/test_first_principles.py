@@ -13,6 +13,10 @@ if DRAW:
     from mpl_toolkits.mplot3d import Axes3D
     from pymvg.plot_utils import plot_camera
 
+def pytest_generate_tests(metafunc):
+    if "distorted" in metafunc.fixturenames:
+        metafunc.parametrize("distorted", [True, False])
+
 def test_lookat():
 
     dist = 5.0
@@ -60,12 +64,8 @@ def test_lookat():
                     [cx,cy-(f/dist)]]
     assert np.allclose( pix_actual,      pix_expected      )
 
-def test_flip():
-    for distortion in (False,True):
-        yield check_flip, distortion
-
-def check_flip(distortion=False):
-    if distortion:
+def test_flip(distorted):
+    if distorted:
         d = [0.1, 0.2, 0.3, 0.4, 0.5]
     else:
         d = None

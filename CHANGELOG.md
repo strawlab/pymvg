@@ -4,6 +4,8 @@
 ## Improvements
 
 - Test against Python 3.4 using Travis
+- Build with `pyproject.toml` and `setuptools`, removing old `setup.py`.
+- Convert testing library to `pytest` (from `nose`).
 
 ## API changes
 

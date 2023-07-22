@@ -1,5 +1,5 @@
 import numpy as np
-import cv # ubuntu: apt-get install python-opencv
+import cv2 as cv # ubuntu: sudo apt-get install python3-opencv
 
 # helper functions ---------------
 

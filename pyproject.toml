@@ -1,0 +1,27 @@
+[project]
+name = "pymvg"
+version = "2.0.0"  # keep in sync with pymvg/__init__.py
+description = "Python Multi-View Geometry"
+readme = "README.md"
+license.file = "LICENSE.txt"
+authors = [{ name = "Andrew Straw", email = "strawman@astraw.com" }]
+
+urls.homepage = "https://github.com/strawlab/pymvg"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+addopts = [
+    "--doctest-modules",
+    "--ignore=pymvg/test/external/opencv/test_versus_opencv.py",
+    "--ignore=pymvg/test/external/ros/test_full_ros_pipeline.py",
+    "--doctest-ignore-import-errors",
+    ]
+
+[tool.setuptools.package-data]
+"pymvg.test" = [
+    "*.yaml",
+    "*.json",
+]

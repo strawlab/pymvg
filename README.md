@@ -17,13 +17,7 @@ PyMVG has a large collection of unit tests which ensure correctness
 and fulfilled expectations for use other software (see 'Ecosystem' in
 the documentation). To run the tests:
 
-    nosetests -w pymvg/test
-
-To run the tests with external dependencies:
-
-    nosetests -w pymvg/test/external/opencv
-    nosetests -w pymvg/test/external/ros
-    nosetests -w pymvg/test/external/mcsc
+    pytest
 
 ## TODO
 
