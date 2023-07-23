@@ -20,6 +20,9 @@ addopts = [
     "--doctest-ignore-import-errors",
     ]
 
+[tool.setuptools.packages.find]
+namespaces = true
+
 [tool.setuptools.package-data]
 "pymvg.test" = [
     "*.yaml",
