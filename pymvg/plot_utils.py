@@ -41,5 +41,7 @@ def plot_camera( ax, cam, scale=0.2, show_upper_left=False, axes_size=0.2):
         ax.text( pts3d_far[0,0], pts3d_far[0,1], pts3d_far[0,2], 'UL' )
 
 def plot_system( ax, system, **kwargs):
-    for name, cam in system.get_camera_dict().iteritems():
+    camdict = system.get_camera_dict()
+    for name in camdict:
+        cam = camdict[name]
         plot_camera( ax, cam, **kwargs)
