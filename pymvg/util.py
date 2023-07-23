@@ -149,7 +149,7 @@ def get_rotation_matrix_and_quaternion(rotation):
     rotation = np.array(rotation)
     if rotation.ndim==2:
         assert rotation.shape==(3,3)
-        if not np.alltrue(np.isnan( rotation )):
+        if not np.all(np.isnan( rotation )):
             assert is_rotation_matrix(rotation)
 
         rmat = rotation
@@ -157,7 +157,7 @@ def get_rotation_matrix_and_quaternion(rotation):
         rnew = np.eye(4)
         rnew[:3,:3] = rmat
         rquat = quaternion_from_matrix(rnew)
-        if not np.alltrue(np.isnan( rquat )):
+        if not np.all(np.isnan( rquat )):
             R2 = quaternion_matrix(rquat)[:3,:3]
             assert np.allclose(rmat,R2)
     elif rotation.ndim==0:
@@ -173,7 +173,7 @@ def get_rotation_matrix_and_quaternion(rotation):
         rquat = rotation
         rmat = quaternion_matrix(rquat)[:3,:3]
 
-        if not np.alltrue(np.isnan( rmat )):
+        if not np.all(np.isnan( rmat )):
             assert is_rotation_matrix(rmat)
 
     return rmat, rquat

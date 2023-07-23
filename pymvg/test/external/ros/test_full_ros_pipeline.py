@@ -60,8 +60,8 @@ def draw_checkerboard(check_pixels,cw,ch,imw,imh):
     assert len(check_pixels)==(cw*ch)
     x = check_pixels[:,0]
     y = check_pixels[:,1]
-    assert np.alltrue( (0<=x) & (x<imw) ), 'fail: %f %f'%(np.min(x), np.max(x))
-    assert np.alltrue( (0<=y) & (y<imh) ), 'fail: %f %f'%(np.min(y), np.max(y))
+    assert np.all( (0<=x) & (x<imw) ), 'fail: %f %f'%(np.min(x), np.max(x))
+    assert np.all( (0<=y) & (y<imh) ), 'fail: %f %f'%(np.min(y), np.max(y))
     canvas = 0.5*np.ones( (imh,imw) )
     for col in range(cw-1):
         for row in range(ch-1):
