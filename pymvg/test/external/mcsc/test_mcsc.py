@@ -146,10 +146,9 @@ def test_mcsc_roundtrip(with_rad_files=False,align_existing=False):
                               cam_resolutions=cam_resolutions,
                               cam_points=cam_points,
                               cam_calibrations=cam_calibrations,
-                              cam_centers=cam_centers,
                               )
 
-        result = mcsc.execute(silent=True)
+        result = mcsc.execute()
         raw_cams = MultiCameraSystem.from_mcsc( result )
         if align_existing:
             aligned_cams = raw_cams
