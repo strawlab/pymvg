@@ -1,6 +1,6 @@
 [project]
 name = "pymvg"
-version = "2.0.0"  # keep in sync with pymvg/__init__.py
+version = "2.1.0"  # keep in sync with pymvg/__init__.py
 description = "Python Multi-View Geometry"
 readme = "README.md"
 license.file = "LICENSE.txt"
