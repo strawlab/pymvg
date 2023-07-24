@@ -16,6 +16,8 @@ build-backend = "setuptools.build_meta"
 [tool.pytest.ini_options]
 addopts = [
     "--doctest-modules",
+    "--ignore=examples/plot_cameras.py",
+    "--ignore=examples/plot_camera_system.py",
     "--ignore=tests/external/opencv/test_versus_opencv.py",
     "--ignore=tests/external/ros/test_full_ros_pipeline.py",
     "--doctest-ignore-import-errors",
