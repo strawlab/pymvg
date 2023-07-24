@@ -5,6 +5,7 @@ description = "Python Multi-View Geometry"
 readme = "README.md"
 license.file = "LICENSE.txt"
 authors = [{ name = "Andrew Straw", email = "strawman@astraw.com" }]
+requires-python = ">=3.8"
 
 urls.homepage = "https://github.com/strawlab/pymvg"
 
