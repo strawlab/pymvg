@@ -2,3 +2,4 @@ build
 pymvg.egg-info
 dist
 .coverage
+__pycache__
