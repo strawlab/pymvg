@@ -35,7 +35,7 @@ def check_undistortion(cam_opts):
         for col in range(border, cam.width-border, step):
             distorted = [col, row]
             distorteds.append(distorted)
-    npdistorted = np.array(distorteds,dtype=np.float)
+    npdistorted = np.array(distorteds,dtype=float)
 
     src = numpy2opencv_pointmat(npdistorted)
     dst = cv.CloneMat(src)
