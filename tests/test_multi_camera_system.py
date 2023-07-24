@@ -132,8 +132,7 @@ def test_roundtrip_to_pymvg_file():
 
 def test_pymvg_file_in_docs():
     # Keep in sync with docs/source/pymvg_camsystem_example.json
-    import importlib_resources
-    fname = importlib_resources.files('tests').joinpath('pymvg_camsystem_example.json')
+    fname = 'tests/pymvg_camsystem_example.json'
     system = MultiCameraSystem.from_pymvg_file( fname )
 
 def test_roundtrip_to_str():
