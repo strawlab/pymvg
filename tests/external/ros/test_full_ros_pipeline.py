@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import numpy as np
-from pymvg.test.utils import make_M, _build_test_camera, get_default_options
-import pymvg.test.fill_polygon as fill_polygon
+from tests.utils import make_M, _build_test_camera, get_default_options
+import tests.fill_polygon as fill_polygon
 import tarfile, time, os, tempfile
 import subprocess
 import cv2 as cv # ubuntu: sudo apt-get install python3-opencv

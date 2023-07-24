@@ -8,7 +8,7 @@ from unittest import SkipTest
 
 from pymvg.ros_compat import sensor_msgs, geometry_msgs
 
-from pymvg.test.utils import _build_test_camera, _build_points_3d, get_default_options
+from tests.utils import _build_test_camera, _build_points_3d, get_default_options
 from pymvg.extern.opencv.npcv import numpy2opencv_image, numpy2opencv_pointmat,\
      opencv_pointmat2numpy
 

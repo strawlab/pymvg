@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from pymvg.test.utils import _build_points_3d, make_M
+from tests.utils import _build_points_3d, make_M
 import os
 
 from pymvg.util import normalize
